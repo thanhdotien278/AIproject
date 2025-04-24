@@ -1,0 +1,301 @@
+<%- contentFor('body') %>
+
+<!-- Dashboard Header -->
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+  <p class="text-gray-600">Manage conference registrations and participant data</p>
+</div>
+
+<!-- Dashboard Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <!-- Total Registrations -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-gray-500 text-sm">Total Registrations</p>
+        <h2 class="text-3xl font-bold text-gray-800"><%= participants.length %></h2>
+      </div>
+      <div class="bg-blue-100 p-3 rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Offline Attendees -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-gray-500 text-sm">Offline Attendees</p>
+        <h2 class="text-3xl font-bold text-gray-800"><%= participants.filter(p => p.attendanceType === 'Offline').length %></h2>
+      </div>
+      <div class="bg-green-100 p-3 rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Online Attendees -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-gray-500 text-sm">Online Attendees</p>
+        <h2 class="text-3xl font-bold text-gray-800"><%= participants.filter(p => p.attendanceType === 'Online').length %></h2>
+      </div>
+      <div class="bg-purple-100 p-3 rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="flex flex-wrap gap-4 mb-8">
+  <a href="/admin/export" class="btn bg-green-600 hover:bg-green-700 text-white">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    Export to Excel
+  </a>
+  
+  <button id="send-bulk-emails" class="btn bg-blue-600 hover:bg-blue-700 text-white">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+    Send Bulk Emails
+  </button>
+</div>
+
+<!-- Alert container for notifications -->
+<div id="alert-container" class="mb-6 hidden">
+  <div class="px-4 py-3 rounded relative" role="alert" id="alert-box">
+    <span id="alert-message" class="block sm:inline"></span>
+    <button type="button" class="absolute top-0 right-0 px-4 py-3" id="close-alert">
+      <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Participants Table -->
+<div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h3 class="text-lg font-semibold text-gray-800">Registered Participants</h3>
+  </div>
+  
+  <div class="overflow-x-auto">
+    <% if (participants.length === 0) { %>
+      <div class="p-6 text-center text-gray-500">
+        <p>No participants registered yet.</p>
+      </div>
+    <% } else { %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organization</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email Sent</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% participants.forEach(participant => { %>
+            <tr data-id="<%= participant._id %>">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <%= participant.name %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.email %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.phone || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.organization || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= participant.attendanceType === 'Online' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800' %>">
+                  <%= participant.attendanceType %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= new Date(participant.registrationDate).toLocaleDateString() %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if (participant.emailSent) { %>
+                  <span class="text-green-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                <% } else { %>
+                  <span class="text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </span>
+                <% } %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <button class="send-email-btn text-blue-600 hover:text-blue-800" <%= participant.emailSent ? 'disabled' : '' %>>
+                  <% if (participant.emailSent) { %>
+                    Email Sent
+                  <% } else { %>
+                    Send Email
+                  <% } %>
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<!-- Modal to view participant details (optional) -->
+<div id="participant-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg max-w-lg w-full mx-4">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+      <h3 class="text-lg font-semibold text-gray-800">Participant Details</h3>
+      <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+        </svg>
+      </button>
+    </div>
+    
+    <div class="px-6 py-4">
+      <div id="modal-content" class="space-y-4">
+        <!-- Content will be dynamically populated -->
+      </div>
+    </div>
+    
+    <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+      <button id="close-modal-btn" class="btn bg-gray-600 hover:bg-gray-700 text-white">Close</button>
+    </div>
+  </div>
+</div>
+
+<%- contentFor('script') %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sendBulkEmailsBtn = document.getElementById('send-bulk-emails');
+    const alertContainer = document.getElementById('alert-container');
+    const alertBox = document.getElementById('alert-box');
+    const alertMessage = document.getElementById('alert-message');
+    const closeAlert = document.getElementById('close-alert');
+    
+    // Individual send email buttons
+    const sendEmailBtns = document.querySelectorAll('.send-email-btn');
+    
+    // Close alert
+    closeAlert.addEventListener('click', function() {
+      alertContainer.classList.add('hidden');
+    });
+    
+    // Send bulk emails
+    sendBulkEmailsBtn.addEventListener('click', async function() {
+      try {
+        sendBulkEmailsBtn.disabled = true;
+        sendBulkEmailsBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sending...';
+        
+        const response = await fetch('/admin/send-bulk-emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showAlert(data.message, 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          showAlert(data.message, 'error');
+          sendBulkEmailsBtn.disabled = false;
+          sendBulkEmailsBtn.innerHTML = 'Send Bulk Emails';
+        }
+      } catch (error) {
+        console.error('Error sending bulk emails:', error);
+        showAlert('An error occurred while sending bulk emails', 'error');
+        sendBulkEmailsBtn.disabled = false;
+        sendBulkEmailsBtn.innerHTML = 'Send Bulk Emails';
+      }
+    });
+    
+    // Send individual email
+    sendEmailBtns.forEach(btn => {
+      btn.addEventListener('click', async function() {
+        if (btn.disabled) return;
+        
+        const row = btn.closest('tr');
+        const participantId = row.dataset.id;
+        
+        try {
+          btn.disabled = true;
+          btn.innerHTML = 'Sending...';
+          
+          const response = await fetch(`/admin/send-email/${participantId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showAlert('Email sent successfully', 'success');
+            btn.innerHTML = 'Email Sent';
+            row.querySelector('td:nth-child(7)').innerHTML = '<span class="text-green-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></span>';
+          } else {
+            showAlert(data.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = 'Send Email';
+          }
+        } catch (error) {
+          console.error('Error sending email:', error);
+          showAlert('An error occurred while sending the email', 'error');
+          btn.disabled = false;
+          btn.innerHTML = 'Send Email';
+        }
+      });
+    });
+    
+    // Helper function to show alert
+    function showAlert(message, type) {
+      alertMessage.textContent = message;
+      alertBox.className = 'px-4 py-3 rounded relative';
+      
+      if (type === 'success') {
+        alertBox.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-400');
+      } else {
+        alertBox.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-400');
+      }
+      
+      alertContainer.classList.remove('hidden');
+      
+      // Auto-close success alert after 5 seconds
+      if (type === 'success') {
+        setTimeout(() => {
+          alertContainer.classList.add('hidden');
+        }, 5000);
+      }
+    }
+  });
+</script> 

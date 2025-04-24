@@ -1,0 +1,179 @@
+<%- contentFor('body') %>
+
+<!-- Registration Banner Section -->
+<section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
+  <div class="container mx-auto px-4 text-center">
+    <h1 class="text-3xl md:text-4xl font-bold mb-4">Register for the Conference</h1>
+    <p class="text-xl max-w-2xl mx-auto">Complete the form below to secure your spot at our upcoming conference.</p>
+  </div>
+</section>
+
+<!-- Registration Form Section -->
+<section class="py-12">
+  <div class="container mx-auto px-4">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 md:p-8">
+      <!-- Alert container for form validation errors -->
+      <div id="alert-container" class="mb-6 hidden">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong class="font-bold">Error!</strong>
+          <span id="alert-message" class="block sm:inline ml-1"></span>
+        </div>
+      </div>
+      
+      <!-- Registration Form -->
+      <form id="registration-form" method="POST" action="/register" class="space-y-6">
+        <!-- Name -->
+        <div>
+          <label for="name" class="form-label">Full Name <span class="text-red-500">*</span></label>
+          <input type="text" id="name" name="name" class="form-input" required>
+        </div>
+        
+        <!-- Email -->
+        <div>
+          <label for="email" class="form-label">Email Address <span class="text-red-500">*</span></label>
+          <input type="email" id="email" name="email" class="form-input" required>
+        </div>
+        
+        <!-- Phone -->
+        <div>
+          <label for="phone" class="form-label">Phone Number</label>
+          <input type="tel" id="phone" name="phone" class="form-input">
+        </div>
+        
+        <!-- Organization -->
+        <div>
+          <label for="organization" class="form-label">Organization/Company</label>
+          <input type="text" id="organization" name="organization" class="form-input">
+        </div>
+        
+        <!-- Attendance Type -->
+        <div>
+          <label class="form-label">Attendance Type <span class="text-red-500">*</span></label>
+          <div class="mt-2 space-y-2">
+            <div class="flex items-center">
+              <input type="radio" id="offline" name="attendanceType" value="Offline" class="h-4 w-4 text-blue-600" required>
+              <label for="offline" class="ml-2 text-gray-700">Offline (In Person)</label>
+            </div>
+            <div class="flex items-center">
+              <input type="radio" id="online" name="attendanceType" value="Online" class="h-4 w-4 text-blue-600">
+              <label for="online" class="ml-2 text-gray-700">Online (Virtual)</label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Questions -->
+        <div>
+          <label for="questions" class="form-label">Questions or Comments</label>
+          <textarea id="questions" name="questions" rows="4" class="form-input"></textarea>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="pt-4">
+          <button type="submit" id="submit-btn" class="btn btn-primary w-full">Register Now</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Additional Info -->
+    <div class="max-w-2xl mx-auto mt-8 text-center text-gray-600">
+      <p>Already registered? <a href="/" class="text-blue-600 hover:underline">Return to homepage</a></p>
+      <p class="mt-2">For registration assistance, please contact <a href="mailto:conference@example.com" class="text-blue-600 hover:underline">conference@example.com</a></p>
+    </div>
+  </div>
+</section>
+
+<%- contentFor('script') %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registration-form');
+    const alertContainer = document.getElementById('alert-container');
+    const alertMessage = document.getElementById('alert-message');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Basic form validation
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const attendanceType = document.querySelector('input[name="attendanceType"]:checked');
+      
+      if (!name) {
+        showAlert('Please enter your full name.');
+        return;
+      }
+      
+      if (!email) {
+        showAlert('Please enter your email address.');
+        return;
+      }
+      
+      if (!validateEmail(email)) {
+        showAlert('Please enter a valid email address.');
+        return;
+      }
+      
+      if (!attendanceType) {
+        showAlert('Please select your attendance type.');
+        return;
+      }
+      
+      // Disable button and show loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Submitting...';
+      
+      try {
+        // Collect form data
+        const formData = {
+          name: document.getElementById('name').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          organization: document.getElementById('organization').value.trim(),
+          attendanceType: attendanceType.value,
+          questions: document.getElementById('questions').value.trim()
+        };
+        
+        // Submit form via AJAX
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Redirect to thank you page
+          window.location.href = data.redirectUrl || '/thankyou';
+        } else {
+          // Show error message
+          showAlert(data.message || 'An error occurred during registration. Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Register Now';
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        showAlert('An error occurred during registration. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Register Now';
+      }
+    });
+    
+    // Helper function to validate email
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    // Helper function to show alert message
+    function showAlert(message) {
+      alertMessage.textContent = message;
+      alertContainer.classList.remove('hidden');
+      
+      // Scroll to the top to make alert visible
+      window.scrollTo({ top: form.offsetTop - 100, behavior: 'smooth' });
+    }
+  });
+</script> 

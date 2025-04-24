@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Admin Dashboard - Conference Registration' %></title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/images/favicon.ico">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Font - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Add any additional styles if needed -->
+  <%- typeof style !== 'undefined' ? style : '' %>
+</head>
+<body class="bg-gray-100">
+  <div class="flex min-h-screen">
+    <!-- Sidebar (hidden on mobile) -->
+    <aside class="hidden md:flex md:flex-col md:w-64 bg-gray-800 text-white">
+      <div class="p-6">
+        <h1 class="text-2xl font-bold">Admin Panel</h1>
+      </div>
+      <nav class="flex-1 px-4 py-4 space-y-2">
+        <a href="/admin/dashboard" class="block px-4 py-2 rounded-md hover:bg-gray-700 <%= typeof currentPath !== 'undefined' && currentPath === '/admin/dashboard' ? 'bg-gray-700' : '' %>">
+          Dashboard
+        </a>
+        <a href="/admin/logout" class="block px-4 py-2 rounded-md hover:bg-gray-700">
+          Logout
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Mobile header -->
+      <header class="bg-white shadow md:hidden">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 class="text-xl font-semibold">Admin Panel</h1>
+          <button id="mobile-menu-toggle" class="text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Mobile menu (hidden by default) -->
+        <div id="mobile-menu" class="hidden px-4 py-2 bg-gray-100">
+          <a href="/admin/dashboard" class="block py-2 px-4 hover:bg-gray-200 rounded-md">Dashboard</a>
+          <a href="/admin/logout" class="block py-2 px-4 hover:bg-gray-200 rounded-md">Logout</a>
+        </div>
+      </header>
+      
+      <!-- Main content container -->
+      <main class="flex-1 p-6">
+        <% if (typeof username !== 'undefined') { %>
+          <div class="mb-6 text-right">
+            <span class="text-gray-600">Logged in as: <strong><%= username %></strong></span>
+          </div>
+        <% } %>
+        
+        <%- body %>
+      </main>
+      
+      <!-- Footer -->
+      <footer class="bg-white py-4 px-6 border-t">
+        <p class="text-center text-gray-600 text-sm">
+          &copy; <%= new Date().getFullYear() %> Conference Registration Admin Panel
+        </p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-toggle')?.addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+  
+  <!-- Add any additional scripts if needed -->
+  <%- typeof script !== 'undefined' ? script : '' %>
+</body>
+</html> 

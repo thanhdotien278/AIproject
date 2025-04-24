@@ -1,0 +1,121 @@
+<%- contentFor('body') %>
+
+<!-- Hero section -->
+<section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+  <div class="container mx-auto px-4 py-16 md:py-24">
+    <div class="md:w-2/3">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6">Welcome to Our Conference</h1>
+      <p class="text-xl mb-8">Join us for an inspiring event with industry experts and networking opportunities</p>
+      <a href="/register" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Register Now</a>
+    </div>
+  </div>
+</section>
+
+<!-- Conference details section -->
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center mb-12">Conference Details</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Date & Time -->
+      <div class="bg-blue-50 p-6 rounded-lg text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <h3 class="text-xl font-bold mb-2">Date & Time</h3>
+        <p class="text-gray-700">May 15-16, 2023</p>
+        <p class="text-gray-700">9:00 AM - 5:00 PM</p>
+      </div>
+      
+      <!-- Location -->
+      <div class="bg-blue-50 p-6 rounded-lg text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <h3 class="text-xl font-bold mb-2">Location</h3>
+        <p class="text-gray-700">Grand Conference Center</p>
+        <p class="text-gray-700">123 Main Street, City</p>
+      </div>
+      
+      <!-- Contact -->
+      <div class="bg-blue-50 p-6 rounded-lg text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <h3 class="text-xl font-bold mb-2">Contact</h3>
+        <p class="text-gray-700">conference@example.com</p>
+        <p class="text-gray-700">+1 (123) 456-7890</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Speakers section -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center mb-12">Our Speakers</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Speaker 1 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="h-64 bg-gray-300">
+          <!-- Speaker image placeholder -->
+          <div class="h-full flex items-center justify-center bg-blue-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">John Doe</h3>
+          <p class="text-blue-600 mb-4">CEO, Tech Company</p>
+          <p class="text-gray-600">Expert in technology leadership with over 15 years of industry experience.</p>
+        </div>
+      </div>
+      
+      <!-- Speaker 2 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="h-64 bg-gray-300">
+          <!-- Speaker image placeholder -->
+          <div class="h-full flex items-center justify-center bg-blue-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">Jane Smith</h3>
+          <p class="text-blue-600 mb-4">CTO, Innovation Labs</p>
+          <p class="text-gray-600">Leading expert in artificial intelligence and machine learning technologies.</p>
+        </div>
+      </div>
+      
+      <!-- Speaker 3 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="h-64 bg-gray-300">
+          <!-- Speaker image placeholder -->
+          <div class="h-full flex items-center justify-center bg-blue-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">Robert Johnson</h3>
+          <p class="text-blue-600 mb-4">Professor, University</p>
+          <p class="text-gray-600">Researcher and educator specializing in emerging technologies and their applications.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA section -->
+<section class="py-16 bg-blue-600 text-white text-center">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold mb-6">Ready to Join?</h2>
+    <p class="text-xl mb-8 md:w-2/3 mx-auto">Secure your spot at this exclusive event. Limited seats available!</p>
+    <a href="/register" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Register Now</a>
+  </div>
+</section> 

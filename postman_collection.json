@@ -1,0 +1,136 @@
+{
+  "info": {
+    "name": "Conference Registration API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Registration",
+      "item": [
+        {
+          "name": "Register Participant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"1234567890\",\n  \"organization\": \"Example Corp\",\n  \"attendanceType\": \"Offline\",\n  \"questions\": \"Any special dietary requirements?\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["register"]
+            },
+            "description": "Register a new participant for the conference"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/admin/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["admin", "login"]
+            },
+            "description": "Login to the admin dashboard"
+          }
+        },
+        {
+          "name": "Send Email to Participant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/admin/send-email/:participantId",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["admin", "send-email", ":participantId"],
+              "variable": [
+                {
+                  "key": "participantId",
+                  "value": "123456789",
+                  "description": "The ID of the participant to send an email to"
+                }
+              ]
+            },
+            "description": "Send a confirmation email to a specific participant"
+          }
+        },
+        {
+          "name": "Send Bulk Emails",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/admin/send-bulk-emails",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["admin", "send-bulk-emails"]
+            },
+            "description": "Send confirmation emails to all participants who haven't received one yet"
+          }
+        },
+        {
+          "name": "Export to Excel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/admin/export",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["admin", "export"]
+            },
+            "description": "Export all participant data to an Excel file"
+          }
+        }
+      ]
+    }
+  ]
+} 

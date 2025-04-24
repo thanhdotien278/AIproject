@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Conference Registration</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Font - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="max-w-md w-full mx-4">
+    <!-- Logo and Title -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-800">Admin Login</h1>
+      <p class="text-gray-600 mt-2">Conference Registration System</p>
+    </div>
+    
+    <!-- Login Form -->
+    <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+      <!-- Alert for login errors -->
+      <div id="alert-container" class="mb-6 hidden">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span id="alert-message" class="block sm:inline"></span>
+        </div>
+      </div>
+      
+      <form id="login-form" class="space-y-6">
+        <!-- Username -->
+        <div>
+          <label for="username" class="form-label">Username</label>
+          <input type="text" id="username" name="username" class="form-input" required autocomplete="username">
+        </div>
+        
+        <!-- Password -->
+        <div>
+          <label for="password" class="form-label">Password</label>
+          <input type="password" id="password" name="password" class="form-input" required autocomplete="current-password">
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <button type="submit" id="login-btn" class="btn btn-primary w-full">
+            Login
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Return to Home -->
+    <div class="text-center mt-6">
+      <a href="/" class="text-blue-600 hover:underline text-sm">Return to Homepage</a>
+    </div>
+  </div>
+
+  <!-- JavaScript for Login Form -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('login-form');
+      const alertContainer = document.getElementById('alert-container');
+      const alertMessage = document.getElementById('alert-message');
+      const loginBtn = document.getElementById('login-btn');
+      
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Get form values
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        
+        // Basic validation
+        if (!username || !password) {
+          showAlert('Please enter both username and password.');
+          return;
+        }
+        
+        // Disable button and show loading state
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = 'Logging in...';
+        
+        try {
+          // Submit login request
+          const response = await fetch('/admin/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            // Redirect to dashboard
+            window.location.href = data.redirectUrl || '/admin/dashboard';
+          } else {
+            // Show error message
+            showAlert(data.message || 'Invalid credentials. Please try again.');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = 'Login';
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          showAlert('An error occurred during login. Please try again.');
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = 'Login';
+        }
+      });
+      
+      // Helper function to show alert message
+      function showAlert(message) {
+        alertMessage.textContent = message;
+        alertContainer.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Conference Registration' %></title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/images/favicon.ico">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Font - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Add additional meta tags for SEO -->
+  <meta name="description" content="Register for our upcoming conference. Join us for insightful discussions and networking opportunities.">
+  <meta name="keywords" content="conference, registration, event, seminar">
+  
+  <!-- Add any additional styles if needed -->
+  <%- typeof style !== 'undefined' ? style : '' %>
+</head>
+<body>
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto py-4 px-4 flex justify-between items-center">
+      <a href="/" class="text-2xl font-bold text-blue-600">Conference</a>
+      
+      <nav class="hidden md:block">
+        <ul class="flex space-x-6">
+          <li><a href="/" class="text-gray-700 hover:text-blue-600">Home</a></li>
+          <li><a href="/register" class="text-gray-700 hover:text-blue-600">Register</a></li>
+        </ul>
+      </nav>
+      
+      <!-- Mobile menu button -->
+      <button type="button" class="md:hidden text-gray-700 hover:text-blue-600 focus:outline-none" id="mobile-menu-button">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Mobile menu (hidden by default) -->
+    <div class="md:hidden hidden" id="mobile-menu">
+      <div class="container mx-auto px-4 py-3 space-y-3">
+        <a href="/" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Home</a>
+        <a href="/register" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Register</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="min-h-screen">
+    <%- body %>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Conference Registration</h3>
+          <p class="text-gray-300">Join us for an exciting conference experience. Register now to secure your spot.</p>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
+          <ul class="space-y-2">
+            <li><a href="/" class="text-gray-300 hover:text-white">Home</a></li>
+            <li><a href="/register" class="text-gray-300 hover:text-white">Register</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Contact</h3>
+          <ul class="space-y-2 text-gray-300">
+            <li>Email: conference@example.com</li>
+            <li>Phone: +1 (123) 456-7890</li>
+            <li>Address: 123 Conference St, City, Country</li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+        <p>&copy; <%= new Date().getFullYear() %> Conference Registration. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="/js/main.js"></script>
+  
+  <!-- Add any additional scripts if needed -->
+  <%- typeof script !== 'undefined' ? script : '' %>
+  
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html> 
