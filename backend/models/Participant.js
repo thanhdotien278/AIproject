@@ -16,24 +16,55 @@ const participantSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  address: {
+    type: String,
+    trim: true
+  },
+  age: {
+    type: String,
+    trim: true
+  },
+  business: {
+    type: String,
+    trim: true
+  },
+  lunch: {
+    type: String,
+    trim: true
+  },
+  source: {
+    type: String,
+    trim: true
+  },
+  nationality: {
+    type: String,
+    trim: true
+  },
   organization: {
     type: String,
     trim: true
   },
-  attendanceType: {
-    type: String,
-    enum: ['Online', 'Offline'],
-    required: true
-  },
   questions: {
     type: String,
     trim: true
+  },
+  conferenceCode: {
+    type: String,
+    required: true,
+    trim: true,
+    uppercase: true,
+    minLength: 4,
+    maxLength: 4
   },
   registrationDate: {
     type: Date,
     default: Date.now
   },
   emailSent: {
+    type: Boolean,
+    default: false
+  },
+  attendance: {
     type: Boolean,
     default: false
   }

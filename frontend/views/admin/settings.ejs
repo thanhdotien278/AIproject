@@ -1,0 +1,462 @@
+<%- contentFor('body') %>
+
+<div class="container mx-auto py-8 px-4">
+  <h1 class="text-2xl font-bold text-gray-800 mb-8">Settings</h1>
+  
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- User Settings -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-6">Admin Profile</h2>
+      
+      <form id="settings-form" class="space-y-6">
+        <div>
+          <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+          <input type="text" id="fullName" name="fullName" value="<%= fullName %>" class="form-input w-full rounded-md">
+        </div>
+        
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="email" name="email" value="<%= email %>" class="form-input w-full rounded-md">
+        </div>
+        
+        <div>
+          <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+          <textarea id="bio" name="bio" rows="3" class="form-input w-full rounded-md"><%= bio %></textarea>
+        </div>
+        
+        <div class="pt-4 border-t border-gray-200">
+          <h3 class="text-lg font-medium text-gray-800 mb-4">Change Password</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+              <input type="password" id="currentPassword" name="currentPassword" class="form-input w-full rounded-md">
+            </div>
+            
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+              <input type="password" id="password" name="password" class="form-input w-full rounded-md">
+            </div>
+            
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+              <input type="password" id="confirmPassword" name="confirmPassword" class="form-input w-full rounded-md">
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <button type="submit" class="btn bg-blue-600 hover:bg-blue-700 text-white">Save Changes</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Location Management -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Conference Locations</h2>
+        <button id="add-location-btn" class="btn bg-green-600 hover:bg-green-700 text-white flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add Location
+        </button>
+      </div>
+      
+      <div id="locations-container" class="space-y-4">
+        <!-- Locations will be loaded dynamically -->
+        <div class="text-center py-8 text-gray-500">
+          <p>Loading locations...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Location Modal -->
+<div id="location-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg w-full max-w-md mx-4">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+      <h3 id="location-modal-title" class="text-lg font-semibold text-gray-800">Add Location</h3>
+      <button id="close-location-modal" class="text-gray-500 hover:text-gray-700">
+        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+        </svg>
+      </button>
+    </div>
+    
+    <form id="location-form" class="px-6 py-4">
+      <input type="hidden" id="location-id" name="id">
+      
+      <div class="space-y-4">
+        <div>
+          <label for="location-name" class="block text-sm font-medium text-gray-700 mb-1">Location Name <span class="text-red-500">*</span></label>
+          <input type="text" id="location-name" name="name" class="form-input w-full rounded-md" required>
+        </div>
+        
+        <div>
+          <label for="location-address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+          <input type="text" id="location-address" name="address" class="form-input w-full rounded-md">
+        </div>
+        
+        <div>
+          <label for="location-capacity" class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+          <input type="number" id="location-capacity" name="capacity" min="0" class="form-input w-full rounded-md">
+        </div>
+      </div>
+    </form>
+    
+    <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+      <button type="button" id="cancel-location-btn" class="btn bg-gray-500 hover:bg-gray-600 text-white mr-2">Cancel</button>
+      <button type="button" id="save-location-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirm-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg w-full max-w-md mx-4">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-800">Confirm Delete</h3>
+    </div>
+    
+    <div class="px-6 py-4">
+      <p id="confirm-message">Are you sure you want to delete this location? This action cannot be undone.</p>
+    </div>
+    
+    <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+      <button type="button" id="cancel-confirm-btn" class="btn bg-gray-500 hover:bg-gray-600 text-white mr-2">Cancel</button>
+      <button type="button" id="confirm-action-btn" class="btn bg-red-600 hover:bg-red-700 text-white">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Alert container for notifications -->
+<div id="alert-container" class="fixed bottom-4 right-4 w-64 hidden">
+  <div class="px-4 py-3 rounded-lg shadow-lg" role="alert" id="alert-box">
+    <span id="alert-message" class="block sm:inline"></span>
+  </div>
+</div>
+
+<%- contentFor('script') %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const settingsForm = document.getElementById('settings-form');
+    const addLocationBtn = document.getElementById('add-location-btn');
+    const locationModal = document.getElementById('location-modal');
+    const closeLocationModal = document.getElementById('close-location-modal');
+    const cancelLocationBtn = document.getElementById('cancel-location-btn');
+    const saveLocationBtn = document.getElementById('save-location-btn');
+    const locationForm = document.getElementById('location-form');
+    const locationsContainer = document.getElementById('locations-container');
+    const confirmModal = document.getElementById('confirm-modal');
+    const cancelConfirmBtn = document.getElementById('cancel-confirm-btn');
+    const confirmActionBtn = document.getElementById('confirm-action-btn');
+    const confirmMessage = document.getElementById('confirm-message');
+    const alertContainer = document.getElementById('alert-container');
+    const alertBox = document.getElementById('alert-box');
+    const alertMessage = document.getElementById('alert-message');
+    
+    let deleteLocationId = null;
+    
+    // Load locations
+    loadLocations();
+    
+    // Settings form submission
+    settingsForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Get form data
+      const formData = new FormData(settingsForm);
+      const settingsData = {};
+      
+      formData.forEach((value, key) => {
+        settingsData[key] = value;
+      });
+      
+      // Validate passwords
+      if (settingsData.password || settingsData.currentPassword) {
+        if (!settingsData.currentPassword) {
+          showAlert('Please enter your current password', 'error');
+          return;
+        }
+        
+        if (settingsData.password !== settingsData.confirmPassword) {
+          showAlert('New passwords do not match', 'error');
+          return;
+        }
+      }
+      
+      // Remove confirm password field
+      delete settingsData.confirmPassword;
+      
+      try {
+        const response = await fetch('/admin/settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(settingsData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showAlert('Settings updated successfully', 'success');
+          
+          // Clear password fields
+          document.getElementById('currentPassword').value = '';
+          document.getElementById('password').value = '';
+          document.getElementById('confirmPassword').value = '';
+        } else {
+          showAlert(data.message || 'Error updating settings', 'error');
+        }
+      } catch (error) {
+        console.error('Error updating settings:', error);
+        showAlert('An error occurred while updating settings', 'error');
+      }
+    });
+    
+    // Fetch and display locations
+    async function loadLocations() {
+      try {
+        const response = await fetch('/admin/locations');
+        const data = await response.json();
+        
+        if (data.success) {
+          renderLocations(data.locations);
+        } else {
+          locationsContainer.innerHTML = `
+            <div class="text-center py-8 text-red-500">
+              <p>Failed to load locations: ${data.message}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading locations:', error);
+        locationsContainer.innerHTML = `
+          <div class="text-center py-8 text-red-500">
+            <p>Error loading locations. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+    
+    // Render locations
+    function renderLocations(locations) {
+      if (!locations || locations.length === 0) {
+        locationsContainer.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <p>No locations added yet. Add your first location!</p>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      
+      locations.forEach(location => {
+        html += `
+          <div class="bg-gray-50 rounded-lg p-4 border border-gray-200" data-id="${location._id}">
+            <div class="flex justify-between">
+              <div>
+                <h3 class="font-medium text-gray-800">${location.name}</h3>
+                ${location.address ? `<p class="text-sm text-gray-600">${location.address}</p>` : ''}
+                ${location.capacity ? `<p class="text-sm text-gray-600">Capacity: ${location.capacity}</p>` : ''}
+              </div>
+              <div class="flex space-x-2">
+                <button class="edit-location-btn text-blue-600 hover:text-blue-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button class="delete-location-btn text-red-600 hover:text-red-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      locationsContainer.innerHTML = html;
+      
+      // Add event listeners for edit and delete buttons
+      document.querySelectorAll('.edit-location-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const locationItem = this.closest('[data-id]');
+          const locationId = locationItem.dataset.id;
+          const location = locations.find(l => l._id === locationId);
+          
+          if (location) {
+            openLocationModal(location);
+          }
+        });
+      });
+      
+      document.querySelectorAll('.delete-location-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const locationItem = this.closest('[data-id]');
+          const locationId = locationItem.dataset.id;
+          const location = locations.find(l => l._id === locationId);
+          
+          if (location) {
+            confirmDelete(location);
+          }
+        });
+      });
+    }
+    
+    // Open location modal for adding/editing
+    function openLocationModal(location = null) {
+      const modalTitle = document.getElementById('location-modal-title');
+      const locationId = document.getElementById('location-id');
+      const locationName = document.getElementById('location-name');
+      const locationAddress = document.getElementById('location-address');
+      const locationCapacity = document.getElementById('location-capacity');
+      
+      if (location) {
+        // Edit mode
+        modalTitle.textContent = 'Edit Location';
+        locationId.value = location._id;
+        locationName.value = location.name;
+        locationAddress.value = location.address || '';
+        locationCapacity.value = location.capacity || '';
+      } else {
+        // Add mode
+        modalTitle.textContent = 'Add Location';
+        locationForm.reset();
+        locationId.value = '';
+      }
+      
+      locationModal.classList.remove('hidden');
+    }
+    
+    // Confirm delete location
+    function confirmDelete(location) {
+      confirmMessage.textContent = `Are you sure you want to delete "${location.name}"? This action cannot be undone.`;
+      deleteLocationId = location._id;
+      confirmModal.classList.remove('hidden');
+    }
+    
+    // Add location button click
+    addLocationBtn.addEventListener('click', function() {
+      openLocationModal();
+    });
+    
+    // Close location modal
+    [closeLocationModal, cancelLocationBtn].forEach(el => {
+      el.addEventListener('click', function() {
+        locationModal.classList.add('hidden');
+      });
+    });
+    
+    // Close confirm modal
+    cancelConfirmBtn.addEventListener('click', function() {
+      confirmModal.classList.add('hidden');
+      deleteLocationId = null;
+    });
+    
+    // Save location
+    saveLocationBtn.addEventListener('click', async function() {
+      // Get form data
+      const formData = new FormData(locationForm);
+      const locationData = {};
+      
+      formData.forEach((value, key) => {
+        locationData[key] = value;
+      });
+      
+      // Validate name
+      if (!locationData.name.trim()) {
+        showAlert('Location name is required', 'error');
+        return;
+      }
+      
+      const isEdit = !!locationData.id;
+      const url = isEdit ? `/admin/locations/${locationData.id}` : '/admin/locations';
+      const method = isEdit ? 'PUT' : 'POST';
+      
+      try {
+        saveLocationBtn.disabled = true;
+        saveLocationBtn.textContent = 'Saving...';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(locationData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showAlert(`Location ${isEdit ? 'updated' : 'created'} successfully`, 'success');
+          locationModal.classList.add('hidden');
+          loadLocations();
+        } else {
+          showAlert(data.message || `Error ${isEdit ? 'updating' : 'creating'} location`, 'error');
+        }
+      } catch (error) {
+        console.error(`Error ${isEdit ? 'updating' : 'creating'} location:`, error);
+        showAlert(`An error occurred while ${isEdit ? 'updating' : 'creating'} the location`, 'error');
+      } finally {
+        saveLocationBtn.disabled = false;
+        saveLocationBtn.textContent = 'Save';
+      }
+    });
+    
+    // Confirm delete action
+    confirmActionBtn.addEventListener('click', async function() {
+      if (!deleteLocationId) return;
+      
+      try {
+        confirmActionBtn.disabled = true;
+        confirmActionBtn.textContent = 'Deleting...';
+        
+        const response = await fetch(`/admin/locations/${deleteLocationId}`, {
+          method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showAlert('Location deleted successfully', 'success');
+          confirmModal.classList.add('hidden');
+          loadLocations();
+        } else {
+          showAlert(data.message || 'Error deleting location', 'error');
+        }
+      } catch (error) {
+        console.error('Error deleting location:', error);
+        showAlert('An error occurred while deleting the location', 'error');
+      } finally {
+        confirmActionBtn.disabled = false;
+        confirmActionBtn.textContent = 'Delete';
+        deleteLocationId = null;
+      }
+    });
+    
+    // Helper function to show alert
+    function showAlert(message, type) {
+      alertMessage.textContent = message;
+      alertBox.className = 'px-4 py-3 rounded-lg shadow-lg';
+      
+      if (type === 'success') {
+        alertBox.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-400');
+      } else {
+        alertBox.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-400');
+      }
+      
+      alertContainer.classList.remove('hidden');
+      
+      // Auto-close alert after 5 seconds
+      setTimeout(() => {
+        alertContainer.classList.add('hidden');
+      }, 5000);
+    }
+  });
+</script> 

@@ -5,6 +5,7 @@ const cors = require('cors');
 const session = require('express-session');
 const dotenv = require('dotenv');
 const expressLayouts = require('express-ejs-layouts');
+const QRCode = require('qrcode');
 
 // Load environment variables
 dotenv.config();
@@ -34,6 +35,17 @@ app.set('views', path.join(__dirname, '../frontend/views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
+// Middleware to set admin layout for admin routes
+app.use('/admin', (req, res, next) => {
+  // Skip for login page (it has its own layout)
+  if (req.path === '/login') {
+    return next();
+  }
+  // Set admin layout for all other admin routes
+  res.locals.layout = 'layouts/admin';
+  next();
+});
+
 // Serve static files
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
@@ -46,9 +58,79 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/conferenc
 app.use('/register', registerRoutes);
 app.use('/admin', adminRoutes);
 
+// QR Code API endpoint
+app.get('/api/qrcode', async (req, res) => {
+  try {
+    // Get the conference code from query parameters
+    const { code } = req.query;
+    
+    // Build the registration URL
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    let registrationUrl = `${baseUrl}/register`;
+    
+    // Add the conference code if provided
+    if (code) {
+      registrationUrl += `?code=${code}`;
+    }
+    
+    // Generate QR code as data URL
+    const qrCodeDataUrl = await QRCode.toDataURL(registrationUrl, {
+      width: 300,
+      margin: 1,
+      color: {
+        dark: '#2563eb', // Blue color for QR code
+        light: '#ffffff' // White background
+      }
+    });
+    
+    // Send the QR code data URL
+    res.send({ qrCodeDataUrl });
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    res.status(500).send({ error: 'Failed to generate QR code' });
+  }
+});
+
 // Home route
-app.get('/', (req, res) => {
-  res.render('index');
+app.get('/', async (req, res) => {
+  try {
+    // Fetch the latest conference
+    const latestConference = await mongoose.model('Conference').findOne()
+      .sort({ createdAt: -1 })
+      .populate('location');
+    
+    // Fetch the receptionist user with username 'rec1'
+    const receptionist = await mongoose.model('User').findOne({ username: 'rec1' });
+    
+    if (!latestConference) {
+      return res.render('index', { receptionist });
+    }
+    
+    // Format dates for display
+    const startDate = new Date(latestConference.startDate);
+    const endDate = new Date(latestConference.endDate);
+    const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    
+    let formattedDates = startDate.toLocaleDateString('en-US', formatOptions);
+    if (startDate.getTime() !== endDate.getTime()) {
+      formattedDates += ` - ${endDate.toLocaleDateString('en-US', formatOptions)}`;
+    }
+    
+    // Get location details
+    const locationName = latestConference.location ? latestConference.location.name : 'To be announced';
+    const locationAddress = latestConference.location ? latestConference.location.address : '';
+    
+    res.render('index', {
+      conference: latestConference,
+      formattedDates,
+      locationName,
+      locationAddress,
+      receptionist
+    });
+  } catch (error) {
+    console.error('Error fetching latest conference:', error);
+    res.render('index');
+  }
 });
 
 // Thank you route

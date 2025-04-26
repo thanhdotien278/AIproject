@@ -12,6 +12,29 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  fullName: {
+    type: String,
+    trim: true
+  },
+  email: {
+    type: String,
+    trim: true
+  },
+  bio: {
+    type: String
+  },
+  userPhone: {
+    type: String
+  },
+  userRole: {
+    type: String,
+    enum: ['admin', 'manager', 'staff','receptionist','user'],
+    default: 'user'
+  },
+  shortBio: {
+    type: String,
+    maxlength: 200
+  },
   isAdmin: {
     type: Boolean,
     default: true
@@ -19,20 +42,28 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
 });
 
-// Hash password before saving
+// Update the updatedAt field before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  this.updatedAt = new Date();
   
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
+  // Hash password if modified
+  if (this.isModified('password')) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    } catch (error) {
+      return next(error);
+    }
   }
+  
+  next();
 });
 
 // Method to compare passwords

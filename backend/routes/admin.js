@@ -23,6 +23,31 @@ router.post('/send-email/:participantId', adminController.isAuthenticated, admin
 // POST /admin/send-bulk-emails - Send emails to all participants (protected)
 router.post('/send-bulk-emails', adminController.isAuthenticated, adminController.sendBulkEmails);
 
+// GET /admin/settings - Show settings page (protected)
+router.get('/settings', adminController.isAuthenticated, adminController.showSettings);
+
+// POST /admin/settings - Update admin settings (protected)
+router.post('/settings', adminController.isAuthenticated, adminController.updateSettings);
+
+// POST /admin/conferences/create - Create new conference (protected)
+router.post('/conferences/create', adminController.isAuthenticated, adminController.createConference);
+
+// GET /admin/conferences - Get all conferences (protected) 
+router.get('/conferences', adminController.isAuthenticated, adminController.getConferences);
+
+// Add routes for locations
+router.get('/locations', adminController.isAuthenticated, adminController.getLocations);
+router.post('/locations', adminController.isAuthenticated, adminController.createLocation);
+router.put('/locations/:id', adminController.isAuthenticated, adminController.updateLocation);
+router.delete('/locations/:id', adminController.isAuthenticated, adminController.deleteLocation);
+
+// Add routes for user management
+router.get('/users', adminController.isAuthenticated, adminController.showUsers);
+router.get('/api/users', adminController.isAuthenticated, adminController.getUsers);
+router.post('/api/users', adminController.isAuthenticated, adminController.createUser);
+router.put('/api/users/:id', adminController.isAuthenticated, adminController.updateUser);
+router.delete('/api/users/:id', adminController.isAuthenticated, adminController.deleteUser);
+
 // Root path redirect to dashboard if authenticated, otherwise to login
 router.get('/', (req, res) => {
   if (req.session.isAuthenticated) {
