@@ -3,10 +3,18 @@
 <!-- Hero section -->
 <section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
   <div class="container mx-auto px-4 py-16 md:py-24">
-    <div class="md:w-2/3">
-      <h1 class="text-4xl md:text-5xl font-bold mb-6">Welcome to Our Conference</h1>
-      <p class="text-xl mb-8">Join us for an inspiring event with industry experts and networking opportunities</p>
-      <a href="/register" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Register Now</a>
+    <div class="relative">
+      <!-- QR Code positioned at the top right -->
+      <div class="absolute top-0 right-0 bg-white p-4 rounded-lg shadow-md hidden md:block">
+        <p class="text-sm text-gray-600 mb-2 text-center">Scan to register:</p>
+        <img id="register-qr-code" class="h-32 w-32" alt="Registration QR Code">
+      </div>
+      
+      <div class="md:w-2/3">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6"><%= conference ? conference.name : 'Welcome to Our Conference' %></h1>
+        <p class="text-xl mb-8">Join us for an inspiring event with industry experts and networking opportunities</p>
+        <a href="<%= conference ? `/register?code=${conference.code}` : '/register' %>" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Register Now</a>
+      </div>
     </div>
   </div>
 </section>
@@ -23,8 +31,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         <h3 class="text-xl font-bold mb-2">Date & Time</h3>
-        <p class="text-gray-700">May 15-16, 2023</p>
-        <p class="text-gray-700">9:00 AM - 5:00 PM</p>
+        <p class="text-gray-700"><%= formattedDates || 'To be announced' %></p>
+        <p class="text-gray-700"><%= conference ? conference.time : '9:00 AM - 5:00 PM' %></p>
       </div>
       
       <!-- Location -->
@@ -34,20 +42,34 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         <h3 class="text-xl font-bold mb-2">Location</h3>
-        <p class="text-gray-700">Grand Conference Center</p>
-        <p class="text-gray-700">123 Main Street, City</p>
+        <p class="text-gray-700"><%= locationName || 'Conference Center' %></p>
+        <p class="text-gray-700"><%= locationAddress || '' %></p>
       </div>
       
-      <!-- Contact -->
+      <!-- Contact Information -->
       <div class="bg-blue-50 p-6 rounded-lg text-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
         <h3 class="text-xl font-bold mb-2">Contact</h3>
-        <p class="text-gray-700">conference@example.com</p>
-        <p class="text-gray-700">+1 (123) 456-7890</p>
+        <p class="text-gray-700">Name: <%= receptionist ? receptionist.fullName : 'Rec One' %></p>
+        <p class="text-gray-700">Phone: <%= receptionist ? receptionist.userPhone : '(555) 123-4567' %></p>
+        <p class="text-gray-700">Email: <%= receptionist ? receptionist.email : 'rec1@example.com' %></p>
+        
+        <!-- QR Code for mobile devices only -->
+        <div class="mt-4 md:hidden">
+          <p class="text-sm text-gray-600 mb-2">Scan to register:</p>
+          <img id="register-qr-code-mobile" class="mx-auto h-32 w-32" alt="Registration QR Code">
+        </div>
       </div>
     </div>
+    
+    <% if (conference && conference.description) { %>
+    <div class="mt-8 bg-blue-50 p-6 rounded-lg">
+      <h3 class="text-xl font-bold mb-2 text-center">Description</h3>
+      <p class="text-gray-700 text-center"><%= conference.description %></p>
+    </div>
+    <% } %>
   </div>
 </section>
 
@@ -56,57 +78,122 @@
   <div class="container mx-auto px-4">
     <h2 class="text-3xl font-bold text-center mb-12">Our Speakers</h2>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Speaker 1 -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="h-64 bg-gray-300">
-          <!-- Speaker image placeholder -->
-          <div class="h-full flex items-center justify-center bg-blue-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-        </div>
-        <div class="p-6">
-          <h3 class="text-xl font-bold mb-2">John Doe</h3>
-          <p class="text-blue-600 mb-4">CEO, Tech Company</p>
-          <p class="text-gray-600">Expert in technology leadership with over 15 years of industry experience.</p>
-        </div>
-      </div>
+    <div class="speakers-slider-container relative">
+      <!-- Slider navigation buttons -->
+      <button class="slider-prev absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-md text-blue-600 hover:bg-gray-100 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
       
-      <!-- Speaker 2 -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="h-64 bg-gray-300">
-          <!-- Speaker image placeholder -->
-          <div class="h-full flex items-center justify-center bg-blue-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-        </div>
-        <div class="p-6">
-          <h3 class="text-xl font-bold mb-2">Jane Smith</h3>
-          <p class="text-blue-600 mb-4">CTO, Innovation Labs</p>
-          <p class="text-gray-600">Leading expert in artificial intelligence and machine learning technologies.</p>
-        </div>
-      </div>
+      <button class="slider-next absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-md text-blue-600 hover:bg-gray-100 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
       
-      <!-- Speaker 3 -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="h-64 bg-gray-300">
-          <!-- Speaker image placeholder -->
-          <div class="h-full flex items-center justify-center bg-blue-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+      <!-- Speakers slider -->
+      <div class="speakers-slider overflow-x-auto pb-4 hide-scrollbar">
+        <div class="inline-flex space-x-8">
+          <!-- Speaker 1 -->
+          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
+            <div class="h-64 bg-gray-200">
+              <!-- Speaker image -->
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Doe" class="h-full w-full object-cover speaker-image">
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">John Doe</h3>
+              <p class="text-blue-600 mb-4">CEO, Tech Company</p>
+              <p class="text-gray-600">Expert in technology leadership with over 15 years of industry experience.</p>
+            </div>
+          </div>
+          
+          <!-- Speaker 2 -->
+          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
+            <div class="h-64 bg-gray-200">
+              <!-- Speaker image -->
+              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Smith" class="h-full w-full object-cover speaker-image">
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">Jane Smith</h3>
+              <p class="text-blue-600 mb-4">CTO, Innovation Labs</p>
+              <p class="text-gray-600">Leading expert in artificial intelligence and machine learning technologies.</p>
+            </div>
+          </div>
+          
+          <!-- Speaker 3 -->
+          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
+            <div class="h-64 bg-gray-200">
+              <!-- Speaker image -->
+              <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Robert Johnson" class="h-full w-full object-cover speaker-image">
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">Robert Johnson</h3>
+              <p class="text-blue-600 mb-4">Professor, University</p>
+              <p class="text-gray-600">Researcher and educator specializing in emerging technologies and their applications.</p>
+            </div>
+          </div>
+          
+          <!-- Speaker 4 (New) -->
+          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
+            <div class="h-64 bg-gray-200">
+              <!-- Speaker image -->
+              <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Sarah Miller" class="h-full w-full object-cover speaker-image">
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">Sarah Miller</h3>
+              <p class="text-blue-600 mb-4">Product Director, Software Inc.</p>
+              <p class="text-gray-600">Product strategy expert with a focus on user experience and market innovation.</p>
+            </div>
+          </div>
+          
+          <!-- Speaker 5 (New) -->
+          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
+            <div class="h-64 bg-gray-200">
+              <!-- Speaker image -->
+              <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Michael Chen" class="h-full w-full object-cover speaker-image">
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">Michael Chen</h3>
+              <p class="text-blue-600 mb-4">Security Specialist, CyberDefense</p>
+              <p class="text-gray-600">Cybersecurity expert focused on enterprise security frameworks and threat mitigation.</p>
+            </div>
+          </div>
+          
+          <!-- Speaker 6 (New) -->
+          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
+            <div class="h-64 bg-gray-200">
+              <!-- Speaker image -->
+              <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Alexa Rodriguez" class="h-full w-full object-cover speaker-image">
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">Alexa Rodriguez</h3>
+              <p class="text-blue-600 mb-4">Data Scientist, Insights Analytics</p>
+              <p class="text-gray-600">Specializes in big data analysis and predictive modeling for business intelligence.</p>
+            </div>
+          </div>
+          
+          <!-- Speaker 7 (New) -->
+          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
+            <div class="h-64 bg-gray-200">
+              <!-- Speaker image -->
+              <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="David Williams" class="h-full w-full object-cover speaker-image">
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">David Williams</h3>
+              <p class="text-blue-600 mb-4">Blockchain Expert, FutureTech</p>
+              <p class="text-gray-600">Pioneer in blockchain technology implementation for enterprise solutions.</p>
+            </div>
           </div>
         </div>
-        <div class="p-6">
-          <h3 class="text-xl font-bold mb-2">Robert Johnson</h3>
-          <p class="text-blue-600 mb-4">Professor, University</p>
-          <p class="text-gray-600">Researcher and educator specializing in emerging technologies and their applications.</p>
-        </div>
       </div>
+    </div>
+    
+    <!-- Slider pagination dots (optional) -->
+    <div class="flex justify-center mt-6 space-x-2 speakers-slider-pagination">
+      <button class="w-3 h-3 rounded-full bg-blue-600" aria-label="Slide 1"></button>
+      <button class="w-3 h-3 rounded-full bg-gray-300" aria-label="Slide 2"></button>
+      <button class="w-3 h-3 rounded-full bg-gray-300" aria-label="Slide 3"></button>
     </div>
   </div>
 </section>
@@ -116,6 +203,66 @@
   <div class="container mx-auto px-4">
     <h2 class="text-3xl font-bold mb-6">Ready to Join?</h2>
     <p class="text-xl mb-8 md:w-2/3 mx-auto">Secure your spot at this exclusive event. Limited seats available!</p>
-    <a href="/register" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Register Now</a>
+    <a href="<%= conference ? `/register?code=${conference.code}` : '/register' %>" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Register Now</a>
   </div>
-</section> 
+</section>
+
+<!-- QR Code Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the QR code image elements
+    const qrCodeElement = document.getElementById('register-qr-code');
+    const qrCodeMobileElement = document.getElementById('register-qr-code-mobile');
+    
+    // Fetch QR code from API
+    let qrCodeUrl = '/api/qrcode';
+    
+    <% if (typeof conference !== 'undefined' && conference && conference.code) { %>
+    // Add conference code if available
+    qrCodeUrl += '?code=' + '<%= conference.code %>';
+    <% } %>
+    
+    // Fetch the QR code from our API
+    fetch(qrCodeUrl)
+      .then(response => response.json())
+      .then(data => {
+        // Set the image source to the data URL for both QR codes
+        if (qrCodeElement) {
+          qrCodeElement.src = data.qrCodeDataUrl;
+        }
+        if (qrCodeMobileElement) {
+          qrCodeMobileElement.src = data.qrCodeDataUrl;
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching QR code:', error);
+      });
+      
+    // Generate random speaker images
+    function getRandomSpeakerImages() {
+      // Set of possible profile images
+      const maleProfiles = [11, 12, 15, 22, 32, 36, 44, 67, 75, 85];
+      const femaleProfiles = [10, 21, 33, 44, 45, 46, 55, 65, 79, 90];
+      
+      // Shuffle the arrays to get random order
+      const shuffledMale = [...maleProfiles].sort(() => 0.5 - Math.random());
+      const shuffledFemale = [...femaleProfiles].sort(() => 0.5 - Math.random());
+      
+      // Get speaker images
+      const speakerImages = document.querySelectorAll('.speaker-image');
+      
+      // Set random images for each speaker
+      speakerImages.forEach((img, index) => {
+        // Alternate between male and female images
+        const profileId = index % 2 === 0 ? shuffledMale[index] : shuffledFemale[index];
+        const gender = index % 2 === 0 ? 'men' : 'women';
+        
+        // Set the image source
+        img.src = `https://randomuser.me/api/portraits/${gender}/${profileId}.jpg`;
+      });
+    }
+    
+    // Call the function to generate random speaker images
+    getRandomSpeakerImages();
+  });
+</script> 

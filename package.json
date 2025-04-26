@@ -9,6 +9,7 @@
     "build:css": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css",
     "watch:css": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css --watch",
     "seed": "node backend/config/seedAdmin.js",
+    "seed:locations": "node backend/seedLocations.js",
     "dev:all": "concurrently \"npm run watch:css\" \"npm run dev\""
   },
   "keywords": [
@@ -34,6 +35,7 @@
     "mongoose": "^7.6.3",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.7",
+    "qrcode": "^1.5.4",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

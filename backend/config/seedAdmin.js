@@ -12,7 +12,7 @@ dotenv.config();
 
 // Default admin credentials
 const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+const adminPassword = process.env.ADMIN_PASSWORD || 'Hanoi@1234';
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/conference-registration')

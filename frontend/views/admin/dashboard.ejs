@@ -1,9 +1,61 @@
 <%- contentFor('body') %>
 
-<!-- Dashboard Header -->
-<div class="mb-8">
-  <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
-  <p class="text-gray-600">Manage conference registrations and participant data</p>
+<!-- Conference Selector -->
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+  <div class="flex-1">
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
+    <div class="flex items-center">
+      <label for="conference-select" class="text-gray-700 font-medium mr-4">Choose Conference:</label>
+      <div class="relative flex-1 max-w-md">
+        <select id="conference-select" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+          <option value="all">All Conferences</option>
+          <% if (typeof conferences !== 'undefined' && conferences.length > 0) { %>
+            <% conferences.forEach((conference, index) => { %>
+              <option value="<%= conference.code %>" <%= index === 0 ? 'selected' : '' %>><%= conference.name %></option>
+            <% }); %>
+          <% } else { %>
+            <option value="conf2024" disabled>No conferences available</option>
+          <% } %>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- New Conference Button -->
+  <button id="new-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white flex items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+    </svg>
+    New Conference
+  </button>
+</div>
+
+<!-- Conference Information -->
+<div id="conference-info" class="bg-white rounded-lg shadow p-6 mb-8 hidden">
+  <h3 class="text-xl font-semibold text-gray-800 mb-4">Conference Information</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      <p class="text-gray-500 mb-1">Conference Name</p>
+      <p class="text-lg font-medium" id="conf-name">-</p>
+    </div>
+    <div>
+      <p class="text-gray-500 mb-1">Location</p>
+      <p class="text-lg font-medium" id="conf-location">-</p>
+    </div>
+    <div>
+      <p class="text-gray-500 mb-1">Time</p>
+      <p class="text-lg font-medium" id="conf-time">-</p>
+    </div>
+    <div>
+      <p class="text-gray-500 mb-1">Dates</p>
+      <p class="text-lg font-medium" id="conf-dates">-</p>
+    </div>
+  </div>
 </div>
 
 <!-- Dashboard Stats -->
@@ -13,7 +65,7 @@
     <div class="flex justify-between items-start">
       <div>
         <p class="text-gray-500 text-sm">Total Registrations</p>
-        <h2 class="text-3xl font-bold text-gray-800"><%= participants.length %></h2>
+        <h2 class="text-3xl font-bold text-gray-800" id="total-registrations"><%= participants.length %></h2>
       </div>
       <div class="bg-blue-100 p-3 rounded-full">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,32 +75,31 @@
     </div>
   </div>
   
-  <!-- Offline Attendees -->
+  <!-- Attending -->
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Offline Attendees</p>
-        <h2 class="text-3xl font-bold text-gray-800"><%= participants.filter(p => p.attendanceType === 'Offline').length %></h2>
+        <p class="text-gray-500 text-sm">Attending</p>
+        <h2 class="text-3xl font-bold text-gray-800" id="attending-count"><%= participants.filter(p => p.attendance === true).length || 0 %></h2>
       </div>
       <div class="bg-green-100 p-3 rounded-full">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
     </div>
   </div>
   
-  <!-- Online Attendees -->
+  <!-- Absence -->
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Online Attendees</p>
-        <h2 class="text-3xl font-bold text-gray-800"><%= participants.filter(p => p.attendanceType === 'Online').length %></h2>
+        <p class="text-gray-500 text-sm">Absence</p>
+        <h2 class="text-3xl font-bold text-gray-800" id="absence-count"><%= participants.filter(p => p.attendance === false).length || participants.length %></h2>
       </div>
-      <div class="bg-purple-100 p-3 rounded-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      <div class="bg-red-100 p-3 rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
     </div>
@@ -84,7 +135,7 @@
   </div>
 </div>
 
-<!-- Participants Table -->
+<!-- Registered Participants Table -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
   <div class="px-6 py-4 border-b border-gray-200">
     <h3 class="text-lg font-semibold text-gray-800">Registered Participants</h3>
@@ -99,19 +150,29 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organization</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lunch</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email Sent</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <% participants.forEach(participant => { %>
-            <tr data-id="<%= participant._id %>">
+        <tbody class="bg-white divide-y divide-gray-200" id="participants-table-body">
+          <% participants.forEach((participant, index) => { 
+              // Generate a participant ID based on conference code and registration number
+              const conferenceCode = participant.conferenceCode || 'CONF';
+              const registrationNumber = (index + 1).toString().padStart(5, '0');
+              const participantId = conferenceCode + registrationNumber;
+          %>
+            <tr data-id="<%= participant._id %>" data-conference="<%= participant.conferenceCode || 'CONF' %>">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <%= participantId %>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 <%= participant.name %>
               </td>
@@ -124,13 +185,26 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= participant.organization || '-' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= participant.attendanceType === 'Online' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800' %>">
-                  <%= participant.attendanceType %>
-                </span>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.age || '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= new Date(participant.registrationDate).toLocaleDateString() %>
+                <%= participant.lunch || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if (participant.attendance) { %>
+                  <span class="text-green-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                <% } else { %>
+                  <span class="text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </span>
+                <% } %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <% if (participant.emailSent) { %>
@@ -148,13 +222,18 @@
                 <% } %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <button class="send-email-btn text-blue-600 hover:text-blue-800" <%= participant.emailSent ? 'disabled' : '' %>>
-                  <% if (participant.emailSent) { %>
-                    Email Sent
-                  <% } else { %>
-                    Send Email
-                  <% } %>
-                </button>
+                <div class="flex space-x-2">
+                  <button class="send-email-btn text-blue-600 hover:text-blue-800" <%= participant.emailSent ? 'disabled' : '' %>>
+                    <% if (participant.emailSent) { %>
+                      Email Sent
+                    <% } else { %>
+                      Send Email
+                    <% } %>
+                  </button>
+                  <button class="view-participant-btn text-gray-600 hover:text-gray-800">
+                    View
+                  </button>
+                </div>
               </td>
             </tr>
           <% }) %>
@@ -164,7 +243,133 @@
   </div>
 </div>
 
-<!-- Modal to view participant details (optional) -->
+<!-- New Conference Modal -->
+<div id="new-conference-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg max-w-xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
+      <h3 class="text-xl font-bold text-blue-700">New Conference</h3>
+      <button id="close-conference-modal" class="text-gray-500 hover:text-gray-700">
+        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+        </svg>
+      </button>
+    </div>
+    
+    <form id="new-conference-form" class="px-6 py-4">
+      <div class="space-y-6">
+        <!-- Conference Name -->
+        <div>
+          <label for="conference-name" class="block text-md font-semibold text-gray-800 mb-2">Conference name <span class="text-red-500">*</span></label>
+          <input type="text" id="conference-name" name="name" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" required>
+        </div>
+        
+        <!-- Conference Dates -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="start-date" class="block text-md font-semibold text-gray-800 mb-2">Start date <span class="text-red-500">*</span></label>
+            <input type="date" id="start-date" name="startDate" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" required>
+          </div>
+          <div>
+            <label for="end-date" class="block text-md font-semibold text-gray-800 mb-2">End date <span class="text-red-500">*</span></label>
+            <input type="date" id="end-date" name="endDate" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" required>
+          </div>
+        </div>
+        
+        <!-- Conference Time and Code (side by side) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="time" class="block text-md font-semibold text-gray-800 mb-2">Time <span class="text-red-500">*</span></label>
+            <input type="text" id="time" name="time" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" placeholder="e.g. 9:00 - 12:00, 14:00 - 17:00" required>
+            <p class="text-xs text-gray-500 mt-1">Use '-' between start and end times, ',' to separate multiple time slots</p>
+          </div>
+          <div>
+            <label for="conference-code" class="block text-md font-semibold text-gray-800 mb-2">Conference code <span class="text-red-500">*</span></label>
+            <input type="text" id="conference-code" name="code" maxlength="4" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800 uppercase" required pattern="[A-Za-z0-9]{4}" title="Please enter a 4-character code (letters and numbers only)">
+          </div>
+        </div>
+        
+        <!-- Location Dropdown -->
+        <div>
+          <label for="location" class="block text-md font-semibold text-gray-800 mb-2">Location <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <select id="location" name="location" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800 appearance-none" required>
+              <option value="" disabled>Select a location</option>
+              <!-- Will be populated with locations -->
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-md font-semibold text-gray-800 mb-2">Description/programs of conference</label>
+          <textarea id="description" name="description" rows="3" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800"></textarea>
+        </div>
+        
+        <!-- Registration Fields -->
+        <div>
+          <label class="block text-md font-semibold text-gray-800 mb-2">Registration Fields</label>
+          <p class="text-sm text-gray-600 mb-2">Select the fields that will appear on the registration form for participants.</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex items-center">
+              <input type="checkbox" id="field-name" name="registrationFields" value="name" class="h-5 w-5 text-blue-600" checked disabled>
+              <label for="field-name" class="ml-2 text-gray-800">Full name <span class="text-xs text-red-500">(Required)</span></label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="field-address" name="registrationFields" value="address" class="h-5 w-5 text-blue-600">
+              <label for="field-address" class="ml-2 text-gray-800">Address</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="field-phone" name="registrationFields" value="phone" class="h-5 w-5 text-blue-600" checked disabled>
+              <label for="field-phone" class="ml-2 text-gray-800">Phone <span class="text-xs text-red-500">(Required)</span></label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="field-age" name="registrationFields" value="age" class="h-5 w-5 text-blue-600">
+              <label for="field-age" class="ml-2 text-gray-800">Age</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="field-email" name="registrationFields" value="email" class="h-5 w-5 text-blue-600" checked disabled>
+              <label for="field-email" class="ml-2 text-gray-800">Email <span class="text-xs text-red-500">(Required)</span></label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="field-business" name="registrationFields" value="business" class="h-5 w-5 text-blue-600">
+              <label for="field-business" class="ml-2 text-gray-800">Your business</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="field-lunch" name="registrationFields" value="lunch" class="h-5 w-5 text-blue-600">
+              <label for="field-lunch" class="ml-2 text-gray-800">Lunch</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="field-source" name="registrationFields" value="source" class="h-5 w-5 text-blue-600">
+              <label for="field-source" class="ml-2 text-gray-800">How do you know about this conference</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="field-nationality" name="registrationFields" value="nationality" class="h-5 w-5 text-blue-600">
+              <label for="field-nationality" class="ml-2 text-gray-800">Nationality</label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Main Speaker (hidden, moved to description) -->
+        <input type="hidden" id="main-speaker" name="mainSpeaker" class="form-input w-full rounded-md">
+        
+        <!-- Max Attendees (required but hidden) -->
+        <input type="hidden" id="max-attendees" name="maxAttendees" value="100" class="form-input w-full rounded-md">
+      </div>
+    </form>
+    
+    <div class="px-6 py-4 border-t border-gray-200 flex justify-end sticky bottom-0 bg-white">
+      <button type="button" id="cancel-conference-btn" class="btn border border-gray-400 bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded-md mr-2">Cancel</button>
+      <button type="button" id="save-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal to view participant details -->
 <div id="participant-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg max-w-lg w-full mx-4">
     <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
@@ -196,13 +401,266 @@
     const alertBox = document.getElementById('alert-box');
     const alertMessage = document.getElementById('alert-message');
     const closeAlert = document.getElementById('close-alert');
+    const newConferenceBtn = document.getElementById('new-conference-btn');
+    const newConferenceModal = document.getElementById('new-conference-modal');
+    const closeConferenceModal = document.getElementById('close-conference-modal');
+    const cancelConferenceBtn = document.getElementById('cancel-conference-btn');
+    const saveConferenceBtn = document.getElementById('save-conference-btn');
+    const conferenceSelect = document.getElementById('conference-select');
+    const conferenceInfo = document.getElementById('conference-info');
+    const confName = document.getElementById('conf-name');
+    const confDates = document.getElementById('conf-dates');
+    const confLocation = document.getElementById('conf-location');
+    const confTime = document.getElementById('conf-time');
+    const totalRegistrations = document.getElementById('total-registrations');
+    const attendingCount = document.getElementById('attending-count');
+    const absenceCount = document.getElementById('absence-count');
+    const participantsTableBody = document.getElementById('participants-table-body');
     
-    // Individual send email buttons
-    const sendEmailBtns = document.querySelectorAll('.send-email-btn');
+    // Store conferences data for client-side access
+    const conferencesData = <%- JSON.stringify(conferences || []) %>;
     
-    // Close alert
-    closeAlert.addEventListener('click', function() {
-      alertContainer.classList.add('hidden');
+    // Store participants data for filtering
+    const participantsData = <%- JSON.stringify(participants || []) %>;
+    
+    // Store locations data
+    let locationsData = [];
+    
+    // Fetch locations
+    const fetchLocations = async () => {
+      try {
+        const response = await fetch('/admin/locations');
+        const data = await response.json();
+        
+        if (data.success) {
+          locationsData = data.locations;
+          populateLocationDropdown();
+        } else {
+          showAlert('Failed to load locations', 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+        showAlert('Error loading locations', 'error');
+      }
+    };
+    
+    // Populate the location dropdown
+    const populateLocationDropdown = () => {
+      const locationSelect = document.getElementById('location');
+      
+      // Clear existing options except the default one
+      while (locationSelect.options.length > 1) {
+        locationSelect.remove(1);
+      }
+      
+      // Add location options
+      locationsData.forEach((location, index) => {
+        const option = document.createElement('option');
+        option.value = location._id;
+        option.textContent = location.name;
+        locationSelect.appendChild(option);
+        
+        // Select the first location by default
+        if (index === 0) {
+          option.selected = true;
+        }
+      });
+    };
+    
+    // Set up date field synchronization
+    const startDateField = document.getElementById('start-date');
+    const endDateField = document.getElementById('end-date');
+    
+    if (startDateField && endDateField) {
+      startDateField.addEventListener('change', function() {
+        // When start date changes, set end date to same value
+        endDateField.value = this.value;
+      });
+    }
+    
+    // Open new conference modal
+    newConferenceBtn.addEventListener('click', function() {
+      // Fetch locations before showing the modal
+      fetchLocations();
+      
+      newConferenceModal.classList.remove('hidden');
+    });
+    
+    // Close new conference modal
+    [closeConferenceModal, cancelConferenceBtn].forEach(el => {
+      el.addEventListener('click', function() {
+        newConferenceModal.classList.add('hidden');
+        // Reset form
+        document.getElementById('new-conference-form').reset();
+      });
+    });
+    
+    // Function to update dashboard stats based on selected conference
+    function updateDashboardStats(conferenceCode) {
+      // Filter participants by conference code if specific conference is selected
+      let filteredParticipants = participantsData;
+      if (conferenceCode !== 'all') {
+        filteredParticipants = participantsData.filter(p => p.conferenceCode === conferenceCode);
+      }
+      
+      // Update stats
+      totalRegistrations.textContent = filteredParticipants.length;
+      attendingCount.textContent = filteredParticipants.filter(p => p.attendance).length;
+      absenceCount.textContent = filteredParticipants.filter(p => !p.attendance).length;
+      
+      // Update conference info
+      if (conferenceCode !== 'all') {
+        const conference = conferencesData.find(c => c.code === conferenceCode);
+        if (conference) {
+          conferenceInfo.classList.remove('hidden');
+          confName.textContent = conference.name;
+          
+          // Format dates
+          const startDate = new Date(conference.startDate);
+          const endDate = new Date(conference.endDate);
+          const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+          confDates.textContent = `${startDate.toLocaleDateString(undefined, formatOptions)} - ${endDate.toLocaleDateString(undefined, formatOptions)}`;
+          
+          // Get location name properly
+          confLocation.textContent = conference.location && conference.location.name ? conference.location.name : 'Unknown';
+          
+          // Get time
+          const time = conference.time || 'Not specified';
+          confTime.textContent = time;
+        }
+      } else {
+        conferenceInfo.classList.add('hidden');
+      }
+      
+      // Update table rows visibility
+      const rows = participantsTableBody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const rowConference = row.dataset.conference;
+        if (conferenceCode === 'all' || rowConference === conferenceCode) {
+          row.classList.remove('hidden');
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+    }
+    
+    // Conference selection changes
+    conferenceSelect.addEventListener('change', function() {
+      const selectedConference = conferenceSelect.value;
+      updateDashboardStats(selectedConference);
+    });
+    
+    // Initialize dashboard with the selected conference
+    if (conferencesData.length > 0) {
+      fetchLocations().then(() => {
+        updateDashboardStats(conferenceSelect.value);
+      });
+    } else {
+      fetchLocations();
+    }
+    
+    // Get selected registration fields
+    const getSelectedRegistrationFields = () => {
+      const checkboxes = document.querySelectorAll('input[name="registrationFields"]:checked');
+      const fields = Array.from(checkboxes).map(cb => cb.value);
+      console.log('Selected registration fields:', fields);
+      return fields;
+    };
+    
+    // Save new conference
+    saveConferenceBtn.addEventListener('click', async function() {
+      try {
+        // Get form data
+        const form = document.getElementById('new-conference-form');
+        const formData = new FormData(form);
+        const conferenceData = {};
+        
+        // Conference code validation (4 characters)
+        const codeInput = document.getElementById('conference-code');
+        const code = codeInput.value.trim().toUpperCase();
+        if (!code || code.length !== 4) {
+          showAlert('Conference code must be exactly 4 characters', 'error');
+          codeInput.focus();
+          return;
+        }
+        
+        // Location validation
+        const locationSelect = document.getElementById('location');
+        if (!locationSelect.value) {
+          showAlert('Please select a location', 'error');
+          locationSelect.focus();
+          return;
+        }
+        
+        // Description validation - đã bỏ yêu cầu bắt buộc
+        
+        // Convert form data to JSON
+        formData.forEach((value, key) => {
+          conferenceData[key] = value;
+        });
+        
+        // Get selected registration fields with careful checking
+        const regFields = getSelectedRegistrationFields();
+        console.log('Selected registration fields:', regFields);
+        
+        // Make sure required fields are included
+        if (!regFields.includes('name')) regFields.push('name');
+        if (!regFields.includes('email')) regFields.push('email');
+        if (!regFields.includes('phone')) regFields.push('phone');
+        
+        conferenceData.registrationFields = regFields;
+        
+        console.log('Form data being submitted:', JSON.stringify(conferenceData, null, 2));
+        
+        // Disable save button during submission
+        saveConferenceBtn.disabled = true;
+        saveConferenceBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
+        
+        // Submit to the server
+        const response = await fetch('/admin/conferences/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(conferenceData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Show success message
+          showAlert('Conference created successfully!', 'success');
+          
+          // Add new conference to the dropdown
+          const newOption = document.createElement('option');
+          newOption.value = data.conference.code;
+          newOption.text = data.conference.name;
+          conferenceSelect.add(newOption, 1); // Add after "All Conferences" option
+          
+          // Select the new conference
+          conferenceSelect.value = data.conference.code;
+          
+          // Close the modal and reset form
+          newConferenceModal.classList.add('hidden');
+          form.reset();
+          
+          // Reload the page after a short delay to update all data
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          // Show error message
+          console.error('Error response from server:', data);
+          showAlert(data.message || 'Error creating conference', 'error');
+          saveConferenceBtn.disabled = false;
+          saveConferenceBtn.innerHTML = 'Create';
+        }
+      } catch (error) {
+        console.error('Error creating conference:', error);
+        showAlert('An error occurred while creating the conference. Check the console for details.', 'error');
+        saveConferenceBtn.disabled = false;
+        saveConferenceBtn.innerHTML = 'Create';
+      }
     });
     
     // Send bulk emails
@@ -239,41 +697,113 @@
     });
     
     // Send individual email
-    sendEmailBtns.forEach(btn => {
-      btn.addEventListener('click', async function() {
-        if (btn.disabled) return;
-        
-        const row = btn.closest('tr');
+    const sendEmailBtns = document.querySelectorAll('.send-email-btn');
+    
+    // Close alert
+    closeAlert.addEventListener('click', function() {
+      alertContainer.classList.add('hidden');
+    });
+    
+    // View participant details
+    const viewParticipantBtns = document.querySelectorAll('.view-participant-btn');
+    
+    viewParticipantBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const row = this.closest('tr');
         const participantId = row.dataset.id;
         
-        try {
-          btn.disabled = true;
-          btn.innerHTML = 'Sending...';
+        // Find participant data
+        const participant = participantsData.find(p => p._id === participantId);
+        
+        if (participant) {
+          const modalContent = document.getElementById('modal-content');
           
-          const response = await fetch(`/admin/send-email/${participantId}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
+          // Format registration date
+          const registrationDate = new Date(participant.registrationDate);
+          const dateOptions = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          };
           
-          const data = await response.json();
+          // Create content
+          modalContent.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-gray-500 mb-1">Name</p>
+                <p class="text-lg font-medium">${participant.name}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Email</p>
+                <p class="text-lg">${participant.email}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Phone</p>
+                <p class="text-lg">${participant.phone || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Address</p>
+                <p class="text-lg">${participant.address || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Age</p>
+                <p class="text-lg">${participant.age || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Business</p>
+                <p class="text-lg">${participant.business || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Lunch</p>
+                <p class="text-lg">${participant.lunch || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Source</p>
+                <p class="text-lg">${participant.source || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Nationality</p>
+                <p class="text-lg">${participant.nationality || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Organization</p>
+                <p class="text-lg">${participant.organization || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Registration Date</p>
+                <p class="text-lg">${registrationDate.toLocaleString(undefined, dateOptions)}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Attendance</p>
+                <p class="text-lg">${participant.attendance ? 'Yes' : 'No'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Email Sent</p>
+                <p class="text-lg">${participant.emailSent ? 'Yes' : 'No'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Questions/Comments</p>
+                <p class="text-lg">${participant.questions || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500 mb-1">Conference</p>
+                <p class="text-lg">${participant.conferenceCode}</p>
+              </div>
+            </div>
+          `;
           
-          if (data.success) {
-            showAlert('Email sent successfully', 'success');
-            btn.innerHTML = 'Email Sent';
-            row.querySelector('td:nth-child(7)').innerHTML = '<span class="text-green-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></span>';
-          } else {
-            showAlert(data.message, 'error');
-            btn.disabled = false;
-            btn.innerHTML = 'Send Email';
-          }
-        } catch (error) {
-          console.error('Error sending email:', error);
-          showAlert('An error occurred while sending the email', 'error');
-          btn.disabled = false;
-          btn.innerHTML = 'Send Email';
+          // Show modal
+          document.getElementById('participant-modal').classList.remove('hidden');
         }
+      });
+    });
+    
+    // Close participant modal
+    [document.getElementById('close-modal'), document.getElementById('close-modal-btn')].forEach(el => {
+      el.addEventListener('click', function() {
+        document.getElementById('participant-modal').classList.add('hidden');
       });
     });
     

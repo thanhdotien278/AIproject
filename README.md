@@ -129,12 +129,11 @@ ISC License
 
 ## Author
 
-Your Name or Company Name
-
+Time format: "9:00 - 12:00, 14:00 - 17:00".
 ## Acknowledgements
 
 - Tailwind CSS
 - Express.js
 - MongoDB
 - Nodemailer
-- All other open-source libraries used in this project 
+- All other open-source libraries used in this project  
