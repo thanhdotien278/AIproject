@@ -103,7 +103,13 @@ app.get('/', async (req, res) => {
     const receptionist = await mongoose.model('User').findOne({ username: 'rec1' });
     
     if (!latestConference) {
-      return res.render('index', { receptionist });
+      return res.render('index', { 
+        receptionist,
+        conference: null,
+        formattedDates: null,
+        locationName: null,
+        locationAddress: null
+      });
     }
     
     // Format dates for display
@@ -129,7 +135,13 @@ app.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching latest conference:', error);
-    res.render('index');
+    res.render('index', { 
+      conference: null,
+      formattedDates: null,
+      locationName: null,
+      locationAddress: null,
+      receptionist: null
+    });
   }
 });
 
