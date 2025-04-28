@@ -73,7 +73,7 @@ app.get('/api/qrcode', async (req, res) => {
     if (code) {
       registrationUrl += `?code=${code}`;
     }
-    registrationUrl = `http://192.168.1.17:3000/register?code=KDUR`;
+    registrationUrl = `http://192.168.1.114:3000/register?code=KDUR`;
     // registrationUrl = `https://dev.3tsmart.org/2`;
     // Generate QR code as data URL
     const qrCodeDataUrl = await QRCode.toDataURL(registrationUrl, {
@@ -148,15 +148,81 @@ app.get('/', async (req, res) => {
 });
 
 // Thank you route
-app.get('/thankyou', (req, res) => {
-  // Pass participant name from session if available
+app.get('/thankyou', async (req, res) => {
+  try {
+    // Get participant data from session
+    const participantName = req.session.participantName;
+    const participantEmail = req.session.participantEmail;
+    const conferenceName = req.session.conferenceName;
+    const conferenceCode = req.session.conferenceCode;
+    const participantData = req.session.participantData;
+    
+    if (!participantEmail) {
+      return res.redirect('/');
+    }
+    
+    // Find the participant in database to get all registration details
+    const participant = await mongoose.model('Participant').findOne({ email: participantEmail });
+    
+    // Find the conference details
+    const conference = await mongoose.model('Conference').findOne({ 
+      code: participant ? participant.conferenceCode : (conferenceCode || null)
+    }).populate('location');
+    
+    if (!conference) {
+      return res.render('thankyou', { 
+        participantName,
+        participantEmail,
+        participant: participantData || null, // Use session data as fallback
+        conference: { name: conferenceName || 'Hội Nghị', code: conferenceCode },
+        formattedDates: null,
+        locationName: null,
+        locationAddress: null
+      });
+    }
+    
+    // Format dates for display
+    const startDate = new Date(conference.startDate);
+    const endDate = new Date(conference.endDate);
+    const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    
+    let formattedDates = startDate.toLocaleDateString('vi-VN', formatOptions);
+    if (startDate.getTime() !== endDate.getTime()) {
+      formattedDates += ` - ${endDate.toLocaleDateString('vi-VN', formatOptions)}`;
+    }
+    
+    // Get location details
+    const locationName = conference.location ? conference.location.name : 'Sẽ được thông báo sau';
+    const locationAddress = conference.location ? conference.location.address : '';
+    
+    res.render('thankyou', { 
+      participantName,
+      participantEmail,
+      participant: participant || participantData, // Use session data as fallback
+      conference,
+      formattedDates,
+      locationName,
+      locationAddress
+    });
+  } catch (error) {
+    console.error('Error rendering thank you page:', error);
+    // Use session data as fallback in case of error
   const participantName = req.session.participantName;
   const participantEmail = req.session.participantEmail;
+    const conferenceName = req.session.conferenceName;
+    const conferenceCode = req.session.conferenceCode;
+    const participantData = req.session.participantData;
   
   res.render('thankyou', { 
     participantName,
-    participantEmail 
+      participantEmail,
+      participant: participantData || null,
+      conference: { name: conferenceName || 'Hội Nghị', code: conferenceCode },
+      formattedDates: null,
+      locationName: null,
+      locationAddress: null
   });
+  }
 });
 
 // 404 handler

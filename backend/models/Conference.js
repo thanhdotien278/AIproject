@@ -73,7 +73,26 @@ const conferenceSchema = new mongoose.Schema({
   },
   registrationFields: [{
     type: String,
-    enum: ['name', 'email', 'phone', 'address', 'age', 'business', 'lunch', 'source', 'nationality']
+    enum: [
+      'name',
+      'email',
+      'phone',
+      'address',
+      'age',
+      'business',
+      'nationality',
+      'workunit',
+      'rank',
+      'academic',
+      'role',
+      'speech',
+      'lunch',
+      'dinner',
+      'transport',
+      'feedback',
+      'questions',
+      'source'
+    ]
   }],
   createdAt: {
     type: Date,

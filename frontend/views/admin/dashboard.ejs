@@ -154,9 +154,22 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organization</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nationality</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Unit</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speech</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lunch</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dinner</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transport</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feedback</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered At</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email Sent</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -183,13 +196,52 @@
                 <%= participant.phone || '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.organization || '-' %>
+                <%= participant.address || '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= participant.age || '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.business || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.nationality || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.workunit || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.rank || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.academic || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.role || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.speech || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= participant.lunch || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.dinner || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.transport || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.feedback || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.questions || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.source || '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= participant.createdAt ? new Date(participant.createdAt).toLocaleString() : '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <% if (participant.attendance) { %>
@@ -245,9 +297,9 @@
 
 <!-- New Conference Modal -->
 <div id="new-conference-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg max-w-xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+  <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
     <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
-      <h3 class="text-xl font-bold text-blue-700">New Conference</h3>
+      <h3 class="text-xl font-bold text-blue-700">Thêm Hội Nghị Mới</h3>
       <button id="close-conference-modal" class="text-gray-500 hover:text-gray-700">
         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
           <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
@@ -255,22 +307,23 @@
       </button>
     </div>
     
+    <div class="overflow-y-auto flex-1">
     <form id="new-conference-form" class="px-6 py-4">
       <div class="space-y-6">
         <!-- Conference Name -->
         <div>
-          <label for="conference-name" class="block text-md font-semibold text-gray-800 mb-2">Conference name <span class="text-red-500">*</span></label>
+            <label for="conference-name" class="block text-md font-semibold text-gray-800 mb-2">Tên hội nghị <span class="text-red-500">*</span></label>
           <input type="text" id="conference-name" name="name" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" required>
         </div>
         
         <!-- Conference Dates -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label for="start-date" class="block text-md font-semibold text-gray-800 mb-2">Start date <span class="text-red-500">*</span></label>
+              <label for="start-date" class="block text-md font-semibold text-gray-800 mb-2">Ngày bắt đầu <span class="text-red-500">*</span></label>
             <input type="date" id="start-date" name="startDate" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" required>
           </div>
           <div>
-            <label for="end-date" class="block text-md font-semibold text-gray-800 mb-2">End date <span class="text-red-500">*</span></label>
+              <label for="end-date" class="block text-md font-semibold text-gray-800 mb-2">Ngày kết thúc <span class="text-red-500">*</span></label>
             <input type="date" id="end-date" name="endDate" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" required>
           </div>
         </div>
@@ -278,22 +331,22 @@
         <!-- Conference Time and Code (side by side) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label for="time" class="block text-md font-semibold text-gray-800 mb-2">Time <span class="text-red-500">*</span></label>
-            <input type="text" id="time" name="time" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" placeholder="e.g. 9:00 - 12:00, 14:00 - 17:00" required>
-            <p class="text-xs text-gray-500 mt-1">Use '-' between start and end times, ',' to separate multiple time slots</p>
+              <label for="time" class="block text-md font-semibold text-gray-800 mb-2">Thời gian <span class="text-red-500">*</span></label>
+              <input type="text" id="time" name="time" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" placeholder="VD: 9:00 - 12:00, 14:00 - 17:00" required>
+              <p class="text-xs text-gray-500 mt-1">Sử dụng '-' giữa thời gian bắt đầu và kết thúc, ',' để phân cách các khung giờ</p>
           </div>
           <div>
-            <label for="conference-code" class="block text-md font-semibold text-gray-800 mb-2">Conference code <span class="text-red-500">*</span></label>
-            <input type="text" id="conference-code" name="code" maxlength="4" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800 uppercase" required pattern="[A-Za-z0-9]{4}" title="Please enter a 4-character code (letters and numbers only)">
+              <label for="conference-code" class="block text-md font-semibold text-gray-800 mb-2">Mã hội nghị <span class="text-red-500">*</span></label>
+              <input type="text" id="conference-code" name="code" maxlength="4" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800 uppercase" required pattern="[A-Za-z0-9]{4}" title="Vui lòng nhập mã 4 ký tự (chỉ chữ và số)">
           </div>
         </div>
         
         <!-- Location Dropdown -->
         <div>
-          <label for="location" class="block text-md font-semibold text-gray-800 mb-2">Location <span class="text-red-500">*</span></label>
+            <label for="location" class="block text-md font-semibold text-gray-800 mb-2">Địa điểm <span class="text-red-500">*</span></label>
           <div class="relative">
             <select id="location" name="location" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800 appearance-none" required>
-              <option value="" disabled>Select a location</option>
+                <option value="" disabled>Chọn địa điểm</option>
               <!-- Will be populated with locations -->
             </select>
             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -306,51 +359,96 @@
         
         <!-- Description -->
         <div>
-          <label for="description" class="block text-md font-semibold text-gray-800 mb-2">Description/programs of conference</label>
+            <label for="description" class="block text-md font-semibold text-gray-800 mb-2">Mô tả/Chương trình hội nghị</label>
           <textarea id="description" name="description" rows="3" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800"></textarea>
         </div>
         
         <!-- Registration Fields -->
         <div>
-          <label class="block text-md font-semibold text-gray-800 mb-2">Registration Fields</label>
-          <p class="text-sm text-gray-600 mb-2">Select the fields that will appear on the registration form for participants.</p>
+            <label class="block text-md font-semibold text-gray-800 mb-2">Các trường đăng ký</label>
+            <p class="text-sm text-gray-600 mb-2">Chọn các trường sẽ xuất hiện trên form đăng ký cho người tham dự.</p>
+            <div class="max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-4">
           <div class="grid grid-cols-2 gap-4">
+                <!-- Basic Information -->
+                <div class="space-y-2">
             <div class="flex items-center">
-              <input type="checkbox" id="field-name" name="registrationFields" value="name" class="h-5 w-5 text-blue-600" checked disabled>
-              <label for="field-name" class="ml-2 text-gray-800">Full name <span class="text-xs text-red-500">(Required)</span></label>
+                    <input type="checkbox" id="field-name" name="registrationFields" value="name" class="form-checkbox h-4 w-4 text-blue-600" checked disabled>
+                    <label for="field-name" class="ml-2 text-gray-700">Họ và tên</label>
             </div>
             <div class="flex items-center">
-              <input type="checkbox" id="field-address" name="registrationFields" value="address" class="h-5 w-5 text-blue-600">
-              <label for="field-address" class="ml-2 text-gray-800">Address</label>
+                    <input type="checkbox" id="field-email" name="registrationFields" value="email" class="form-checkbox h-4 w-4 text-blue-600" checked disabled>
+                    <label for="field-email" class="ml-2 text-gray-700">Email</label>
             </div>
             <div class="flex items-center">
-              <input type="checkbox" id="field-phone" name="registrationFields" value="phone" class="h-5 w-5 text-blue-600" checked disabled>
-              <label for="field-phone" class="ml-2 text-gray-800">Phone <span class="text-xs text-red-500">(Required)</span></label>
+                    <input type="checkbox" id="field-phone" name="registrationFields" value="phone" class="form-checkbox h-4 w-4 text-blue-600" checked disabled>
+                    <label for="field-phone" class="ml-2 text-gray-700">Số điện thoại</label>
             </div>
             <div class="flex items-center">
-              <input type="checkbox" id="field-age" name="registrationFields" value="age" class="h-5 w-5 text-blue-600">
-              <label for="field-age" class="ml-2 text-gray-800">Age</label>
+                    <input type="checkbox" id="field-address" name="registrationFields" value="address" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-address" class="ml-2 text-gray-700">Địa chỉ</label>
             </div>
             <div class="flex items-center">
-              <input type="checkbox" id="field-email" name="registrationFields" value="email" class="h-5 w-5 text-blue-600" checked disabled>
-              <label for="field-email" class="ml-2 text-gray-800">Email <span class="text-xs text-red-500">(Required)</span></label>
+                    <input type="checkbox" id="field-age" name="registrationFields" value="age" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-age" class="ml-2 text-gray-700">Tuổi</label>
             </div>
             <div class="flex items-center">
-              <input type="checkbox" id="field-business" name="registrationFields" value="business" class="h-5 w-5 text-blue-600">
-              <label for="field-business" class="ml-2 text-gray-800">Your business</label>
+                    <input type="checkbox" id="field-business" name="registrationFields" value="business" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-business" class="ml-2 text-gray-700">Lĩnh vực kinh doanh</label>
             </div>
             <div class="flex items-center">
-              <input type="checkbox" id="field-lunch" name="registrationFields" value="lunch" class="h-5 w-5 text-blue-600">
-              <label for="field-lunch" class="ml-2 text-gray-800">Lunch</label>
+                    <input type="checkbox" id="field-nationality" name="registrationFields" value="nationality" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-nationality" class="ml-2 text-gray-700">Quốc tịch</label>
             </div>
             <div class="flex items-center">
-              <input type="checkbox" id="field-source" name="registrationFields" value="source" class="h-5 w-5 text-blue-600">
-              <label for="field-source" class="ml-2 text-gray-800">How do you know about this conference</label>
+                    <input type="checkbox" id="field-workunit" name="registrationFields" value="workunit" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-workunit" class="ml-2 text-gray-700">Đơn vị công tác</label>
             </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="space-y-2">
             <div class="flex items-center">
-              <input type="checkbox" id="field-nationality" name="registrationFields" value="nationality" class="h-5 w-5 text-blue-600">
-              <label for="field-nationality" class="ml-2 text-gray-800">Nationality</label>
+                    <input type="checkbox" id="field-rank" name="registrationFields" value="rank" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-rank" class="ml-2 text-gray-700">Cấp bậc</label>
             </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-academic" name="registrationFields" value="academic" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-academic" class="ml-2 text-gray-700">Học hàm học vị</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-role" name="registrationFields" value="role" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-role" class="ml-2 text-gray-700">Vai trò (Báo cáo viên/Tham dự)</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-speech" name="registrationFields" value="speech" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-speech" class="ml-2 text-gray-700">Có phát biểu</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-lunch" name="registrationFields" value="lunch" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-lunch" class="ml-2 text-gray-700">Ăn trưa</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-dinner" name="registrationFields" value="dinner" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-dinner" class="ml-2 text-gray-700">Ăn tối</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-transport" name="registrationFields" value="transport" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-transport" class="ml-2 text-gray-700">Đăng ký theo xe về học viện</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-feedback" name="registrationFields" value="feedback" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-feedback" class="ml-2 text-gray-700">Góp ý về công tác tổ chức</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-questions" name="registrationFields" value="questions" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-questions" class="ml-2 text-gray-700">Câu hỏi</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="field-source" name="registrationFields" value="source" class="form-checkbox h-4 w-4 text-blue-600">
+                    <label for="field-source" class="ml-2 text-gray-700">Nguồn biết về hội nghị</label>
+                  </div>
+                </div>
+              </div>
           </div>
         </div>
         
@@ -361,10 +459,11 @@
         <input type="hidden" id="max-attendees" name="maxAttendees" value="100" class="form-input w-full rounded-md">
       </div>
     </form>
+    </div>
     
     <div class="px-6 py-4 border-t border-gray-200 flex justify-end sticky bottom-0 bg-white">
-      <button type="button" id="cancel-conference-btn" class="btn border border-gray-400 bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded-md mr-2">Cancel</button>
-      <button type="button" id="save-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md">Create</button>
+      <button type="button" id="cancel-conference-btn" class="btn border border-gray-400 bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded-md mr-2">Hủy</button>
+      <button type="button" id="save-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md">Tạo</button>
     </div>
   </div>
 </div>

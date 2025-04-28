@@ -6,6 +6,18 @@ const participantSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  rank: {
+    type: String,
+    trim: true
+  },
+  academic: {
+    type: String,
+    trim: true
+  },
+  workunit: {
+    type: String,
+    trim: true
+  },
   email: {
     type: String,
     required: true,
@@ -13,6 +25,32 @@ const participantSchema = new mongoose.Schema({
     lowercase: true
   },
   phone: {
+    type: String,
+    trim: true
+  },
+  role: {
+    type: String,
+    enum: ['Báo cáo viên', 'Tham dự'],
+    default: 'Tham dự'
+  },
+  speech: {
+    type: Boolean,
+    default: false
+  },
+  
+  transport: {
+    type: Boolean,
+    default: false
+  },
+  lunch: {
+    type: Boolean,
+    default: false
+  },
+  dinner: {
+    type: Boolean,
+    default: false
+  },
+  feedback: {
     type: String,
     trim: true
   },
@@ -28,10 +66,6 @@ const participantSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  lunch: {
-    type: String,
-    trim: true
-  },
   source: {
     type: String,
     trim: true
@@ -40,11 +74,11 @@ const participantSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  organization: {
+  questions: {
     type: String,
     trim: true
   },
-  questions: {
+  mostinterested: {
     type: String,
     trim: true
   },
@@ -67,7 +101,9 @@ const participantSchema = new mongoose.Schema({
   attendance: {
     type: Boolean,
     default: false
-  }
+  },
+  
+  
 });
 
 const Participant = mongoose.model('Participant', participantSchema);
