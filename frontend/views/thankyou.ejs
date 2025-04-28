@@ -8,9 +8,9 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
       </svg>
     </div>
-    <h1 class="text-3xl md:text-4xl font-bold mb-4">Registration Successful!</h1>
-    <p class="text-xl max-w-2xl mx-auto">Thank you, <%= typeof participantName !== 'undefined' ? participantName : "Valued Participant" %>, for registering.</p>
-    <p class="text-lg mt-2">We're excited to have you join us at My Conference 2024.</p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-4">Đăng Ký Thành Công!</h1>
+    <p class="text-xl max-w-2xl mx-auto">Cảm ơn <%= typeof participantName !== 'undefined' ? participantName : "Quý vị" %> đã đăng ký.</p>
+    <p class="text-lg mt-2">Chúng tôi rất vui mừng khi quý vị tham gia Hội Nghị 2024.</p>
   </div>
 </section>
 
@@ -19,35 +19,35 @@
   <div class="container mx-auto px-4">
     <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 md:p-8">
       <div class="border-b pb-6 mb-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Event Details</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Chi Tiết Sự Kiện</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h3 class="font-semibold text-gray-700 mb-1">Date:</h3>
-            <p class="text-gray-600">June 15-16, 2024</p>
+            <h3 class="font-semibold text-gray-700 mb-1">Ngày:</h3>
+            <p class="text-gray-600">15-16 tháng 6, 2024</p>
           </div>
           
           <div>
-            <h3 class="font-semibold text-gray-700 mb-1">Location:</h3>
-            <p class="text-gray-600">Hanoi, Vietnam</p>
+            <h3 class="font-semibold text-gray-700 mb-1">Địa điểm:</h3>
+            <p class="text-gray-600">Hà Nội, Việt Nam</p>
           </div>
         </div>
       </div>
       
       <div class="mb-6">
-        <p class="text-gray-600 text-center italic">Please save this page for your reference.</p>
+        <p class="text-gray-600 text-center italic">Vui lòng lưu lại trang này để tham khảo sau này.</p>
       </div>
       
       <div class="flex justify-between items-center">
         <a href="/" class="btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium inline-flex items-center">
-          Return to Home
+          Quay Lại Trang Chủ
         </a>
         
         <button id="download-ticket" class="btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium inline-flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          Print Confirmation
+          In Xác Nhận
         </button>
       </div>
     </div>
@@ -61,11 +61,11 @@
       <svg class="h-8 w-8 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
-      <span class="text-2xl font-bold text-blue-600">My Conference 2024</span>
+      <span class="text-2xl font-bold text-blue-600">Hội Nghị 2024</span>
     </div>
     
-    <p class="text-gray-600">June 15-16, 2024</p>
-    <p class="text-gray-600">Hanoi, Vietnam</p>
+    <p class="text-gray-600">15-16 tháng 6, 2024</p>
+    <p class="text-gray-600">Hà Nội, Việt Nam</p>
     
     <div class="flex justify-center mt-4 space-x-4">
       <a href="#" class="text-gray-400 hover:text-gray-600">
@@ -101,7 +101,7 @@
     downloadBtn.addEventListener('click', function() {
       // Check if jsPDF is loaded
       if (typeof window.jspdf === 'undefined') {
-        alert('PDF generation library not loaded. Please try again later.');
+        alert('Thư viện tạo PDF không được tải. Vui lòng thử lại sau.');
         return;
       }
       
@@ -114,16 +114,16 @@
         // Add content to the PDF
         doc.setFontSize(22);
         doc.setTextColor(0, 86, 179); // Blue color
-        doc.text('My Conference 2024', 105, 20, { align: 'center' });
+        doc.text('Hội Nghị 2024', 105, 20, { align: 'center' });
         
         doc.setFontSize(14);
         doc.setTextColor(0, 0, 0); // Black color
         
         // Get participant name from session if available
-        const participantName = '<%= typeof participantName !== "undefined" ? participantName : "Valued Participant" %>';
+        const participantName = '<%= typeof participantName !== "undefined" ? participantName : "Quý vị" %>';
         
-        doc.text(`Registration Successful!`, 105, 35, { align: 'center' });
-        doc.text(`Thank you, ${participantName}, for registering.`, 105, 50, { align: 'center' });
+        doc.text(`Đăng Ký Thành Công!`, 105, 35, { align: 'center' });
+        doc.text(`Cảm ơn ${participantName} đã đăng ký.`, 105, 50, { align: 'center' });
         
         // Add divider line
         doc.setDrawColor(200, 200, 200);
@@ -131,14 +131,14 @@
         
         // Event details
         doc.setFontSize(16);
-        doc.text('Event Details', 105, 75, { align: 'center' });
+        doc.text('Chi Tiết Sự Kiện', 105, 75, { align: 'center' });
         
         doc.setFontSize(12);
-        doc.text('Date:', 40, 90);
-        doc.text('June 15-16, 2024', 80, 90);
+        doc.text('Ngày:', 40, 90);
+        doc.text('15-16 tháng 6, 2024', 80, 90);
         
-        doc.text('Location:', 40, 105);
-        doc.text('Hanoi, Vietnam', 80, 105);
+        doc.text('Địa điểm:', 40, 105);
+        doc.text('Hà Nội, Việt Nam', 80, 105);
         
         // Add divider line
         doc.setDrawColor(200, 200, 200);
@@ -146,26 +146,26 @@
         
         // Additional info
         doc.setFontSize(11);
-        doc.text('Please save this confirmation for your reference.', 105, 135, { align: 'center' });
+        doc.text('Vui lòng lưu lại xác nhận này để tham khảo sau này.', 105, 135, { align: 'center' });
         
         // Add QR code placeholder (usually would be generated)
         doc.setDrawColor(0, 0, 0);
         doc.setFillColor(240, 240, 240);
         doc.roundedRect(75, 150, 60, 60, 3, 3, 'FD');
         doc.setFontSize(8);
-        doc.text('QR Code', 105, 180, { align: 'center' });
+        doc.text('Mã QR', 105, 180, { align: 'center' });
         
         // Footer
         doc.setFontSize(10);
-        doc.text('We look forward to seeing you at My Conference 2024!', 105, 250, { align: 'center' });
-        doc.text('For any questions, contact: conference@example.com', 105, 260, { align: 'center' });
+        doc.text('Chúng tôi mong đợi được gặp bạn tại Hội Nghị 2024!', 105, 250, { align: 'center' });
+        doc.text('Mọi thắc mắc, liên hệ: conference@example.com', 105, 260, { align: 'center' });
         
         // Save the PDF with the participant's name
-        doc.save(`conference_ticket_${participantName.replace(/\s+/g, '_')}.pdf`);
+        doc.save(`ve_hoi_nghi_${participantName.replace(/\s+/g, '_')}.pdf`);
         
       } catch (error) {
-        console.error('Error generating PDF:', error);
-        alert('Error generating PDF. Please try again later.');
+        console.error('Lỗi khi tạo PDF:', error);
+        alert('Lỗi khi tạo PDF. Vui lòng thử lại sau.');
       }
     });
   });

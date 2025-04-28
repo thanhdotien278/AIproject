@@ -3,22 +3,22 @@
 <!-- Registration Banner Section -->
 <section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
   <div class="container mx-auto px-4 text-center">
-    <h1 class="text-3xl md:text-4xl font-bold mb-4"><%= conference ? conference.name : 'Conference' %></h1>
+    <h1 class="text-3xl md:text-4xl font-bold mb-4"><%= conference ? conference.name : 'Hội Nghị' %></h1>
     <div class="flex flex-wrap justify-center gap-4 mt-6">
       <div class="bg-white bg-opacity-10 px-4 py-2 rounded-lg">
-        <span class="font-semibold">Date:</span> <%= formattedDates || 'To be announced' %>
+        <span class="font-semibold">Ngày:</span> <%= formattedDates || 'Sẽ được thông báo sau' %>
       </div>
       <div class="bg-white bg-opacity-10 px-4 py-2 rounded-lg">
-        <span class="font-semibold">Location:</span> <%= locationName || 'To be announced' %>
+        <span class="font-semibold">Địa điểm:</span> <%= locationName || 'Sẽ được thông báo sau' %>
       </div>
       <% if (conference && conference.contactName) { %>
       <div class="bg-white bg-opacity-10 px-4 py-2 rounded-lg">
-        <span class="font-semibold">Contact:</span> <%= conference.contactName %>
+        <span class="font-semibold">Liên hệ:</span> <%= conference.contactName %>
       </div>
       <% } %>
       <% if (conference && conference.contactPhone) { %>
       <div class="bg-white bg-opacity-10 px-4 py-2 rounded-lg">
-        <span class="font-semibold">Phone:</span> <%= conference.contactPhone %>
+        <span class="font-semibold">Điện thoại:</span> <%= conference.contactPhone %>
       </div>
       <% } %>
       <% if (conference && conference.contactEmail) { %>
@@ -37,7 +37,7 @@
       <!-- Alert container for form validation errors -->
       <div id="alert-container" class="mb-6 hidden">
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong class="font-bold">Error!</strong>
+          <strong class="font-bold">Lỗi!</strong>
           <span id="alert-message" class="block sm:inline ml-1"></span>
         </div>
       </div>
@@ -48,105 +48,105 @@
         
         <!-- Name - always required -->
         <div>
-          <label for="name" class="form-label">Full Name <span class="text-red-500">*</span></label>
+          <label for="name" class="form-label">Họ và Tên <span class="text-red-500">*</span></label>
           <input type="text" id="name" name="name" class="form-input" required>
         </div>
         
         <!-- Email - always required -->
         <div>
-          <label for="email" class="form-label">Email Address <span class="text-red-500">*</span></label>
+          <label for="email" class="form-label">Địa chỉ Email <span class="text-red-500">*</span></label>
           <input type="email" id="email" name="email" class="form-input" required>
         </div>
         
         <!-- Phone - always required -->
         <div>
-          <label for="phone" class="form-label">Phone Number <span class="text-red-500">*</span></label>
+          <label for="phone" class="form-label">Số Điện Thoại <span class="text-red-500">*</span></label>
           <input type="tel" id="phone" name="phone" class="form-input" required>
         </div>
         
         <!-- Dynamic fields based on conference settings -->
         <% if (registrationFields.includes('address')) { %>
         <div>
-          <label for="address" class="form-label">Address</label>
+          <label for="address" class="form-label">Địa chỉ</label>
           <input type="text" id="address" name="address" class="form-input">
         </div>
         <% } %>
         
         <% if (registrationFields.includes('age')) { %>
         <div>
-          <label for="age" class="form-label">Age</label>
+          <label for="age" class="form-label">Tuổi</label>
           <input type="text" id="age" name="age" class="form-input">
         </div>
         <% } %>
         
         <% if (registrationFields.includes('business')) { %>
         <div>
-          <label for="business" class="form-label">Your Business</label>
+          <label for="business" class="form-label">Lĩnh vực kinh doanh</label>
           <input type="text" id="business" name="business" class="form-input">
         </div>
         <% } %>
         
         <% if (registrationFields.includes('lunch')) { %>
         <div>
-          <label for="lunch" class="form-label">Lunch Preference</label>
+          <label for="lunch" class="form-label">Nhu cầu ăn trưa</label>
           <select id="lunch" name="lunch" class="form-input">
-            <option value="">-- Select option --</option>
-            <option value="Standard">Standard</option>
-            <option value="Vegetarian">Vegetarian</option>
-            <option value="Vegan">Vegan</option>
-            <option value="None">No lunch needed</option>
+            <option value="">-- Lựa chọn --</option>
+            <option value="Standard">Tiêu chuẩn</option>
+            <option value="Vegetarian">Chay</option>
+            <option value="Vegan">Thuần chay</option>
+            <option value="None">Không cần ăn trưa</option>
           </select>
         </div>
         <% } %>
         
         <% if (registrationFields.includes('source')) { %>
         <div>
-          <label for="source" class="form-label">How did you hear about this conference?</label>
+          <label for="source" class="form-label">Bạn biết về hội nghị này qua đâu?</label>
           <select id="source" name="source" class="form-input">
-            <option value="">-- Select option --</option>
-            <option value="Social Media">Social Media</option>
+            <option value="">-- Lựa chọn --</option>
+            <option value="Social Media">Mạng xã hội</option>
             <option value="Website">Website</option>
             <option value="Email">Email</option>
-            <option value="Friend">Friend/Colleague</option>
-            <option value="Other">Other</option>
+            <option value="Friend">Bạn bè/Đồng nghiệp</option>
+            <option value="Other">Khác</option>
           </select>
         </div>
         <% } %>
         
         <% if (registrationFields.includes('nationality')) { %>
         <div>
-          <label for="nationality" class="form-label">Nationality</label>
+          <label for="nationality" class="form-label">Quốc tịch</label>
           <input type="text" id="nationality" name="nationality" class="form-input">
         </div>
         <% } %>
         
         <% if (registrationFields.includes('organization')) { %>
         <div>
-          <label for="organization" class="form-label">Organization/Company</label>
+          <label for="organization" class="form-label">Tổ chức/Công ty</label>
           <input type="text" id="organization" name="organization" class="form-input">
         </div>
         <% } %>
         
         <!-- Questions - always available -->
         <div>
-          <label for="questions" class="form-label">Questions or Comments</label>
+          <label for="questions" class="form-label">Câu hỏi hoặc Ý kiến</label>
           <textarea id="questions" name="questions" rows="4" class="form-input"></textarea>
         </div>
         
         <!-- Submit Button -->
         <div class="pt-4">
-          <button type="submit" id="submit-btn" class="btn btn-primary w-full">Register Now</button>
+          <button type="submit" id="submit-btn" class="btn btn-primary w-full">Đăng Ký Ngay</button>
         </div>
       </form>
     </div>
     
     <!-- Additional Info -->
     <div class="max-w-2xl mx-auto mt-8 text-center text-gray-600">
-      <p>Already registered? <a href="/" class="text-blue-600 hover:underline">Return to homepage</a></p>
+      <p>Đã đăng ký? <a href="/" class="text-blue-600 hover:underline">Quay lại trang chủ</a></p>
       <% if (conference && conference.contactEmail) { %>
-        <p class="mt-2">For registration assistance, please contact <a href="mailto:<%= conference.contactEmail %>" class="text-blue-600 hover:underline"><%= conference.contactEmail %></a></p>
+        <p class="mt-2">Để được hỗ trợ đăng ký, vui lòng liên hệ <a href="mailto:<%= conference.contactEmail %>" class="text-blue-600 hover:underline"><%= conference.contactEmail %></a></p>
       <% } else { %>
-        <p class="mt-2">For registration assistance, please contact the conference organizers.</p>
+        <p class="mt-2">Để được hỗ trợ đăng ký, vui lòng liên hệ ban tổ chức hội nghị.</p>
       <% } %>
     </div>
   </div>
@@ -169,28 +169,28 @@
       const phone = document.getElementById('phone').value.trim();
       
       if (!name) {
-        showAlert('Please enter your full name.');
+        showAlert('Vui lòng nhập họ và tên của bạn.');
         return;
       }
       
       if (!email) {
-        showAlert('Please enter your email address.');
+        showAlert('Vui lòng nhập địa chỉ email của bạn.');
         return;
       }
       
       if (!validateEmail(email)) {
-        showAlert('Please enter a valid email address.');
+        showAlert('Vui lòng nhập địa chỉ email hợp lệ.');
         return;
       }
       
       if (!phone) {
-        showAlert('Please enter your phone number.');
+        showAlert('Vui lòng nhập số điện thoại của bạn.');
         return;
       }
       
       // Disable button and show loading state
       submitBtn.disabled = true;
-      submitBtn.innerHTML = 'Submitting...';
+      submitBtn.innerHTML = 'Đang xử lý...';
       
       try {
         // Collect form data
@@ -216,15 +216,15 @@
           window.location.href = data.redirectUrl || '/thankyou';
         } else {
           // Show error message
-          showAlert(data.message || 'An error occurred during registration. Please try again.');
+          showAlert(data.message || 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.');
           submitBtn.disabled = false;
-          submitBtn.innerHTML = 'Register Now';
+          submitBtn.innerHTML = 'Đăng Ký Ngay';
         }
       } catch (error) {
         console.error('Registration error:', error);
-        showAlert('An error occurred during registration. Please try again.');
+        showAlert('Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Register Now';
+        submitBtn.innerHTML = 'Đăng Ký Ngay';
       }
     });
     
@@ -251,14 +251,14 @@
   }
   
   .form-input {
-    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500;
   }
   
   .btn {
-    @apply py-2 px-4 rounded-md text-center font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
   
   .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+    @apply text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500;
   }
 </style> 

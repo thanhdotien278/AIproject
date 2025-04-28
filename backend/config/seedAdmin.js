@@ -15,7 +15,7 @@ const adminUsername = process.env.ADMIN_USERNAME || 'admin';
 const adminPassword = process.env.ADMIN_PASSWORD || 'Hanoi@1234';
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/conference-registration')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://thanhdt:0VahNbqkvY9Xpby3@vmmuconference.ht9r2zy.mongodb.net/?retryWrites=true&w=majority&appName=vmmuconference')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => {
     console.error('Could not connect to MongoDB', err);

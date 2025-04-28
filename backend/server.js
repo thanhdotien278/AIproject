@@ -50,7 +50,8 @@ app.use('/admin', (req, res, next) => {
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/conference-registration')
+// mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/conference-registration')
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
 
@@ -72,7 +73,8 @@ app.get('/api/qrcode', async (req, res) => {
     if (code) {
       registrationUrl += `?code=${code}`;
     }
-    
+    registrationUrl = `http://192.168.1.17:3000/register?code=KDUR`;
+    // registrationUrl = `https://dev.3tsmart.org/2`;
     // Generate QR code as data URL
     const qrCodeDataUrl = await QRCode.toDataURL(registrationUrl, {
       width: 300,

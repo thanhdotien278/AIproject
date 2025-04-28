@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
+    "build": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css",
     "build:css": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css",
     "watch:css": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css --watch",
     "seed": "node backend/config/seedAdmin.js",

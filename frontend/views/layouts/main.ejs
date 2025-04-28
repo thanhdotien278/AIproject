@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof title !== 'undefined' ? title : 'Conference Registration' %></title>
+  <title><%= typeof title !== 'undefined' ? title : 'Đăng Ký Hội Nghị' %></title>
   
   <!-- Favicon -->
   <link rel="icon" href="/images/favicon.ico">
@@ -18,8 +18,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Add additional meta tags for SEO -->
-  <meta name="description" content="Register for our upcoming conference. Join us for insightful discussions and networking opportunities.">
-  <meta name="keywords" content="conference, registration, event, seminar">
+  <meta name="description" content="Đăng ký tham gia hội nghị sắp tới. Tham gia cùng chúng tôi để có những thảo luận sâu sắc và cơ hội kết nối.">
+  <meta name="keywords" content="hội nghị, đăng ký, sự kiện, hội thảo">
   
   <!-- Add any additional styles if needed -->
   <%- typeof style !== 'undefined' ? style : '' %>
@@ -28,12 +28,12 @@
   <!-- Header -->
   <header class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container mx-auto py-4 px-4 flex justify-between items-center">
-      <a href="/" class="text-2xl font-bold text-blue-600">Conference</a>
+      <a href="/" class="text-2xl font-bold text-blue-600">Hội Nghị</a>
       
       <nav class="hidden md:block">
         <ul class="flex space-x-6">
-          <li><a href="/" class="text-gray-700 hover:text-blue-600">Home</a></li>
-          <li><a href="/register" class="text-gray-700 hover:text-blue-600">Register</a></li>
+          <li><a href="/" class="text-gray-700 hover:text-blue-600">Trang Chủ</a></li>
+          <li><a href="/register" class="text-gray-700 hover:text-blue-600">Đăng Ký</a></li>
         </ul>
       </nav>
       
@@ -48,8 +48,8 @@
     <!-- Mobile menu (hidden by default) -->
     <div class="md:hidden hidden" id="mobile-menu">
       <div class="container mx-auto px-4 py-3 space-y-3">
-        <a href="/" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Home</a>
-        <a href="/register" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Register</a>
+        <a href="/" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Trang Chủ</a>
+        <a href="/register" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Đăng Ký</a>
       </div>
     </div>
   </header>
@@ -64,27 +64,27 @@
     <div class="container mx-auto px-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
-          <h3 class="text-xl font-semibold mb-4">Conference Registration</h3>
-          <p class="text-gray-300">Join us for an exciting conference experience. Register now to secure your spot.</p>
+          <h3 class="text-xl font-semibold mb-4">Đăng Ký Hội Nghị</h3>
+          <p class="text-gray-300">Tham gia cùng chúng tôi để có trải nghiệm hội nghị thú vị. Đăng ký ngay để đảm bảo vị trí của bạn.</p>
         </div>
         <div>
-          <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
+          <h3 class="text-xl font-semibold mb-4">Liên Kết Nhanh</h3>
           <ul class="space-y-2">
-            <li><a href="/" class="text-gray-300 hover:text-white">Home</a></li>
-            <li><a href="/register" class="text-gray-300 hover:text-white">Register</a></li>
+            <li><a href="/" class="text-gray-300 hover:text-white">Trang Chủ</a></li>
+            <li><a href="/register" class="text-gray-300 hover:text-white">Đăng Ký</a></li>
           </ul>
         </div>
         <div>
-          <h3 class="text-xl font-semibold mb-4">Contact</h3>
+          <h3 class="text-xl font-semibold mb-4">Liên Hệ</h3>
           <ul class="space-y-2 text-gray-300">
             <li>Email: thanhdt@vmmu.edu.vn</li>
-            <li>Phone: +84 (98) 583-4366</li>
-            <li>Address: 160 Phung Hung, Ha Dong, Hanoi, Vietnam</li>
+            <li>Điện thoại: +84 (98) 583-4366</li>
+            <li>Địa chỉ: 160 Phùng Hưng, Hà Đông, Hà Nội, Việt Nam</li>
           </ul>
         </div>
       </div>
       <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
-        <p>&copy; <%= new Date().getFullYear() %> Conference Registration. All rights reserved.</p>
+        <p>&copy; <%= new Date().getFullYear() %> Đăng Ký Hội Nghị. Đã đăng ký bản quyền.</p>
       </div>
     </div>
   </footer>

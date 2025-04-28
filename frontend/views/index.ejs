@@ -6,14 +6,14 @@
     <div class="relative">
       <!-- QR Code positioned at the top right -->
       <div class="absolute top-0 right-0 bg-white p-4 rounded-lg shadow-md hidden md:block">
-        <p class="text-sm text-gray-600 mb-2 text-center">Scan to register:</p>
-        <img id="register-qr-code" class="h-32 w-32" alt="Registration QR Code">
+        <p class="text-sm text-gray-600 mb-2 text-center">Quét để đăng ký:</p>
+        <img id="register-qr-code" class="h-32 w-32" alt="Mã QR Đăng Ký">
       </div>
       
       <div class="md:w-2/3">
-        <h1 class="text-4xl md:text-5xl font-bold mb-6"><%= conference ? conference.name : 'Welcome to Our Conference' %></h1>
-        <p class="text-xl mb-8">Join us for an inspiring event with industry experts and networking opportunities</p>
-        <a href="<%= conference ? `/register?code=${conference.code}` : '/register' %>" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Register Now</a>
+        <h1 class="text-4xl md:text-5xl font-bold mb-6"><%= conference ? conference.name : 'Chào Mừng Đến Với Hội Nghị' %></h1>
+        <p class="text-xl mb-8">Tham gia cùng chúng tôi trong sự kiện truyền cảm hứng với các chuyên gia hàng đầu và cơ hội kết nối</p>
+        <a href="<%= conference ? `/register?code=${conference.code}` : '/register' %>" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Đăng Ký Ngay</a>
       </div>
     </div>
   </div>
@@ -22,7 +22,7 @@
 <!-- Conference details section -->
 <section class="py-16 bg-white">
   <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold text-center mb-12">Conference Details</h2>
+    <h2 class="text-3xl font-bold text-center mb-12">Chi Tiết Hội Nghị</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <!-- Date & Time -->
@@ -30,9 +30,9 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <h3 class="text-xl font-bold mb-2">Date & Time</h3>
-        <p class="text-gray-700"><%= formattedDates || 'To be announced' %></p>
-        <p class="text-gray-700"><%= conference ? conference.time : '9:00 AM - 5:00 PM' %></p>
+        <h3 class="text-xl font-bold mb-2">Ngày & Giờ</h3>
+        <p class="text-gray-700"><%= formattedDates || 'Sẽ được thông báo sau' %></p>
+        <p class="text-gray-700"><%= conference ? conference.time : '9:00 - 17:00' %></p>
       </div>
       
       <!-- Location -->
@@ -41,8 +41,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        <h3 class="text-xl font-bold mb-2">Location</h3>
-        <p class="text-gray-700"><%= locationName || 'Conference Center' %></p>
+        <h3 class="text-xl font-bold mb-2">Địa Điểm</h3>
+        <p class="text-gray-700"><%= locationName || 'Trung Tâm Hội Nghị' %></p>
         <p class="text-gray-700"><%= locationAddress || '' %></p>
       </div>
       
@@ -51,22 +51,22 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
-        <h3 class="text-xl font-bold mb-2">Contact</h3>
-        <p class="text-gray-700">Name: <%= receptionist ? receptionist.fullName : 'Rec One' %></p>
-        <p class="text-gray-700">Phone: <%= receptionist ? receptionist.userPhone : '(555) 123-4567' %></p>
+        <h3 class="text-xl font-bold mb-2">Liên Hệ</h3>
+        <p class="text-gray-700">Tên: <%= receptionist ? receptionist.fullName : 'Rec One' %></p>
+        <p class="text-gray-700">Điện thoại: <%= receptionist ? receptionist.userPhone : '(555) 123-4567' %></p>
         <p class="text-gray-700">Email: <%= receptionist ? receptionist.email : 'rec1@example.com' %></p>
         
         <!-- QR Code for mobile devices only -->
         <div class="mt-4 md:hidden">
-          <p class="text-sm text-gray-600 mb-2">Scan to register:</p>
-          <img id="register-qr-code-mobile" class="mx-auto h-32 w-32" alt="Registration QR Code">
+          <p class="text-sm text-gray-600 mb-2">Quét để đăng ký:</p>
+          <img id="register-qr-code-mobile" class="mx-auto h-32 w-32" alt="Mã QR Đăng Ký">
         </div>
       </div>
     </div>
     
     <% if (conference && conference.description) { %>
     <div class="mt-8 bg-blue-50 p-6 rounded-lg">
-      <h3 class="text-xl font-bold mb-2 text-center">Description</h3>
+      <h3 class="text-xl font-bold mb-2 text-center">Mô Tả</h3>
       <p class="text-gray-700 text-center"><%= conference.description %></p>
     </div>
     <% } %>
@@ -76,7 +76,7 @@
 <!-- Speakers section -->
 <section class="py-16 bg-gray-50">
   <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold text-center mb-12">Our Speakers</h2>
+    <h2 class="text-3xl font-bold text-center mb-12">Diễn Giả Của Chúng Tôi</h2>
     
     <div class="speakers-slider-container relative">
       <!-- Slider navigation buttons -->
@@ -99,12 +99,12 @@
           <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
             <div class="h-64 bg-gray-200">
               <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Doe" class="h-full w-full object-cover speaker-image">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Nguyễn Văn A" class="h-full w-full object-cover speaker-image">
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">John Doe</h3>
-              <p class="text-blue-600 mb-4">CEO, Tech Company</p>
-              <p class="text-gray-600">Expert in technology leadership with over 15 years of industry experience.</p>
+              <h3 class="text-xl font-bold mb-2">Nguyễn Văn A</h3>
+              <p class="text-blue-600 mb-4">CEO, Công ty Công nghệ</p>
+              <p class="text-gray-600">Chuyên gia lãnh đạo công nghệ với hơn 15 năm kinh nghiệm trong ngành.</p>
             </div>
           </div>
           
@@ -112,12 +112,12 @@
           <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
             <div class="h-64 bg-gray-200">
               <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Smith" class="h-full w-full object-cover speaker-image">
+              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Trần Thị B" class="h-full w-full object-cover speaker-image">
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Jane Smith</h3>
+              <h3 class="text-xl font-bold mb-2">Trần Thị B</h3>
               <p class="text-blue-600 mb-4">CTO, Innovation Labs</p>
-              <p class="text-gray-600">Leading expert in artificial intelligence and machine learning technologies.</p>
+              <p class="text-gray-600">Chuyên gia hàng đầu về trí tuệ nhân tạo và công nghệ học máy.</p>
             </div>
           </div>
           
@@ -125,12 +125,12 @@
           <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
             <div class="h-64 bg-gray-200">
               <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Robert Johnson" class="h-full w-full object-cover speaker-image">
+              <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Lê Văn C" class="h-full w-full object-cover speaker-image">
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Robert Johnson</h3>
-              <p class="text-blue-600 mb-4">Professor, University</p>
-              <p class="text-gray-600">Researcher and educator specializing in emerging technologies and their applications.</p>
+              <h3 class="text-xl font-bold mb-2">Lê Văn C</h3>
+              <p class="text-blue-600 mb-4">Giáo sư, Đại học</p>
+              <p class="text-gray-600">Nhà nghiên cứu và giáo dục chuyên về các công nghệ mới và ứng dụng của chúng.</p>
             </div>
           </div>
           
@@ -138,12 +138,12 @@
           <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
             <div class="h-64 bg-gray-200">
               <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Sarah Miller" class="h-full w-full object-cover speaker-image">
+              <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Phạm Thị D" class="h-full w-full object-cover speaker-image">
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Sarah Miller</h3>
-              <p class="text-blue-600 mb-4">Product Director, Software Inc.</p>
-              <p class="text-gray-600">Product strategy expert with a focus on user experience and market innovation.</p>
+              <h3 class="text-xl font-bold mb-2">Phạm Thị D</h3>
+              <p class="text-blue-600 mb-4">Giám đốc Sản phẩm, Công ty Phần mềm</p>
+              <p class="text-gray-600">Chuyên gia chiến lược sản phẩm với trọng tâm về trải nghiệm người dùng và đổi mới thị trường.</p>
             </div>
           </div>
           
@@ -151,12 +151,12 @@
           <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
             <div class="h-64 bg-gray-200">
               <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Michael Chen" class="h-full w-full object-cover speaker-image">
+              <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Trần Văn E" class="h-full w-full object-cover speaker-image">
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Michael Chen</h3>
-              <p class="text-blue-600 mb-4">Security Specialist, CyberDefense</p>
-              <p class="text-gray-600">Cybersecurity expert focused on enterprise security frameworks and threat mitigation.</p>
+              <h3 class="text-xl font-bold mb-2">Trần Văn E</h3>
+              <p class="text-blue-600 mb-4">Chuyên gia An ninh, CyberDefense</p>
+              <p class="text-gray-600">Chuyên gia an ninh mạng tập trung vào khung bảo mật doanh nghiệp và giảm thiểu mối đe dọa.</p>
             </div>
           </div>
           
@@ -164,12 +164,12 @@
           <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
             <div class="h-64 bg-gray-200">
               <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Alexa Rodriguez" class="h-full w-full object-cover speaker-image">
+              <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Nguyễn Thị F" class="h-full w-full object-cover speaker-image">
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Alexa Rodriguez</h3>
-              <p class="text-blue-600 mb-4">Data Scientist, Insights Analytics</p>
-              <p class="text-gray-600">Specializes in big data analysis and predictive modeling for business intelligence.</p>
+              <h3 class="text-xl font-bold mb-2">Nguyễn Thị F</h3>
+              <p class="text-blue-600 mb-4">Nhà Khoa học Dữ liệu, Insights Analytics</p>
+              <p class="text-gray-600">Chuyên về phân tích dữ liệu lớn và mô hình dự đoán cho hoạt động kinh doanh.</p>
             </div>
           </div>
           
@@ -177,12 +177,12 @@
           <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
             <div class="h-64 bg-gray-200">
               <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="David Williams" class="h-full w-full object-cover speaker-image">
+              <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="Hoàng Văn G" class="h-full w-full object-cover speaker-image">
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">David Williams</h3>
-              <p class="text-blue-600 mb-4">Blockchain Expert, FutureTech</p>
-              <p class="text-gray-600">Pioneer in blockchain technology implementation for enterprise solutions.</p>
+              <h3 class="text-xl font-bold mb-2">Hoàng Văn G</h3>
+              <p class="text-blue-600 mb-4">Chuyên gia Blockchain, FutureTech</p>
+              <p class="text-gray-600">Người tiên phong trong việc triển khai công nghệ blockchain cho các giải pháp doanh nghiệp.</p>
             </div>
           </div>
         </div>
@@ -201,9 +201,9 @@
 <!-- CTA section -->
 <section class="py-16 bg-blue-600 text-white text-center">
   <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold mb-6">Ready to Join?</h2>
-    <p class="text-xl mb-8 md:w-2/3 mx-auto">Secure your spot at this exclusive event. Limited seats available!</p>
-    <a href="<%= conference ? `/register?code=${conference.code}` : '/register' %>" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Register Now</a>
+    <h2 class="text-3xl font-bold mb-6">Sẵn Sàng Tham Gia?</h2>
+    <p class="text-xl mb-8 md:w-2/3 mx-auto">Đảm bảo vị trí của bạn tại sự kiện độc quyền này. Số lượng ghế có hạn!</p>
+    <a href="<%= conference ? `/register?code=${conference.code}` : '/register' %>" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Đăng Ký Ngay</a>
   </div>
 </section>
 
