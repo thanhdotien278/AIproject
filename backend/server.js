@@ -68,12 +68,12 @@ app.get('/api/qrcode', async (req, res) => {
     // Build the registration URL
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     let registrationUrl = `${baseUrl}/register`;
-    
+    registrationUrl = `http://192.168.1.53:3000/register`;
     // Add the conference code if provided
     if (code) {
       registrationUrl += `?code=${code}`;
     }
-    registrationUrl = `http://192.168.1.114:3000/register?code=KDUR`;
+    
     // registrationUrl = `https://dev.3tsmart.org/2`;
     // Generate QR code as data URL
     const qrCodeDataUrl = await QRCode.toDataURL(registrationUrl, {
