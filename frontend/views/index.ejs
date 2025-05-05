@@ -1,273 +1,226 @@
 <%- contentFor('body') %>
 
-<!-- Hero section -->
-<section class="relative text-white">
-  <!-- Background image with 30% transparency -->
-  <div class="absolute inset-0" style="background-image: url('/images/img1.jpg'); background-size: cover; background-position: center; opacity: 0.9; z-index: 1;"></div>
-  <!-- Blue overlay to maintain color scheme -->
-  <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-800" style="opacity: 0.7; z-index: 2;"></div>
+<!-- Conference Landing Page - Single-screen layout for auditorium projection -->
+<div class="h-screen w-screen flex flex-col relative">
+  <!-- Background with image3.png as stretched background -->
+  <div class="absolute inset-0 z-0">
+    <img src="/images/image1.png" alt="Background" class="w-full h-full object-cover">
+  </div>
   
-  <div class="container mx-auto px-4 py-16 md:py-24 relative z-10">
-    <div class="relative">
-      <!-- QR Code positioned at the top right -->
-      <div class="absolute top-0 right-0 bg-white p-4 rounded-lg shadow-md hidden md:block">
-        <p class="text-sm text-gray-600 mb-2 text-center">Quét để đăng ký:</p>
-        <img id="register-qr-code" class="h-32 w-32" alt="Mã QR Đăng Ký">
-      </div>
-      
-      <div class="md:w-2/3">
-        <h1 class="text-4xl md:text-5xl font-bold mb-6"><%= conference ? conference.name : 'Chào Mừng Đến Với Hội Nghị' %></h1>
-        <p class="text-xl mb-8">Tham gia cùng chúng tôi trong sự kiện truyền cảm hứng với các chuyên gia hàng đầu và cơ hội kết nối</p>
-        <a href="<%= conference ? `/register?code=${conference.code}` : '/register' %>" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Đăng Ký Ngay</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Conference details section -->
-<section class="py-16 bg-white">
-  <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold text-center mb-12">Chi Tiết Hội Nghị</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Date & Time -->
-      <div class="bg-blue-50 p-6 rounded-lg text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <h3 class="text-xl font-bold mb-2">Ngày & Giờ</h3>
-        <p class="text-gray-700"><%= formattedDates || 'Sẽ được thông báo sau' %></p>
-        <p class="text-gray-700"><%= conference ? conference.time : '9:00 - 17:00' %></p>
-      </div>
-      
-      <!-- Location -->
-      <div class="bg-blue-50 p-6 rounded-lg text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <h3 class="text-xl font-bold mb-2">Địa Điểm</h3>
-        <p class="text-gray-700"><%= locationName || 'Trung Tâm Hội Nghị' %></p>
-        <p class="text-gray-700"><%= locationAddress || '' %></p>
-      </div>
-      
-      <!-- Contact Information -->
-      <div class="bg-blue-50 p-6 rounded-lg text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-        <h3 class="text-xl font-bold mb-2">Liên Hệ</h3>
-        <p class="text-gray-700">Tên: <%= receptionist ? receptionist.fullName : 'Rec One' %></p>
-        <p class="text-gray-700">Điện thoại: <%= receptionist ? receptionist.userPhone : '(555) 123-4567' %></p>
-        <p class="text-gray-700">Email: <%= receptionist ? receptionist.email : 'rec1@example.com' %></p>
-        
-        <!-- QR Code for mobile devices only -->
-        <div class="mt-4 md:hidden">
-          <p class="text-sm text-gray-600 mb-2">Quét để đăng ký:</p>
-          <img id="register-qr-code-mobile" class="mx-auto h-32 w-32" alt="Mã QR Đăng Ký">
-        </div>
-      </div>
+  <!-- Header Section -->
+  <header class="py-4 px-8 flex items-center justify-between relative z-10">
+    <div class="flex items-center">
+      <!-- Logo/Favicon -->
+      <img src="/images/favicon.png" alt="Logo" class="h-16 w-16 mr-4">
+      <!-- Institution Name -->
+      <h1 class="text-4xl font-bold text-blue-800">Học viện Quân y</h1>
     </div>
     
-    <% if (conference && conference.description) { %>
-    <div class="mt-8 bg-blue-50 p-6 rounded-lg">
-      <h3 class="text-xl font-bold mb-2 text-center">Mô Tả</h3>
-      <p class="text-gray-700 text-center"><%= conference.description %></p>
+    <!-- QR Code (Right) -->
+    <div class="bg-white p-3 rounded-lg shadow-md">
+      <img id="register-qr-code" src="" alt="Registration QR Code" class="h-20 w-20 border border-gray-200 bg-gray-50" style="min-width: 80px;">
     </div>
-    <% } %>
-  </div>
-</section>
-
-<!-- Speakers section -->
-<section class="py-16 bg-gray-50">
-  <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold text-center mb-12">Diễn Giả Của Chúng Tôi</h2>
+  </header>
+  
+  <!-- Main Banner Area - Left aligned, 1/2 width, white text with blue outline -->
+  <section class="flex-grow flex items-center px-8 py-6 relative z-10" style="top: -150px;">
+    <div class="w-1/2 text-left">
+      <h2 class="text-6xl font-bold mb-2 text-white" style="text-shadow: -1px -1px 0 #2563eb, 1px -1px 0 #2563eb, -1px 1px 0 #2563eb, 1px 1px 0 #2563eb, 2px 2px 4px rgba(0,0,0,0.5);">
+        <span class="title-line block opacity-0 animate-fade-in-up animation-delay-0s">Ứng dụng chuyển đổi số</span>
+        <span class="title-line block opacity-0 animate-fade-in-up animation-delay-1s">trong đào tạo Y Dược</span>
+        <span class="title-line block opacity-0 animate-fade-in-up animation-delay-2s">tại Học viện Quân y</span>
+      </h2>
+    </div>
+  </section>
+  
+  <!-- Bottom Sections Container - for proper positioning -->
+  <div class="mt-auto px-8 pb-4 flex justify-between relative z-10">
+    <!-- Information Section - 1/3 width, left aligned -->
+   
     
-    <div class="speakers-slider-container relative">
-      <!-- Slider navigation buttons -->
-      <button class="slider-prev absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-md text-blue-600 hover:bg-gray-100 focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      
-      <button class="slider-next absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-md text-blue-600 hover:bg-gray-100 focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-      
-      <!-- Speakers slider -->
-      <div class="speakers-slider overflow-x-auto pb-4 hide-scrollbar">
-        <div class="inline-flex space-x-8">
+    <!-- Speakers Section - 1/2 width, center aligned with sliding animation -->
+    <div class="w-1/2 mx-auto overflow-hidden">
+      <div class="speakers-slider relative w-full">
+        <div class="speakers-track flex transition-transform duration-500 ease-in-out" style="transform: translateX(0);">
           <!-- Speaker 1 -->
-          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
-            <div class="h-64 bg-gray-200">
-              <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Nguyễn Văn A" class="h-full w-full object-cover speaker-image">
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Nguyễn Văn A</h3>
-              <p class="text-blue-600 mb-4">CEO, Công ty Công nghệ</p>
-              <p class="text-gray-600">Chuyên gia lãnh đạo công nghệ với hơn 15 năm kinh nghiệm trong ngành.</p>
+          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
+            <div class="text-center">
+              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Speaker 1" class="w-full h-full object-cover">
+              </div>
+              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">GS. Nguyễn Văn A</p>
+              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Chuyên gia y học cổ truyền</p>
             </div>
           </div>
           
           <!-- Speaker 2 -->
-          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
-            <div class="h-64 bg-gray-200">
-              <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Trần Thị B" class="h-full w-full object-cover speaker-image">
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Trần Thị B</h3>
-              <p class="text-blue-600 mb-4">CTO, Innovation Labs</p>
-              <p class="text-gray-600">Chuyên gia hàng đầu về trí tuệ nhân tạo và công nghệ học máy.</p>
+          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
+            <div class="text-center">
+              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Speaker 2" class="w-full h-full object-cover">
+              </div>
+              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">PGS.TS. Trần Thị B</p>
+              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Nhà nghiên cứu AI y tế</p>
             </div>
           </div>
           
           <!-- Speaker 3 -->
-          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
-            <div class="h-64 bg-gray-200">
-              <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Lê Văn C" class="h-full w-full object-cover speaker-image">
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Lê Văn C</h3>
-              <p class="text-blue-600 mb-4">Giáo sư, Đại học</p>
-              <p class="text-gray-600">Nhà nghiên cứu và giáo dục chuyên về các công nghệ mới và ứng dụng của chúng.</p>
+          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
+            <div class="text-center">
+              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
+                <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Speaker 3" class="w-full h-full object-cover">
+              </div>
+              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">TS. Lê Văn C</p>
+              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Giám đốc dữ liệu y tế</p>
             </div>
           </div>
           
-          <!-- Speaker 4 (New) -->
-          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
-            <div class="h-64 bg-gray-200">
-              <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Phạm Thị D" class="h-full w-full object-cover speaker-image">
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Phạm Thị D</h3>
-              <p class="text-blue-600 mb-4">Giám đốc Sản phẩm, Công ty Phần mềm</p>
-              <p class="text-gray-600">Chuyên gia chiến lược sản phẩm với trọng tâm về trải nghiệm người dùng và đổi mới thị trường.</p>
+          <!-- Speaker 4 -->
+          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
+            <div class="text-center">
+              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
+                <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Speaker 4" class="w-full h-full object-cover">
+              </div>
+              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">PGS.TS. Hoàng Thị D</p>
+              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Chuyên gia dược phẩm</p>
             </div>
           </div>
           
-          <!-- Speaker 5 (New) -->
-          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
-            <div class="h-64 bg-gray-200">
-              <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Trần Văn E" class="h-full w-full object-cover speaker-image">
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Trần Văn E</h3>
-              <p class="text-blue-600 mb-4">Chuyên gia An ninh, CyberDefense</p>
-              <p class="text-gray-600">Chuyên gia an ninh mạng tập trung vào khung bảo mật doanh nghiệp và giảm thiểu mối đe dọa.</p>
+          <!-- Speaker 5 -->
+          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
+            <div class="text-center">
+              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
+                <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="Speaker 5" class="w-full h-full object-cover">
+              </div>
+              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">GS.TS. Phạm Văn E</p>
+              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Giáo sư đào tạo y khoa</p>
             </div>
           </div>
           
-          <!-- Speaker 6 (New) -->
-          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
-            <div class="h-64 bg-gray-200">
-              <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Nguyễn Thị F" class="h-full w-full object-cover speaker-image">
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Nguyễn Thị F</h3>
-              <p class="text-blue-600 mb-4">Nhà Khoa học Dữ liệu, Insights Analytics</p>
-              <p class="text-gray-600">Chuyên về phân tích dữ liệu lớn và mô hình dự đoán cho hoạt động kinh doanh.</p>
+          <!-- Speaker 6 -->
+          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
+            <div class="text-center">
+              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
+                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Speaker 6" class="w-full h-full object-cover">
+              </div>
+              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">TS. Vũ Thị F</p>
+              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Chuyên gia công nghệ số</p>
             </div>
           </div>
           
-          <!-- Speaker 7 (New) -->
-          <div class="speaker-card bg-white rounded-lg shadow-md overflow-hidden w-80 flex-shrink-0">
-            <div class="h-64 bg-gray-200">
-              <!-- Speaker image -->
-              <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="Hoàng Văn G" class="h-full w-full object-cover speaker-image">
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold mb-2">Hoàng Văn G</h3>
-              <p class="text-blue-600 mb-4">Chuyên gia Blockchain, FutureTech</p>
-              <p class="text-gray-600">Người tiên phong trong việc triển khai công nghệ blockchain cho các giải pháp doanh nghiệp.</p>
+          <!-- Speaker 7 -->
+          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
+            <div class="text-center">
+              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
+                <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Speaker 7" class="w-full h-full object-cover">
+              </div>
+              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">PGS. Trần Văn G</p>
+              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Chuyên gia hệ thống y tế</p>
             </div>
           </div>
         </div>
+        
+        <!-- Navigation dots -->
+        <div class="flex justify-center mt-4">
+          <div class="speaker-dot active bg-white w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
+          <div class="speaker-dot bg-gray-400 w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
+          <div class="speaker-dot bg-gray-400 w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
+          <div class="speaker-dot bg-gray-400 w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
+          <div class="speaker-dot bg-gray-400 w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
+        </div>
       </div>
     </div>
-    
-    <!-- Slider pagination dots (optional) -->
-    <div class="flex justify-center mt-6 space-x-2 speakers-slider-pagination">
-      <button class="w-3 h-3 rounded-full bg-blue-600" aria-label="Slide 1"></button>
-      <button class="w-3 h-3 rounded-full bg-gray-300" aria-label="Slide 2"></button>
-      <button class="w-3 h-3 rounded-full bg-gray-300" aria-label="Slide 3"></button>
-    </div>
   </div>
-</section>
+  
+  <!-- Footer -->
+  <footer class="border-t border-blue-300 pt-3 text-center relative z-10">
+    <p class="text-xl text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">&copy; Học viện Quân y - All rights reserved</p>
+  </footer>
+</div>
 
-<!-- CTA section -->
-<section class="py-16 bg-blue-600 text-white text-center">
-  <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold mb-6">Sẵn Sàng Tham Gia?</h2>
-    <p class="text-xl mb-8 md:w-2/3 mx-auto">Đảm bảo vị trí của bạn tại sự kiện độc quyền này. Số lượng ghế có hạn!</p>
-    <a href="<%= conference ? `/register?code=${conference.code}` : '/register' %>" class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-bold text-lg inline-block">Đăng Ký Ngay</a>
-  </div>
-</section>
-
-<!-- QR Code Script -->
+<!-- QR Code Script & Animations -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Get the QR code image elements
+    // QR Code Logic (existing)
     const qrCodeElement = document.getElementById('register-qr-code');
-    const qrCodeMobileElement = document.getElementById('register-qr-code-mobile');
-    
-    // Fetch QR code from API
     let qrCodeUrl = '/api/qrcode';
-    
-    <% if (typeof conference !== 'undefined' && conference && conference.code) { %>
-    // Add conference code if available
-    qrCodeUrl += '?code=' + '<%= conference.code %>';
-    <% } %>
-    
-    // Fetch the QR code from our API
     fetch(qrCodeUrl)
       .then(response => response.json())
       .then(data => {
-        // Set the image source to the data URL for both QR codes
-        if (qrCodeElement) {
-          qrCodeElement.src = data.qrCodeDataUrl;
-        }
-        if (qrCodeMobileElement) {
-          qrCodeMobileElement.src = data.qrCodeDataUrl;
-        }
+        if (qrCodeElement) { qrCodeElement.src = data.qrCodeDataUrl; }
       })
-      .catch(error => {
-        console.error('Error fetching QR code:', error);
-      });
-      
-    // Generate random speaker images
-    function getRandomSpeakerImages() {
-      // Set of possible profile images
-      const maleProfiles = [11, 12, 15, 22, 32, 36, 44, 67, 75, 85];
-      const femaleProfiles = [10, 21, 33, 44, 45, 46, 55, 65, 79, 90];
-      
-      // Shuffle the arrays to get random order
-      const shuffledMale = [...maleProfiles].sort(() => 0.5 - Math.random());
-      const shuffledFemale = [...femaleProfiles].sort(() => 0.5 - Math.random());
-      
-      // Get speaker images
-      const speakerImages = document.querySelectorAll('.speaker-image');
-      
-      // Set random images for each speaker
-      speakerImages.forEach((img, index) => {
-        // Alternate between male and female images
-        const profileId = index % 2 === 0 ? shuffledMale[index] : shuffledFemale[index];
-        const gender = index % 2 === 0 ? 'men' : 'women';
-        
-        // Set the image source
-        img.src = `https://randomuser.me/api/portraits/${gender}/${profileId}.jpg`;
+      .catch(error => { console.error('Error fetching QR code:', error); });
+
+    // Title Animation Logic
+    const titleLines = document.querySelectorAll('.title-line');
+    function runTitleAnimation() {
+      titleLines.forEach(line => {
+        line.classList.remove('animate-fade-in-up');
+        line.style.opacity = '0'; // Reset opacity
+        // Force reflow to restart animation
+        void line.offsetWidth;
+        // Add animation class back
+        line.classList.add('animate-fade-in-up');
       });
     }
+    // Initial run
+    runTitleAnimation(); 
+    // Repeat every 30 seconds
+    setInterval(runTitleAnimation, 10000);
+
+    // Speakers slider functionality (Updated Interval)
+    const speakersTrack = document.querySelector('.speakers-track');
+    const speakerSlides = document.querySelectorAll('.speaker-slide');
+    const speakerDots = document.querySelectorAll('.speaker-dot');
+    const slideWidth = 100 / 3; 
+    const totalSlides = speakerSlides.length;
+    const visibleSlides = 3;
+    const maxPosition = totalSlides > visibleSlides ? totalSlides - visibleSlides : 0;
+    let currentPosition = 0;
+    let slidingInterval = null; // Initialize interval variable
+
+    function updateSliderPosition() {
+      if (!speakersTrack) return; // Add null check
+      speakersTrack.style.transform = `translateX(-${currentPosition * slideWidth}%)`;
+      
+      speakerDots.forEach((dot, index) => {
+        if (index === currentPosition) {
+          dot.classList.add('active', 'bg-white');
+          dot.classList.remove('bg-gray-400');
+        } else {
+          dot.classList.remove('active', 'bg-white');
+          dot.classList.add('bg-gray-400');
+        }
+      });
+    }
+
+    function startSliding() {
+      // Clear existing interval before starting a new one
+      if (slidingInterval) clearInterval(slidingInterval);
+      
+      if (totalSlides > visibleSlides) {
+         slidingInterval = setInterval(() => {
+          currentPosition = (currentPosition + 1) % (maxPosition + 1);
+          updateSliderPosition();
+        }, 5000); // Updated interval to 5 seconds
+      }
+    }
+
+    // Initial setup
+    if (totalSlides > visibleSlides) {
+        speakerDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentPosition = index;
+                updateSliderPosition();
+                // Restart the interval after manual click
+                startSliding(); 
+            });
+        });
+        startSliding(); // Start the automatic sliding
+    } else {
+        // Hide or disable dots if not enough slides
+        document.querySelector('.flex.justify-center.mt-4').style.display = 'none'; 
+    }
     
-    // Call the function to generate random speaker images
-    getRandomSpeakerImages();
   });
 </script> 
