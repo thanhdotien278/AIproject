@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const registerController = require('../controllers/registerController');
+const ipFilter = require('../middleware/ipFilter');
 
 // GET /register - Show registration form for default conference
-router.get('/', registerController.showRegisterForm);
+router.get('/', ipFilter, registerController.showRegisterForm);
 
 // GET /register/:conferenceCode - Show registration form for specific conference
-router.get('/:conferenceCode', registerController.showRegisterForm);
+router.get('/:conferenceCode', ipFilter, registerController.showRegisterForm);
 
 // POST /register - Process registration for default conference
 router.post('/', registerController.registerParticipant);
