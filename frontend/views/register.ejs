@@ -1,221 +1,299 @@
 <%- contentFor('body') %>
 
-<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-3xl mx-auto">
-    <div class="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100">
-      <!-- Header -->
-      <div class="px-6 py-8 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <h2 class="text-3xl font-bold"><%= conference.name %></h2>
-        <div class="mt-3 flex items-center text-blue-100">
-          <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <p><%= formattedDates %></p>
-      </div>
-        <div class="mt-2 flex items-center text-blue-100">
-          <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <p><%= locationName %></p>
-      </div>
-        <% if (locationAddress) { %>
-          <div class="mt-2 flex items-center text-blue-100">
-            <svg class="h-5 w-5 mr-2 invisible" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
-            <p class="text-sm"><%= locationAddress %></p>
-      </div>
-      <% } %>
-      </div>
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <!-- Sticky Header (Optional) -->
+  <div class="sticky top-0 z-10 bg-white shadow-md p-4 mb-6 rounded-lg">
+    <h2 class="text-xl font-bold text-center text-gray-800">Form đăng ký / Registration</h2>
+  </div>
+
+  <div class="max-w-lg mx-auto">
+    <form id="registration-form" class="space-y-4">
+      <input type="hidden" name="conferenceCode" value="<%= conference.code %>">
+
+      <% /* --- Redesigned Fields based on Image --- */ %>
       
-      <!-- Registration Form -->
-      <form id="registration-form" class="px-6 py-8">
-        <input type="hidden" name="conferenceCode" value="<%= conference.code %>">
-        
-        <h3 class="text-xl font-semibold text-gray-800 mb-6">Thông tin đăng ký</h3>
-        
-        <div class="space-y-6">
-          <!-- Required Fields -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="form-group">
-              <label for="name" class="form-label">
-                <span>Họ và tên</span>
-                <span class="text-red-500">*</span>
-              </label>
-          <input type="text" id="name" name="name" class="form-input" required>
-        </div>
-            <div class="form-group">
-              <label for="email" class="form-label">
-                <span>Email</span>
-                <span class="text-red-500">*</span>
-              </label>
-          <input type="email" id="email" name="email" class="form-input" required>
-        </div>
-            <div class="form-group">
-              <label for="phone" class="form-label">
-                <span>Số điện thoại</span>
-                <span class="text-red-500">*</span>
-              </label>
-          <input type="tel" id="phone" name="phone" class="form-input" required>
-        </div>
+<!-- Mobile Field -->
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl shadow"><span>📞</span></div>
+        <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+          <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+            <div class="font-bold text-sm leading-tight whitespace-nowrap">Điện thoại</div>
+            <div class="text-xs leading-tight whitespace-nowrap">Mobile</div>
           </div>
+          <input type="tel" id="phone" name="phone" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Số điện thoại" required>
+          <div class="flex items-center flex-shrink-0 pr-4 pl-1 text-xs">
+            <span class="text-gray-500 whitespace-nowrap">* Bắt buộc</span>
+            <span class="text-red-500 ml-1">*</span>
+          </div>
+        </div>
+      </div>
 
-          <% if (registrationFields.some(field => ['address', 'age', 'business', 'nationality', 'workunit', 'rank', 'academic', 'role'].includes(field))) { %>
-            <hr class="my-6 border-gray-200">
-            <h3 class="text-lg font-medium text-gray-800 mb-6">Thông tin cá nhân</h3>
+      <!-- Nationality/Country Field -->
+      <% if (registrationFields.includes('nationality')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl shadow"><span>🌍</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Quốc gia</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Country</div>
+            </div>
+            <input type="text" id="nationality" name="nationality" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Quốc tịch">
+            <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Full Name Field -->
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl shadow"><span>✏️</span></div>
+        <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+          <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+            <div class="font-bold text-sm leading-tight whitespace-nowrap">Họ & tên</div>
+            <div class="text-xs leading-tight whitespace-nowrap">Full name</div>
+          </div>
+          <input type="text" id="name" name="name" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Họ tên" required>
+          <div class="flex items-center flex-shrink-0 pr-4 pl-1 text-xs">
+            <span class="text-gray-500 whitespace-nowrap">* Bắt buộc</span>
+            <span class="text-red-500 ml-1">*</span>
+          </div>
+        </div>
+      </div>
+
+      
+      
+      <!-- Email Field -->
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl shadow"><span>✉️</span></div>
+        <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+          <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+            <div class="font-bold text-sm leading-tight whitespace-nowrap">Email</div>
+            <div class="text-xs leading-tight whitespace-nowrap">Email</div>
+          </div>
+          <input type="email" id="email" name="email" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Email" required>
+          <div class="flex items-center flex-shrink-0 pr-4 pl-1 text-xs">
+            <span class="text-gray-500 whitespace-nowrap">* Bắt buộc</span>
+            <span class="text-red-500 ml-1">*</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Field -->
+      <% if (registrationFields.includes('address')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl shadow"><span>📍</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Địa chỉ</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Address</div>
+            </div>
+            <input type="text" id="address" name="address" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Địa chỉ" required>
+            <div class="flex items-center flex-shrink-0 pr-4 pl-1 text-xs">
+                <span class="text-gray-500 whitespace-nowrap">* Bắt buộc</span>
+                <span class="text-red-500 ml-1">*</span>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      
+      <% /* --- Other Fields (applying similar styling) --- */ %>
+
+      <% if (registrationFields.some(field => ['age', 'business', 'workunit', 'rank', 'academic', 'role'].includes(field))) { %>
+        <hr class="my-6 border-gray-300">
+        <h3 class="text-lg font-semibold text-center text-gray-700 mb-4">Thông tin bổ sung / Additional Information</h3>
+      <% } %>
+
+      <!-- Work Unit -->
+      <% if (registrationFields.includes('workunit')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>🏢</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Đơn vị</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Work Unit</div>
+            </div>
+            <div class="flex-grow flex items-center px-2">
+              <select id="workunit-type" name="workunitType" class="bg-transparent focus:outline-none text-gray-700 text-sm py-3 pr-2 flex-initial" style="min-width: 90px;">
+                <option value="Học viện">Học viện</option>
+                <option value="Đơn vị ngoài">Đơn vị ngoài</option>
+              </select>
+              <span class="text-gray-400 mx-1">|</span>
+              <input type="text" id="workunit-detail" name="workunitDetail" placeholder="Tên đơn vị" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 py-3 text-sm">
+            </div>
+            <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Rank -->
+      <% if (registrationFields.includes('rank')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>🎖️</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Cấp bậc</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Rank</div>
+            </div>
+            <input type="text" id="rank" name="rank" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Nhập cấp bậc / Enter rank">
+            <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Academic -->
+      <% if (registrationFields.includes('academic')) { %>
+         <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>🎓</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Học hàm/vị</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Academic</div>
+            </div>
+            <input type="text" id="academic" name="academic" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Nhập học hàm/vị">
+            <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Age -->
+      <% if (registrationFields.includes('age')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>🎂</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Tuổi</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Age</div>
+            </div>
+            <input type="number" id="age" name="age" min="0" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Nhập tuổi / Enter age">
+            <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Business -->
+      <% if (registrationFields.includes('business')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>💼</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Lĩnh vực</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Business</div>
+            </div>
+            <input type="text" id="business" name="business" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Nhập lĩnh vực / Enter field">
+            <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Role -->
+      <% if (registrationFields.includes('role')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>👤</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Vai trò</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Role</div>
+            </div>
+             <div class="relative flex-grow">
+                <select id="role" name="role" class="w-full bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm appearance-none">
+                    <option value="Tham dự" selected>Tham dự / Attendee</option>
+                    <option value="Báo cáo viên">Báo cáo viên / Speaker</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-gray-700">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <% /* --- Checkbox Options --- */ %>
+      <% if (registrationFields.some(field => ['speech', 'lunch', 'dinner', 'transport'].includes(field))) { %>
+        <hr class="my-6 border-gray-300">
+        <h3 class="text-lg font-semibold text-center text-gray-700 mb-4">Tùy chọn / Options</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <% if (registrationFields.includes('speech')) { %>
+            <label class="checkbox-card flex items-center space-x-3 p-4 bg-white rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition cursor-pointer shadow">
+              <input type="checkbox" name="speech" value="true" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+              <span class="text-gray-700">Có phát biểu / Will Speak</span>
+            </label>
           <% } %>
-
-          <!-- Thông tin cá nhân -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <% if (registrationFields.includes('workunit')) { %>
-              <div class="form-group md:col-span-2">
-                <label for="workunit-type" class="form-label">Đơn vị công tác</label>
-                <div class="space-y-2">
-                  <select id="workunit-type" name="workunitType" class="form-input">
-                    <option value="Học viện">Học viện</option>
-                    <option value="Đơn vị ngoài">Đơn vị ngoài</option>
-                  </select>
-                  <input type="text" id="workunit-detail" name="workunitDetail" placeholder="Nhập tên đơn vị cụ thể" class="form-input">
-                </div>
-              </div>
-            <% } %>
-
-        <% if (registrationFields.includes('address')) { %>
-              <div class="form-group md:col-span-2">
-                <label for="address" class="form-label">Địa chỉ</label>
-          <input type="text" id="address" name="address" class="form-input">
-        </div>
-        <% } %>
-
-            <% if (registrationFields.includes('rank')) { %>
-              <div class="form-group">
-                <label for="rank" class="form-label">Cấp bậc</label>
-                <input type="text" id="rank" name="rank" class="form-input">
-              </div>
-            <% } %>
-
-            <% if (registrationFields.includes('academic')) { %>
-              <div class="form-group">
-                <label for="academic" class="form-label">Học hàm học vị</label>
-                <input type="text" id="academic" name="academic" class="form-input">
-              </div>
-            <% } %>
-        
-        <% if (registrationFields.includes('age')) { %>
-              <div class="form-group">
-                <label for="age" class="form-label">Tuổi</label>
-                <input type="number" id="age" name="age" min="0" class="form-input">
-              </div>
-            <% } %>
-
-            <% if (registrationFields.includes('nationality')) { %>
-              <div class="form-group">
-                <label for="nationality" class="form-label">Quốc tịch</label>
-                <input type="text" id="nationality" name="nationality" class="form-input">
-        </div>
-        <% } %>
-        
-        <% if (registrationFields.includes('business')) { %>
-              <div class="form-group">
-                <label for="business" class="form-label">Lĩnh vực kinh doanh</label>
-          <input type="text" id="business" name="business" class="form-input">
-        </div>
-        <% } %>
-        
-            <% if (registrationFields.includes('role')) { %>
-              <div class="form-group">
-                <label for="role" class="form-label">Vai trò</label>
-                <select id="role" name="role" class="form-input">
-                  <option value="Tham dự" selected>Tham dự</option>
-                  <option value="Báo cáo viên">Báo cáo viên</option>
-          </select>
-              </div>
-            <% } %>
-          </div>
-
-          <% if (registrationFields.some(field => ['speech', 'lunch', 'dinner', 'transport'].includes(field))) { %>
-            <hr class="my-6 border-gray-200">
-            <h3 class="text-lg font-medium text-gray-800 mb-6">Tùy chọn bổ sung</h3>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <% if (registrationFields.includes('speech')) { %>
-                <div class="checkbox-card">
-                  <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition cursor-pointer">
-                    <input type="checkbox" name="speech" value="true" class="form-checkbox h-5 w-5 text-blue-600">
-                    <span class="text-gray-700">Có phát biểu</span>
-                  </label>
-                </div>
-              <% } %>
-
-              <% if (registrationFields.includes('lunch')) { %>
-                <div class="checkbox-card">
-                  <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition cursor-pointer">
-                    <input type="checkbox" name="lunch" value="true" class="form-checkbox h-5 w-5 text-blue-600">
-                    <span class="text-gray-700">Ăn trưa</span>
-                  </label>
-                </div>
-              <% } %>
-
-              <% if (registrationFields.includes('dinner')) { %>
-                <div class="checkbox-card">
-                  <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition cursor-pointer">
-                    <input type="checkbox" name="dinner" value="true" class="form-checkbox h-5 w-5 text-blue-600">
-                    <span class="text-gray-700">Ăn tối</span>
-                  </label>
-        </div>
-        <% } %>
-        
-              <% if (registrationFields.includes('transport')) { %>
-                <div class="checkbox-card">
-                  <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition cursor-pointer">
-                    <input type="checkbox" name="transport" value="true" class="form-checkbox h-5 w-5 text-blue-600">
-                    <span class="text-gray-700">Đăng ký theo xe về học viện</span>
-                  </label>
-                </div>
-              <% } %>
-        </div>
-        <% } %>
-        
-          <% if (registrationFields.some(field => ['feedback', 'questions', 'source'].includes(field))) { %>
-            <hr class="my-6 border-gray-200">
-            <h3 class="text-lg font-medium text-gray-800 mb-6">Thông tin bổ sung</h3>
+          <% if (registrationFields.includes('lunch')) { %>
+            <label class="checkbox-card flex items-center space-x-3 p-4 bg-white rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition cursor-pointer shadow">
+              <input type="checkbox" name="lunch" value="true" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+              <span class="text-gray-700">Ăn trưa / Lunch</span>
+            </label>
           <% } %>
+          <% if (registrationFields.includes('dinner')) { %>
+            <label class="checkbox-card flex items-center space-x-3 p-4 bg-white rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition cursor-pointer shadow">
+              <input type="checkbox" name="dinner" value="true" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+              <span class="text-gray-700">Ăn tối / Dinner</span>
+            </label>
+          <% } %>
+          <% if (registrationFields.includes('transport')) { %>
+            <label class="checkbox-card flex items-center space-x-3 p-4 bg-white rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition cursor-pointer shadow">
+              <input type="checkbox" name="transport" value="true" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+              <span class="text-gray-700">Xe về học viện / Transport</span>
+            </label>
+          <% } %>
+        </div>
+      <% } %>
 
-          <div class="space-y-6">
-            <% if (registrationFields.includes('feedback')) { %>
-              <div class="form-group">
-                <label for="feedback" class="form-label">Góp ý về công tác tổ chức</label>
-                <textarea id="feedback" name="feedback" rows="3" class="form-input"></textarea>
+      <% /* --- Textarea Fields --- */ %>
+       <% if (registrationFields.some(field => ['feedback', 'questions', 'source'].includes(field))) { %>
+        <hr class="my-6 border-gray-300">
+        <h3 class="text-lg font-semibold text-center text-gray-700 mb-4">Thông tin khác / Other Info</h3>
+      <% } %>
+
+      <% if (registrationFields.includes('feedback')) { %>
+        <div class="flex items-start space-x-3">
+           <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>📝</span></div>
+           <div class="flex-grow bg-gray-200 rounded-xl flex items-stretch shadow-inner overflow-hidden">
+             <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm self-stretch" style="min-width: 110px;">
+               <div class="font-bold text-sm leading-tight whitespace-nowrap">Góp ý</div>
+               <div class="text-xs leading-tight whitespace-nowrap">Feedback</div>
+             </div>
+             <textarea id="feedback" name="feedback" rows="3" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm resize-none" placeholder="Góp ý về công tác tổ chức..."></textarea>
+             <div class="pr-4 self-stretch"></div> <!-- Right padding -->
+           </div>
         </div>
-        <% } %>
-        
-            <% if (registrationFields.includes('questions')) { %>
-              <div class="form-group">
-                <label for="questions" class="form-label">Câu hỏi</label>
-                <textarea id="questions" name="questions" rows="3" class="form-input"></textarea>
+      <% } %>
+
+      <% if (registrationFields.includes('questions')) { %>
+        <div class="flex items-start space-x-3">
+           <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>❓</span></div>
+           <div class="flex-grow bg-gray-200 rounded-xl flex items-stretch shadow-inner overflow-hidden">
+             <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm self-stretch" style="min-width: 110px;">
+               <div class="font-bold text-sm leading-tight whitespace-nowrap">Câu hỏi</div>
+               <div class="text-xs leading-tight whitespace-nowrap">Questions</div>
+             </div>
+             <textarea id="questions" name="questions" rows="3" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm resize-none" placeholder="Câu hỏi cho ban tổ chức..."></textarea>
+             <div class="pr-4 self-stretch"></div> <!-- Right padding -->
+           </div>
         </div>
-        <% } %>
-        
-            <% if (registrationFields.includes('source')) { %>
-              <div class="form-group">
-                <label for="source" class="form-label">Nguồn biết về hội nghị</label>
-                <input type="text" id="source" name="source" class="form-input">
-              </div>
-            <% } %>
+      <% } %>
+
+      <% if (registrationFields.includes('source')) { %>
+         <div class="flex items-center space-x-3">
+           <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>📰</span></div>
+           <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Nguồn</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Source</div>
+            </div>
+            <input type="text" id="source" name="source" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Bạn biết hội nghị từ đâu? / Source">
+            <div class="pr-4"></div> <!-- Right padding -->
           </div>
         </div>
-        
-        <!-- Submit Button -->
-        <div class="mt-8">
-          <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center">
-            <span class="text-base font-medium">Đăng ký tham dự</span>
-            <svg class="w-5 h-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </button>
-          <p class="text-sm text-center text-gray-500 mt-4">Các trường có dấu <span class="text-red-500">*</span> là trường bắt buộc</p>
-        </div>
-      </form>
-    </div>
+      <% } %>
+
+      <!-- Submit Button -->
+      <div class="pt-6">
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition duration-150 ease-in-out flex items-center justify-center shadow-md">
+          <span>Đăng ký / Submit</span>
+           <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -224,55 +302,70 @@
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('registration-form');
     
-    // Add smooth animation to checkboxes
-    const checkboxCards = document.querySelectorAll('.checkbox-card label');
+    // Handle checkbox styling on change
+    const checkboxCards = document.querySelectorAll('.checkbox-card');
     checkboxCards.forEach(card => {
       const checkbox = card.querySelector('input[type="checkbox"]');
       checkbox.addEventListener('change', function() {
         if (this.checked) {
-          card.classList.add('bg-blue-50', 'border-blue-200');
-          card.classList.remove('bg-gray-50', 'border-gray-200');
+          card.classList.add('bg-blue-50', 'border-blue-300');
+          card.classList.remove('bg-white', 'border-gray-200');
         } else {
-          card.classList.remove('bg-blue-50', 'border-blue-200');
-          card.classList.add('bg-gray-50', 'border-gray-200');
+          card.classList.remove('bg-blue-50', 'border-blue-300');
+          card.classList.add('bg-white', 'border-gray-200');
         }
       });
+      // Initial style check in case of back navigation
+      if (checkbox.checked) {
+         card.classList.add('bg-blue-50', 'border-blue-300');
+         card.classList.remove('bg-white', 'border-gray-200');
+      }
     });
     
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      // Disable submit button and show loading state
       const submitBtn = form.querySelector('button[type="submit"]');
+      const originalBtnContent = submitBtn.innerHTML; // Store original content
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Đang xử lý...';
+      submitBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
       
       try {
         const formData = new FormData(form);
         const data = {};
         formData.forEach((value, key) => {
-          data[key] = value;
+          // Handle checkboxes - ensure all boolean fields are included
+          const checkbox = form.querySelector(`[name="${key}"][type="checkbox"]`);
+          if (checkbox) {
+            // Checkboxes not present in formData if unchecked, handle explicitly
+            data[key] = checkbox.checked;
+          } else {
+            data[key] = value;
+          }
         });
-        
-        // Handle workunit data
+
+        // Consolidate workunit data if fields exist
         if (data.workunitType && data.workunitDetail) {
           data.workunit = `${data.workunitType} - ${data.workunitDetail}`;
           delete data.workunitType;
           delete data.workunitDetail;
+        } else if (data.hasOwnProperty('workunitType')) { 
+          // Keep just the type if detail is empty or doesn't exist
+          data.workunit = data.workunitType;
+          delete data.workunitType;
+          delete data.workunitDetail; // Ensure detail is removed
         }
-
-        // Handle checkbox fields - convert to boolean values
-        const checkboxFields = ['speech', 'lunch', 'dinner', 'transport'];
-        checkboxFields.forEach(field => {
-          // If field exists, it was checked, so set to true
-          if (data[field] === 'true') {
-            data[field] = true;
-          } else {
-            // If field is missing, it wasn't checked, so set to false
-            data[field] = false;
-          }
-        });
         
+        // Ensure boolean conversion for specific checkbox fields expected by backend
+        const booleanFields = ['speech', 'lunch', 'dinner', 'transport'];
+        booleanFields.forEach(field => {
+           if (data.hasOwnProperty(field)) { // Check if the field was included in registrationFields
+             data[field] = !!data[field]; // Convert to strict boolean
+           }
+        });
+
+        console.log("Submitting data:", data); // Debug: Log data before sending
+
         const response = await fetch('/register', {
           method: 'POST',
           headers: {
@@ -284,71 +377,52 @@
         const result = await response.json();
         
         if (result.success) {
-          // Redirect to thank you page
           window.location.href = '/thankyou';
         } else {
-          // Show error message
-          showAlert(result.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.', 'error');
+          showAlert(result.message || 'An error occurred. Please try again.', 'error');
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<span class="text-base font-medium">Đăng ký tham dự</span><svg class="w-5 h-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>';
+          submitBtn.innerHTML = originalBtnContent; // Restore original content
         }
       } catch (error) {
         console.error('Error:', error);
-        showAlert('Đã có lỗi xảy ra. Vui lòng thử lại.', 'error');
+        showAlert('An error occurred. Please try again.', 'error');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span class="text-base font-medium">Đăng ký tham dự</span><svg class="w-5 h-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>';
+        submitBtn.innerHTML = originalBtnContent; // Restore original content
     }
     });
     
-    // Function to show alert
+    // Function to show alert (reusable)
     function showAlert(message, type) {
+      // Remove existing alerts first
+      document.querySelectorAll('.form-alert').forEach(alert => alert.remove());
+
       const alertDiv = document.createElement('div');
-      alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border ${type === 'error' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`;
+      alertDiv.className = `form-alert fixed top-5 right-5 z-50 p-4 rounded-lg shadow-lg border max-w-sm ${type === 'error' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`;
       
       alertDiv.innerHTML = `
         <div class="flex items-center">
-          <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
             ${type === 'error' 
               ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>'
               : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>'}
           </svg>
-          <span>${message}</span>
+          <span class="flex-1">${message}</span>
+          <button type="button" class="ml-4 -mr-1 -my-1 text-gray-400 hover:text-gray-700 focus:outline-none" onclick="this.closest('.form-alert').remove()">
+             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          </button>
         </div>
-        <button type="button" class="absolute top-1 right-1 text-gray-400 hover:text-gray-700" onclick="this.parentElement.remove()">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-          </svg>
-        </button>
       `;
       
       document.body.appendChild(alertDiv);
       
-      // Auto remove after 5 seconds
       setTimeout(() => {
         alertDiv.remove();
-      }, 5000);
+      }, 7000); // Increased timeout
     }
   });
 </script>
 
-<style>
-  .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
-  }
-  
-  .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200;
-  }
-  
-  .form-group {
-    @apply space-y-1;
-  }
-  
-  .checkbox-card {
-    @apply transition-all duration-200;
-  }
-  
-  .checkbox-card:hover {
-    @apply transform -translate-y-1;
-  }
-</style> 
+<%- /* Remove old style block */ %>
+<% /* <style> ... </style> */ %>
+
+</rewritten_file> 
