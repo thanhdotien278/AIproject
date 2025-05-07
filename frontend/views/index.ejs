@@ -37,95 +37,42 @@
     
     <!-- Speakers Section - 1/2 width, center aligned with sliding animation -->
     <div class="w-1/2 mx-auto overflow-hidden">
-      <div class="speakers-slider relative w-full">
-        <div class="speakers-track flex transition-transform duration-500 ease-in-out" style="transform: translateX(0);">
-          <!-- Speaker 1 -->
-          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
-            <div class="text-center">
-              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Speaker 1" class="w-full h-full object-cover">
+      <% if (typeof speakers !== 'undefined' && speakers.length > 0) { %>
+        <div class="speakers-slider relative w-full">
+          <div class="speakers-track flex transition-transform duration-500 ease-in-out" style="transform: translateX(0);">
+            <% speakers.forEach(speaker => { %>
+              <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
+                <div class="text-center">
+                  <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
+                    <% if (speaker.avatarUrl && speaker.avatarUrl !== '') { %>
+                      <img src="<%= speaker.avatarUrl %>" alt="<%= speaker.fullName %>" class="w-full h-full object-cover">
+                    <% } else { %>
+                      <img src="/images/default-avatar.png" alt="Default Avatar" class="w-full h-full object-cover"> 
+                    <% } %>
+                  </div>
+                  <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+                    <%= [speaker.rank, speaker.academic, speaker.fullName].filter(Boolean).join(' ') %>
+                  </p>
+                  <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+                    <%= [speaker.position, speaker.workUnit].filter(Boolean).join(', ') %>
+                  </p>
+                </div>
               </div>
-              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">GS. Nguyễn Văn A</p>
-              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Chuyên gia y học cổ truyền</p>
-            </div>
+            <% }) %>
           </div>
           
-          <!-- Speaker 2 -->
-          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
-            <div class="text-center">
-              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
-                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Speaker 2" class="w-full h-full object-cover">
-              </div>
-              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">PGS.TS. Trần Thị B</p>
-              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Nhà nghiên cứu AI y tế</p>
+          <!-- Navigation dots (dynamically generated if needed by slider logic) -->
+          <% if (speakers.length > 3) { // Only show dots if there are more slides than visible %>
+            <div class="flex justify-center mt-4 speaker-dots-container">
+              <% for(let i = 0; i < Math.ceil(speakers.length / 3); i++) { %> 
+                <div class="speaker-dot <%= i === 0 ? 'active bg-white' : 'bg-gray-400' %> w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
+              <% } %>
             </div>
-          </div>
-          
-          <!-- Speaker 3 -->
-          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
-            <div class="text-center">
-              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
-                <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Speaker 3" class="w-full h-full object-cover">
-              </div>
-              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">TS. Lê Văn C</p>
-              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Giám đốc dữ liệu y tế</p>
-            </div>
-          </div>
-          
-          <!-- Speaker 4 -->
-          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
-            <div class="text-center">
-              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
-                <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Speaker 4" class="w-full h-full object-cover">
-              </div>
-              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">PGS.TS. Hoàng Thị D</p>
-              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Chuyên gia dược phẩm</p>
-            </div>
-          </div>
-          
-          <!-- Speaker 5 -->
-          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
-            <div class="text-center">
-              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
-                <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="Speaker 5" class="w-full h-full object-cover">
-              </div>
-              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">GS.TS. Phạm Văn E</p>
-              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Giáo sư đào tạo y khoa</p>
-            </div>
-          </div>
-          
-          <!-- Speaker 6 -->
-          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
-            <div class="text-center">
-              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
-                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Speaker 6" class="w-full h-full object-cover">
-              </div>
-              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">TS. Vũ Thị F</p>
-              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Chuyên gia công nghệ số</p>
-            </div>
-          </div>
-          
-          <!-- Speaker 7 -->
-          <div class="speaker-slide w-1/3 flex-shrink-0 px-2">
-            <div class="text-center">
-              <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-blue-600">
-                <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Speaker 7" class="w-full h-full object-cover">
-              </div>
-              <p class="text-xl font-bold mt-2 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">PGS. Trần Văn G</p>
-              <p class="text-sm text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Chuyên gia hệ thống y tế</p>
-            </div>
-          </div>
+          <% } %>
         </div>
-        
-        <!-- Navigation dots -->
-        <div class="flex justify-center mt-4">
-          <div class="speaker-dot active bg-white w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
-          <div class="speaker-dot bg-gray-400 w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
-          <div class="speaker-dot bg-gray-400 w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
-          <div class="speaker-dot bg-gray-400 w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
-          <div class="speaker-dot bg-gray-400 w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
-        </div>
-      </div>
+      <% } else { %>
+        <p class="text-center text-white text-xl">No speakers to display.</p>
+      <% } %>
     </div>
   </div>
   
@@ -135,94 +82,116 @@
   </footer>
 
   <!-- QR Code (Moved to Bottom Left) -->
-  <div class="absolute bottom-20 left-20 bg-white p-3 rounded-lg shadow-md z-20">
+  <div class="absolute bottom-20 left-20 bg-white p-3 rounded-lg shadow-md z-20" id="qrCodeContainer">
     <img id="register-qr-code" src="" alt="Registration QR Code" class="h-32 w-32 border border-gray-200 bg-gray-50" style="min-width: 200px; min-height: 200px;">
   </div>
 </div>
 
-<!-- QR Code Script & Animations -->
+<%- contentFor('script') %>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // QR Code Logic (existing)
+    // QR Code Logic
     const qrCodeElement = document.getElementById('register-qr-code');
+    const qrCodeContainer = document.getElementById('qrCodeContainer'); // Get container
     let qrCodeUrl = '/api/qrcode';
+    // You might want to pass conference code to qrCodeUrl if latestConference is available
+    const conferenceCode = "<%= typeof conference !== 'undefined' && conference ? conference.code : '' %>";
+    if (conferenceCode) {
+      qrCodeUrl += `?code=${conferenceCode}`;
+    }
+
     fetch(qrCodeUrl)
       .then(response => response.json())
       .then(data => {
-        if (qrCodeElement) { qrCodeElement.src = data.qrCodeDataUrl; }
+        if (qrCodeElement) { 
+          qrCodeElement.src = data.qrCodeDataUrl;
+          if (qrCodeContainer) { // Check if container exists
+            setTimeout(() => {
+                if (qrCodeContainer) qrCodeContainer.style.display = 'none'; // Hide container
+            }, 60000); // 60000 milliseconds = 1 minute
+          }
+        }
       })
-      .catch(error => { console.error('Error fetching QR code:', error); });
+      .catch(error => { 
+        console.error('Error fetching QR code:', error);
+        if(qrCodeElement) {
+            qrCodeElement.alt = "Error loading QR Code";
+        }
+        if (qrCodeContainer) qrCodeContainer.style.display = 'none'; // Hide on error too
+      });
 
-    // Title Animation Logic
+    // Title Animation Logic (assuming it exists and is needed)
     const titleLines = document.querySelectorAll('.title-line');
     function runTitleAnimation() {
       titleLines.forEach(line => {
         line.classList.remove('animate-fade-in-up');
-        line.style.opacity = '0'; // Reset opacity
-        // Force reflow to restart animation
+        line.style.opacity = '0';
         void line.offsetWidth;
-        // Add animation class back
         line.classList.add('animate-fade-in-up');
       });
     }
-    // Initial run
-    runTitleAnimation(); 
-    // Repeat every 30 seconds
-    setInterval(runTitleAnimation, 10000);
+    if (titleLines.length > 0) {
+        runTitleAnimation(); 
+        setInterval(runTitleAnimation, 10000);
+    }
 
-    // Speakers slider functionality (Updated Interval)
+    // Speakers slider functionality
     const speakersTrack = document.querySelector('.speakers-track');
     const speakerSlides = document.querySelectorAll('.speaker-slide');
-    const speakerDots = document.querySelectorAll('.speaker-dot');
-    const slideWidth = 100 / 3; 
-    const totalSlides = speakerSlides.length;
-    const visibleSlides = 3;
-    const maxPosition = totalSlides > visibleSlides ? totalSlides - visibleSlides : 0;
-    let currentPosition = 0;
-    let slidingInterval = null; // Initialize interval variable
+    const dotsContainer = document.querySelector('.speaker-dots-container');
+    
+    if (speakersTrack && speakerSlides.length > 0) {
+      const visibleSlides = 3; // Number of slides visible at once
+      const totalSlides = speakerSlides.length;
+      const slideWidthPercentage = 100 / visibleSlides; 
+      // Adjust slide width if using flex-shrink-0 on slides that are themselves 1/3 width
+      // For the current HTML (w-1/3 on slide), slideWidthPercentage should actually be based on how many groups of 3 you have.
+      // Let's simplify: each slide is 1/3, so to move one full set of 3 slides, it's 100%.
+      // To move one slide at a time when 3 are visible means each step is 33.33% of the track width.
 
-    function updateSliderPosition() {
-      if (!speakersTrack) return; // Add null check
-      speakersTrack.style.transform = `translateX(-${currentPosition * slideWidth}%)`;
-      
-      speakerDots.forEach((dot, index) => {
-        if (index === currentPosition) {
-          dot.classList.add('active', 'bg-white');
-          dot.classList.remove('bg-gray-400');
-        } else {
-          dot.classList.remove('active', 'bg-white');
-          dot.classList.add('bg-gray-400');
-        }
-      });
-    }
-
-    function startSliding() {
-      // Clear existing interval before starting a new one
-      if (slidingInterval) clearInterval(slidingInterval);
-      
-      if (totalSlides > visibleSlides) {
-         slidingInterval = setInterval(() => {
-          currentPosition = (currentPosition + 1) % (maxPosition + 1);
-          updateSliderPosition();
-        }, 5000); // Updated interval to 5 seconds
+      let numPages = Math.ceil(totalSlides / visibleSlides);
+      if (dotsContainer && totalSlides <= visibleSlides) {
+          dotsContainer.style.display = 'none';
       }
-    }
 
-    // Initial setup
-    if (totalSlides > visibleSlides) {
+      let currentSlideGroup = 0;
+      let slidingInterval = null;
+
+      function updateDynamicSliderPosition() {
+        speakersTrack.style.transform = `translateX(-${currentSlideGroup * 100}%)`; // Move by 100% to show next set of 3
+        const speakerDots = dotsContainer ? dotsContainer.querySelectorAll('.speaker-dot') : [];
+        speakerDots.forEach((dot, index) => {
+          if (index === currentSlideGroup) {
+            dot.classList.add('active', 'bg-white');
+            dot.classList.remove('bg-gray-400');
+          } else {
+            dot.classList.remove('active', 'bg-white');
+            dot.classList.add('bg-gray-400');
+          }
+        });
+      }
+
+      function startDynamicSliding() {
+        if (slidingInterval) clearInterval(slidingInterval);
+        if (numPages > 1) {
+          slidingInterval = setInterval(() => {
+            currentSlideGroup = (currentSlideGroup + 1) % numPages;
+            updateDynamicSliderPosition();
+          }, 5000);
+        }
+      }
+
+      if (dotsContainer) {
+        const speakerDots = dotsContainer.querySelectorAll('.speaker-dot');
         speakerDots.forEach((dot, index) => {
             dot.addEventListener('click', () => {
-                currentPosition = index;
-                updateSliderPosition();
-                // Restart the interval after manual click
-                startSliding(); 
+                currentSlideGroup = index;
+                updateDynamicSliderPosition();
+                startDynamicSliding(); 
             });
         });
-        startSliding(); // Start the automatic sliding
-    } else {
-        // Hide or disable dots if not enough slides
-        document.querySelector('.flex.justify-center.mt-4').style.display = 'none'; 
-    }
-    
+      }
+      startDynamicSliding(); 
+    }    
   });
 </script> 

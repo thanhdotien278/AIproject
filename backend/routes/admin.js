@@ -48,6 +48,12 @@ router.post('/api/users', adminController.isAuthenticated, adminController.creat
 router.put('/api/users/:id', adminController.isAuthenticated, adminController.updateUser);
 router.delete('/api/users/:id', adminController.isAuthenticated, adminController.deleteUser);
 
+// Import speaker routes
+const speakerRoutes = require('./speaker'); 
+
+// Mount speaker routes under /speakers
+router.use('/speakers', speakerRoutes);
+
 // Root path redirect to dashboard if authenticated, otherwise to login
 router.get('/', (req, res) => {
   if (req.session.isAuthenticated) {

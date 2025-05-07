@@ -1,0 +1,250 @@
+<%- contentFor('body') %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Manage Speakers</h1>
+    <button id="addSpeakerBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+      Add Speaker
+    </button>
+  </div>
+
+  <!-- Flash Messages -->
+  <%- include('../partials/flash_messages') %>
+
+  <!-- Speakers Table -->
+  <div class="bg-white shadow-md rounded-lg overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avatar</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speaker ID</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speech Title</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% if (typeof speakers !== 'undefined' && speakers.length > 0) { %>
+          <% speakers.forEach(speaker => { %>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if (speaker.avatarUrl) { %>
+                  <img src="<%= speaker.avatarUrl %>" alt="<%= speaker.fullName %>" class="h-10 w-10 rounded-full object-cover">
+                <% } else { %>
+                  <span class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-sm">No Img</span>
+                <% } %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><%= speaker.speakerID %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= speaker.fullName %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><%= speaker.email %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><%= speaker.mobile || 'N/A' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><%= speaker.speechTitle || 'N/A' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-indigo-600 hover:text-indigo-900 mr-3 editSpeakerBtn" 
+                        data-id="<%= speaker._id %>"
+                        data-speakerid="<%= speaker.speakerID %>"
+                        data-fullname="<%= speaker.fullName %>"
+                        data-email="<%= speaker.email %>"
+                        data-mobile="<%= speaker.mobile %>"
+                        data-birthday="<%= speaker.birthday ? new Date(speaker.birthday).toISOString().split('T')[0] : '' %>"
+                        data-rank="<%= speaker.rank %>"
+                        data-academic="<%= speaker.academic %>"
+                        data-position="<%= speaker.position %>"
+                        data-speciality="<%= speaker.speciality %>"
+                        data-workunit="<%= speaker.workUnit %>"
+                        data-speechtitle="<%= speaker.speechTitle %>"
+                        data-speechtime="<%= speaker.speechTime ? new Date(speaker.speechTime).toISOString().slice(0, 16) : '' %>" 
+                        data-avatarurl="<%= speaker.avatarUrl %>">
+                  Edit
+                </button>
+                <a href="/admin/speakers/delete/<%= speaker._id %>" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this speaker?');">Delete</a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">No speakers found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Speaker Modal -->
+<div id="speakerModal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+      <form id="speakerForm" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_method" id="formMethodField" value="POST"> <input type="hidden" name="speakerId" id="speakerIdField">
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modalTitle">Add Speaker</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="speakerID" class="block text-sm font-medium text-gray-700">Speaker ID <span class="text-red-500">*</span></label>
+                  <input type="text" name="speakerID" id="speakerID" required class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name <span class="text-red-500">*</span></label>
+                  <input type="text" name="fullName" id="fullName" required class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+                  <input type="email" name="email" id="email" required class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile</label>
+                  <input type="tel" name="mobile" id="mobile" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="birthday" class="block text-sm font-medium text-gray-700">Birthday</label>
+                  <input type="date" name="birthday" id="birthday" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="rank" class="block text-sm font-medium text-gray-700">Rank</label>
+                  <input type="text" name="rank" id="rank" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="academic" class="block text-sm font-medium text-gray-700">Academic</label>
+                  <input type="text" name="academic" id="academic" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
+                  <input type="text" name="position" id="position" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="speciality" class="block text-sm font-medium text-gray-700">Speciality</label>
+                  <input type="text" name="speciality" id="speciality" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="workUnit" class="block text-sm font-medium text-gray-700">Work Unit</label>
+                  <input type="text" name="workUnit" id="workUnit" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="speechTitle" class="block text-sm font-medium text-gray-700">Speech Title</label>
+                  <input type="text" name="speechTitle" id="speechTitle" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                  <label for="speechTime" class="block text-sm font-medium text-gray-700">Speech Time</label>
+                  <input type="datetime-local" name="speechTime" id="speechTime" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2">
+                </div>
+                <div class="md:col-span-2">
+                  <label for="avatar" class="block text-sm font-medium text-gray-700">Avatar</label>
+                  <input type="file" name="avatar" id="avatar" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
+                  <img id="avatarPreview" src="#" alt="Avatar Preview" class="mt-2 h-20 w-20 rounded-full object-cover hidden"/>
+                  <input type="hidden" name="currentAvatarUrl" id="currentAvatarUrl">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+            Save Speaker
+          </button>
+          <button type="button" id="cancelBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- contentFor('script') %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const addSpeakerBtn = document.getElementById('addSpeakerBtn');
+    const speakerModal = document.getElementById('speakerModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const speakerForm = document.getElementById('speakerForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const formMethodField = document.getElementById('formMethodField'); // Not used, form action is changed
+    const speakerIdField = document.getElementById('speakerIdField'); // Hidden field for speaker ID during edit
+    const avatarInput = document.getElementById('avatar');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const currentAvatarUrlField = document.getElementById('currentAvatarUrl');
+
+    function openModal() {
+      speakerModal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      speakerModal.classList.add('hidden');
+      speakerForm.reset();
+      avatarPreview.classList.add('hidden');
+      avatarPreview.src = '#';
+      currentAvatarUrlField.value = '';
+      speakerIdField.value = ''; 
+    }
+
+    addSpeakerBtn.addEventListener('click', () => {
+      modalTitle.textContent = 'Add New Speaker';
+      speakerForm.action = '/admin/speakers/add';
+      // formMethodField.value = 'POST'; // Not strictly needed if action is set
+      speakerIdField.value = ''; 
+      openModal();
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+    // Also close modal if backdrop is clicked (optional)
+    speakerModal.addEventListener('click', (event) => {
+      if (event.target === speakerModal) {
+        closeModal();
+      }
+    });
+
+    avatarInput.addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        avatarPreview.src = URL.createObjectURL(file);
+        avatarPreview.classList.remove('hidden');
+      } else {
+        avatarPreview.classList.add('hidden');
+        avatarPreview.src = '#';
+      }
+    });
+
+    document.querySelectorAll('.editSpeakerBtn').forEach(button => {
+      button.addEventListener('click', function() {
+        modalTitle.textContent = 'Edit Speaker';
+        const speakerId = this.dataset.id;
+        speakerForm.action = `/admin/speakers/update/${speakerId}`;
+        // formMethodField.value = 'POST'; // HTML forms only support GET/POST, method override handled by server or specific hidden field if needed
+        speakerIdField.value = speakerId; 
+
+        // Populate form
+        document.getElementById('speakerID').value = this.dataset.speakerid || '';
+        document.getElementById('fullName').value = this.dataset.fullname || '';
+        document.getElementById('email').value = this.dataset.email || '';
+        document.getElementById('mobile').value = this.dataset.mobile || '';
+        document.getElementById('birthday').value = this.dataset.birthday || '';
+        document.getElementById('rank').value = this.dataset.rank || '';
+        document.getElementById('academic').value = this.dataset.academic || '';
+        document.getElementById('position').value = this.dataset.position || '';
+        document.getElementById('speciality').value = this.dataset.speciality || '';
+        document.getElementById('workUnit').value = this.dataset.workunit || '';
+        document.getElementById('speechTitle').value = this.dataset.speechtitle || '';
+        document.getElementById('speechTime').value = this.dataset.speechtime || '';
+        
+        const currentAvatar = this.dataset.avatarurl;
+        currentAvatarUrlField.value = currentAvatar;
+        if (currentAvatar && currentAvatar !== 'N/A') {
+          avatarPreview.src = currentAvatar;
+          avatarPreview.classList.remove('hidden');
+        } else {
+          avatarPreview.src = '#';
+          avatarPreview.classList.add('hidden');
+        }
+        openModal();
+      });
+    });
+  });
+</script> 

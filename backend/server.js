@@ -6,6 +6,7 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 const expressLayouts = require('express-ejs-layouts');
 const QRCode = require('qrcode');
+const flash = require('connect-flash');
 
 // Load environment variables
 dotenv.config();
@@ -28,6 +29,17 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
+
+// Flash middleware
+app.use(flash());
+
+// Middleware to pass flash messages to all views
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error'); // For general errors, like passport errors
+  next();
+});
 
 // Set view engine and layouts
 app.set('view engine', 'ejs');
@@ -104,6 +116,9 @@ app.get('/', async (req, res) => {
     
     // Fetch the receptionist user with username 'rec1'
     const receptionist = await mongoose.model('User').findOne({ username: 'rec1' });
+
+    // Fetch speakers
+    const speakers = await mongoose.model('Speaker').find().sort({ createdAt: -1 }); // Fetch all speakers for now
     
     if (!latestConference) {
       return res.render('index', { 
@@ -111,7 +126,8 @@ app.get('/', async (req, res) => {
         conference: null,
         formattedDates: null,
         locationName: null,
-        locationAddress: null
+        locationAddress: null,
+        speakers: speakers || [] // Pass speakers even if no conference
       });
     }
     
@@ -134,16 +150,18 @@ app.get('/', async (req, res) => {
       formattedDates,
       locationName,
       locationAddress,
-      receptionist
+      receptionist,
+      speakers // Pass speakers to the template
     });
   } catch (error) {
-    console.error('Error fetching latest conference:', error);
+    console.error('Error fetching data for homepage:', error);
     res.render('index', { 
       conference: null,
       formattedDates: null,
       locationName: null,
       locationAddress: null,
-      receptionist: null
+      receptionist: null,
+      speakers: [] // Pass empty array on error
     });
   }
 });

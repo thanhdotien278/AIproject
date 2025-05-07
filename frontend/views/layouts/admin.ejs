@@ -43,6 +43,14 @@
             Người Dùng
           </div>
         </a>
+        <a href="/admin/speakers" class="block px-4 py-2 rounded-md hover:bg-gray-700 <%= typeof currentPath !== 'undefined' && currentPath === '/admin/speakers' ? 'bg-gray-700' : '' %>">
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.08-.99-.225-1.285A5 5 0 1012 15v5M12 15V4m0 11H7m5 0h5"/>
+            </svg>
+            Diễn Giả
+          </div>
+        </a>
         <a href="/admin/settings" class="block px-4 py-2 rounded-md hover:bg-gray-700 <%= typeof currentPath !== 'undefined' && currentPath === '/admin/settings' ? 'bg-gray-700' : '' %>">
           <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,6 +91,7 @@
           <nav class="hidden md:block">
             <ul class="flex space-x-6">
               <li><a href="/admin/users" class="text-gray-700 hover:text-blue-600">Người Dùng</a></li>
+              <li><a href="/admin/speakers" class="text-gray-700 hover:text-blue-600">Diễn Giả</a></li>
               <li><a href="/admin/settings" class="text-gray-700 hover:text-blue-600">Cài Đặt</a></li>
               <li><a href="/admin/logout" class="text-gray-700 hover:text-blue-600">Đăng Xuất</a></li>
             </ul>
@@ -100,6 +109,7 @@
         <div class="md:hidden hidden" id="mobile-menu-top">
           <div class="container mx-auto px-4 py-3 space-y-3">
             <a href="/admin/users" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Người Dùng</a>
+            <a href="/admin/speakers" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Diễn Giả</a>
             <a href="/admin/settings" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Cài Đặt</a>
             <a href="/admin/logout" class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md">Đăng Xuất</a>
           </div>
@@ -109,6 +119,7 @@
         <div id="mobile-menu" class="hidden px-4 py-2 bg-gray-100 md:hidden">
           <a href="/admin/dashboard" class="block py-2 px-4 hover:bg-gray-200 rounded-md">Bảng Điều Khiển</a>
           <a href="/admin/users" class="block py-2 px-4 hover:bg-gray-200 rounded-md">Người Dùng</a>
+          <a href="/admin/speakers" class="block py-2 px-4 hover:bg-gray-200 rounded-md">Diễn Giả</a>
           <a href="/admin/settings" class="block py-2 px-4 hover:bg-gray-200 rounded-md">Cài Đặt</a>
           <a href="/admin/logout" class="block py-2 px-4 hover:bg-gray-200 rounded-md">Đăng Xuất</a>
         </div>
