@@ -1,6 +1,8 @@
 const Participant = require('../models/Participant');
 const Conference = require('../models/Conference');
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -141,45 +143,65 @@ exports.registerParticipant = async (req, res) => {
     
     // Save participant to database
     await participant.save();
-    
+
+    // Prepare attachments
+    const attachments = [];
+    const downloadsPath = path.join(__dirname, '../../frontend/public/downloads');
+    try {
+      if (fs.existsSync(downloadsPath)) {
+        const files = fs.readdirSync(downloadsPath);
+        files.forEach(file => {
+          if (file !== '.gitignore') { // Optional: exclude .gitignore or other specific files
+            attachments.push({
+              filename: file,
+              path: path.join(downloadsPath, file)
+            });
+          }
+        });
+      }
+    } catch (attachError) {
+      console.error('Error reading attachments directory:', attachError);
+      // Proceed without attachments if there's an error
+    }
+
     // Send confirmation email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: req.body.email,
-      subject: `${conference.name} - Registration Confirmation`,
+      subject: `Xác nhận đăng ký tham dự ${conference.name}`,
       html: `
-        <h1>Registration Confirmation</h1>
-        <p>Dear ${req.body.name},</p>
-        <p>Thank you for registering for ${conference.name}!</p>
-        <p><strong>Registration Details:</strong></p>
+        <p>Kính gửi Ông/Bà ${req.body.name},</p>
+        <p>Chúng tôi xác nhận bạn đã đăng ký thành công tham dự hội nghị <strong>${conference.name}</strong>.</p>
+        <p><strong>Thông tin đăng ký của bạn:</strong></p>
         <ul>
-          <li>Name: ${req.body.name}</li>
+          <li>Họ và tên: ${req.body.name}</li>
           <li>Email: ${req.body.email}</li>
-          <li>Phone: ${req.body.phone}</li>
-          ${participantData.workunit ? `<li>Work Unit: ${participantData.workunit}</li>` : ''}
-          ${participantData.rank ? `<li>Rank: ${participantData.rank}</li>` : ''}
-          ${participantData.academic ? `<li>Academic: ${participantData.academic}</li>` : ''}
-          ${participantData.position ? `<li>Position: ${participantData.position}</li>` : ''}
-          ${participantData.speciality ? `<li>Speciality: ${participantData.speciality}</li>` : ''}
-          ${participantData.address ? `<li>Address: ${participantData.address}</li>` : ''}
-          ${participantData.age ? `<li>Age: ${participantData.age}</li>` : ''}
-          ${participantData.business ? `<li>Business: ${participantData.business}</li>` : ''}
-          ${participantData.nationality ? `<li>Nationality: ${participantData.nationality}</li>` : ''}
-          ${participantData.role ? `<li>Role: ${participantData.role}</li>` : ''}
-          ${participantData.speech ? `<li>Will give speech: Yes</li>` : typeof participantData.speech !== 'undefined' ? `<li>Will give speech: No</li>` : ''}
-          ${participantData.lunch ? `<li>Will have lunch: Yes</li>` : typeof participantData.lunch !== 'undefined' ? `<li>Will have lunch: No</li>` : ''}
-          ${participantData.dinner ? `<li>Will attend dinner: Yes</li>` : typeof participantData.dinner !== 'undefined' ? `<li>Will attend dinner: No</li>` : ''}
-          ${participantData.transport ? `<li>Will use transport: Yes</li>` : typeof participantData.transport !== 'undefined' ? `<li>Will use transport: No</li>` : ''}
-          ${participantData.feedback ? `<li>Feedback: ${participantData.feedback}</li>` : ''}
-          ${participantData.questions ? `<li>Questions: ${participantData.questions}</li>` : ''}
-          ${participantData.source ? `<li>Source: ${participantData.source}</li>` : ''}
+          <li>Điện thoại: ${req.body.phone}</li>
+          ${participantData.workunit ? `<li>Đơn vị công tác: ${participantData.workunit}</li>` : ''}
+          ${participantData.rank ? `<li>Cấp bậc: ${participantData.rank}</li>` : ''}
+          ${participantData.academic ? `<li>Học hàm/Học vị: ${participantData.academic}</li>` : ''}
+          ${participantData.position ? `<li>Chức vụ: ${participantData.position}</li>` : ''}
+          ${participantData.speciality ? `<li>Chuyên ngành: ${participantData.speciality}</li>` : ''}
+          ${participantData.address ? `<li>Địa chỉ: ${participantData.address}</li>` : ''}
+          ${participantData.age ? `<li>Tuổi: ${participantData.age}</li>` : ''}
+          ${participantData.business ? `<li>Lĩnh vực: ${participantData.business}</li>` : ''}
+          ${participantData.nationality ? `<li>Quốc tịch: ${participantData.nationality}</li>` : ''}
+          ${participantData.role ? `<li>Vai trò tham dự: ${participantData.role}</li>` : ''}
+          ${registrationFields.includes('speech') ? `<li>Đăng ký phát biểu: ${participantData.speech ? 'Có' : 'Không'}</li>` : ''}
+          ${registrationFields.includes('lunch') ? `<li>Đăng ký ăn trưa: ${participantData.lunch ? 'Có' : 'Không'}</li>` : ''}
+          ${registrationFields.includes('dinner') ? `<li>Đăng ký ăn tối: ${participantData.dinner ? 'Có' : 'Không'}</li>` : ''}
+          ${registrationFields.includes('transport') ? `<li>Đăng ký xe đưa đón: ${participantData.transport ? 'Có' : 'Không'}</li>` : ''}
+          ${participantData.feedback ? `<li>Góp ý: ${participantData.feedback}</li>` : ''}
+          ${participantData.questions ? `<li>Câu hỏi cho BTC: ${participantData.questions}</li>` : ''}
+          ${participantData.source ? `<li>Nguồn biết đến hội nghị: ${participantData.source}</li>` : ''}
         </ul>
-        <p>We look forward to seeing you at the event!</p>
-        <p>Best regards,<br>${conference.name} Team</p>
-      `
+        <p>Chúng tôi rất mong được đón tiếp bạn tại sự kiện.</p>
+        ${attachments.length > 0 ? '<p><strong>Vui lòng kiểm tra các tài liệu quan trọng được đính kèm trong email này.</strong></p>' : ''}
+        <p>Trân trọng,<br>Ban tổ chức ${conference.name}</p>
+      `,
+      attachments: attachments
     };
 
-    // Only send email if email credentials are configured
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       try {
         await transporter.sendMail(mailOptions);
