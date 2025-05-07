@@ -68,7 +68,8 @@ app.get('/api/qrcode', async (req, res) => {
     // Build the registration URL
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     let registrationUrl = `${baseUrl}/register`;
-    registrationUrl = `http://192.168.1.114:3000/register`;
+    // registrationUrl = `http://192.168.1.114:3000/register`;
+    registrationUrl = `http://172.20.10.7:3000/register`;
     // Add the conference code if provided
     if (code) {
       registrationUrl += `?code=${code}`;

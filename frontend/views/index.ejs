@@ -4,34 +4,31 @@
 <div class="h-screen w-screen flex flex-col relative">
   <!-- Background with image3.png as stretched background -->
   <div class="absolute inset-0 z-0">
-    <img src="/images/image1.png" alt="Background" class="w-full h-full object-cover">
+    <!-- <img src="/images/backdrop.jpeg" alt="Background" class="w-full h-full object-cover opacity-80"> -->
+    <img src="/images/backdrop.jpeg" alt="Background" class="w-full h-full object-fill opacity-80">
   </div>
   
+  <!-- Bỏ phần header và logo -->
   <!-- Header Section -->
-  <header class="py-4 px-8 flex items-center justify-between relative z-10">
-    <div class="flex items-center">
+  <!-- <header class="py-4 px-8 flex items-center justify-start relative z-10"> -->
+    <!-- <div class="flex items-center"> -->
       <!-- Logo/Favicon -->
-      <img src="/images/favicon.png" alt="Logo" class="h-16 w-16 mr-4">
+      <!-- <img src="/images/favicon.png" alt="Logo" class="h-16 w-16 mr-4"> -->
       <!-- Institution Name -->
-      <h1 class="text-4xl font-bold text-blue-800">Học viện Quân y</h1>
-    </div>
-    
-    <!-- QR Code (Right) -->
-    <div class="bg-white p-3 rounded-lg shadow-md">
-      <img id="register-qr-code" src="" alt="Registration QR Code" class="h-20 w-20 border border-gray-200 bg-gray-50" style="min-width: 80px;">
-    </div>
-  </header>
+      <!-- <h1 class="text-4xl font-bold text-green-800">Học viện Quân y</h1> -->
+    <!-- </div> -->
+  <!-- </header> -->
   
   <!-- Main Banner Area - Left aligned, 1/2 width, white text with blue outline -->
-  <section class="flex-grow flex items-center px-8 py-6 relative z-10" style="top: -150px;">
-    <div class="w-1/2 text-left">
-      <h2 class="text-6xl font-bold mb-2 text-white" style="text-shadow: -1px -1px 0 #2563eb, 1px -1px 0 #2563eb, -1px 1px 0 #2563eb, 1px 1px 0 #2563eb, 2px 2px 4px rgba(0,0,0,0.5);">
-        <span class="title-line block opacity-0 animate-fade-in-up animation-delay-0s">Ứng dụng chuyển đổi số</span>
-        <span class="title-line block opacity-0 animate-fade-in-up animation-delay-1s">trong đào tạo Y Dược</span>
-        <span class="title-line block opacity-0 animate-fade-in-up animation-delay-2s">tại Học viện Quân y</span>
-      </h2>
-    </div>
-  </section>
+  <!-- <section class="flex-grow flex items-center px-8 py-6 relative z-10" style="top: -150px;"> -->
+    <!-- <div class="w-1/2 text-left"> -->
+      <!-- <h2 class="text-6xl font-bold mb-2 text-white" style="text-shadow: -1px -1px 0 #2563eb, 1px -1px 0 #2563eb, -1px 1px 0 #2563eb, 1px 1px 0 #2563eb, 2px 2px 4px rgba(0,0,0,0.5);"> -->
+        <!-- <span class="title-line block opacity-0 animate-fade-in-up animation-delay-0s">Ứng dụng chuyển đổi số</span> -->
+        <!-- <span class="title-line block opacity-0 animate-fade-in-up animation-delay-1s">trong đào tạo Y Dược</span> -->
+        <!-- <span class="title-line block opacity-0 animate-fade-in-up animation-delay-2s">tại Học viện Quân y</span> -->
+      <!-- </h2> -->
+    <!-- </div> -->
+  <!-- </section> -->
   
   <!-- Bottom Sections Container - for proper positioning -->
   <div class="mt-auto px-8 pb-4 flex justify-between relative z-10">
@@ -136,6 +133,11 @@
   <footer class="border-t border-blue-300 pt-3 text-center relative z-10">
     <p class="text-xl text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">&copy; Học viện Quân y - All rights reserved</p>
   </footer>
+
+  <!-- QR Code (Moved to Bottom Left) -->
+  <div class="absolute bottom-20 left-20 bg-white p-3 rounded-lg shadow-md z-20">
+    <img id="register-qr-code" src="" alt="Registration QR Code" class="h-32 w-32 border border-gray-200 bg-gray-50" style="min-width: 200px; min-height: 200px;">
+  </div>
 </div>
 
 <!-- QR Code Script & Animations -->
