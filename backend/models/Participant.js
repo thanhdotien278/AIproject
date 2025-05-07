@@ -14,6 +14,14 @@ const participantSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  position: { // Chức vụ
+    type: String,
+    trim: true
+  },
+  speciality: { // Chuyên ngành
+    type: String,
+    trim: true
+  },
   workunit: {
     type: String,
     trim: true

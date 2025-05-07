@@ -84,6 +84,8 @@ const conferenceSchema = new mongoose.Schema({
       'workunit',
       'rank',
       'academic',
+      'position',
+      'speciality',
       'role',
       'speech',
       'lunch',

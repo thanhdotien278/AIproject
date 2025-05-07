@@ -157,6 +157,20 @@
           </div>
           <% } %>
           
+          <% if (participant && participant.position) { %>
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-1">Chức vụ:</h3>
+            <p class="text-gray-600"><%= participant.position %></p>
+          </div>
+          <% } %>
+          
+          <% if (participant && participant.speciality) { %>
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-1">Chuyên ngành:</h3>
+            <p class="text-gray-600"><%= participant.speciality %></p>
+          </div>
+          <% } %>
+          
           <% if (participant && participant.role) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Vai trò:</h3>
@@ -408,6 +422,12 @@
                     <% if (participant && participant.role) { %>
                     { text: 'Vai trò:\n', bold: true },
                     <% } %>
+                    <% if (participant && participant.position) { %>
+                    { text: 'Chức vụ:\n', bold: true },
+                    <% } %>
+                    <% if (participant && participant.speciality) { %>
+                    { text: 'Chuyên ngành:\n', bold: true },
+                    <% } %>
                     <% if (participant && typeof participant.speech !== 'undefined') { %>
                     { text: 'Có phát biểu:\n', bold: true },
                     <% } %>
@@ -463,6 +483,12 @@
                     <% } %>
                     <% if (participant && participant.role) { %>
                     { text: '<%= participant.role %>\n' },
+                    <% } %>
+                    <% if (participant && participant.position) { %>
+                    { text: '<%= participant.position %>\n' },
+                    <% } %>
+                    <% if (participant && participant.speciality) { %>
+                    { text: '<%= participant.speciality %>\n' },
                     <% } %>
                     <% if (participant && typeof participant.speech !== 'undefined') { %>
                     { text: '<%= participant.speech === true ? "Có" : "Không" %>\n' },

@@ -141,15 +141,136 @@
 
       <!-- Academic -->
       <% if (registrationFields.includes('academic')) { %>
-         <div class="flex items-center space-x-3">
+         <div class="flex items-center space-x-3 relative">
           <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>🎓</span></div>
           <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
             <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
               <div class="font-bold text-sm leading-tight whitespace-nowrap">Học hàm/vị</div>
               <div class="text-xs leading-tight whitespace-nowrap">Academic</div>
             </div>
-            <input type="text" id="academic" name="academic" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Học hàm học vị">
+            <input type="text" id="academic" name="academic" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Chọn học hàm/vị">
             <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+          <!-- Checkbox container -->
+          <div id="academic-checkbox-container" class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3 z-20 hidden" style="margin-left: calc(3rem + 0.75rem); max-width: calc(100% - 3rem - 0.75rem);">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="checkbox" name="academic_option" value="Cử nhân" class="academic-option-cb form-checkbox h-4 w-4 text-blue-600 rounded">
+                <span class="text-sm text-gray-700">Cử nhân</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="checkbox" name="academic_option" value="ThS" class="academic-option-cb form-checkbox h-4 w-4 text-blue-600 rounded">
+                <span class="text-sm text-gray-700">ThS.</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="checkbox" name="academic_option" value="TS" class="academic-option-cb form-checkbox h-4 w-4 text-blue-600 rounded">
+                <span class="text-sm text-gray-700">TS.</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="checkbox" name="academic_option" value="PGS" class="academic-option-cb form-checkbox h-4 w-4 text-blue-600 rounded">
+                <span class="text-sm text-gray-700">PGS.</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="checkbox" name="academic_option" value="GS" class="academic-option-cb form-checkbox h-4 w-4 text-blue-600 rounded">
+                <span class="text-sm text-gray-700">GS.</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="checkbox" name="academic_option" value="Khác" class="academic-option-cb form-checkbox h-4 w-4 text-blue-600 rounded">
+                <span class="text-sm text-gray-700">Khác</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Position -->
+      <% if (registrationFields.includes('position')) { %>
+        <div class="flex items-center space-x-3 relative">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>👔</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Chức vụ</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Position</div>
+            </div>
+            <input type="text" id="position" name="position" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Chọn hoặc nhập chức vụ">
+            <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+          <!-- Position Checkbox container -->
+          <div id="position-checkbox-container" class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3 z-20 hidden" style="margin-left: calc(3rem + 0.75rem); max-width: calc(100% - 3rem - 0.75rem);">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="position_option" value="GĐ" class="position-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">GĐ</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="position_option" value="PGĐ" class="position-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">PGĐ</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="position_option" value="CNK" class="position-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">CNK</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="position_option" value="PCNK" class="position-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">PCNK</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="position_option" value="CNBM" class="position-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">CNBM</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="position_option" value="PCNBM" class="position-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">PCNBM</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="position_option" value="Giảng viên" class="position-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">Giảng viên</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="position_option" value="Khác" class="position-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">Khác</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Speciality -->
+      <% if (registrationFields.includes('speciality')) { %>
+        <div class="flex items-center space-x-3 relative">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>🔬</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Chuyên ngành</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Speciality</div>
+            </div>
+            <input type="text" id="speciality" name="speciality" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Chọn hoặc nhập chuyên ngành">
+            <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+           <!-- Speciality Radiobutton container -->
+          <div id="speciality-radio-container" class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3 z-20 hidden" style="margin-left: calc(3rem + 0.75rem); max-width: calc(100% - 3rem - 0.75rem);">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="speciality_option" value="Chuyên gia giáo dục" class="speciality-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">Chuyên gia giáo dục</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="speciality_option" value="Quản lý" class="speciality-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">Quản lý</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="speciality_option" value="GV Y học sức khỏe" class="speciality-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">GV Y học sức khỏe</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="speciality_option" value="CNTT" class="speciality-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">CNTT</span>
+              </label>
+              <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                <input type="radio" name="speciality_option" value="AI" class="speciality-option-rb form-radio h-4 w-4 text-blue-600">
+                <span class="text-sm text-gray-700">AI</span>
+              </label>
+            </div>
           </div>
         </div>
       <% } %>
@@ -419,6 +540,128 @@
         alertDiv.remove();
       }, 7000); // Increased timeout
     }
+
+    // Academic field with checkboxes logic
+    const academicInput = document.getElementById('academic');
+    const academicCheckboxContainer = document.getElementById('academic-checkbox-container');
+    const academicOptionCheckboxes = document.querySelectorAll('.academic-option-cb');
+    let academicBlurTimeout;
+
+    if (academicInput && academicCheckboxContainer) {
+      academicInput.addEventListener('focus', () => {
+        clearTimeout(academicBlurTimeout); // Clear any pending blur timeout
+        academicCheckboxContainer.classList.remove('hidden');
+      });
+
+      academicInput.addEventListener('blur', () => {
+        // Delay hiding to allow clicks on checkboxes
+        academicBlurTimeout = setTimeout(() => {
+          academicCheckboxContainer.classList.add('hidden');
+        }, 200); // 200ms delay
+      });
+
+      // Prevent blur from hiding container if click is inside container
+      academicCheckboxContainer.addEventListener('mousedown', (event) => {
+        event.preventDefault(); // Prevent input from losing focus
+      });
+
+      academicOptionCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          const selectedValues = [];
+          academicOptionCheckboxes.forEach(cb => {
+            if (cb.checked) {
+              selectedValues.push(cb.value);
+            }
+          });
+          academicInput.value = selectedValues.join(', ');
+        });
+      });
+    }
+
+    // Position field with radio button options logic
+    const positionInput = document.getElementById('position');
+    const positionCheckboxContainer = document.getElementById('position-checkbox-container');
+    const positionOptionRadioButtons = document.querySelectorAll('.position-option-rb');
+    let positionBlurTimeout;
+
+    if (positionInput && positionCheckboxContainer) {
+      positionInput.addEventListener('focus', () => {
+        clearTimeout(positionBlurTimeout); // Clear any pending blur timeout
+        positionCheckboxContainer.classList.remove('hidden');
+      });
+
+      positionInput.addEventListener('blur', () => {
+        // Delay hiding to allow clicks on radio buttons
+        positionBlurTimeout = setTimeout(() => {
+          positionCheckboxContainer.classList.add('hidden');
+        }, 200); // 200ms delay
+      });
+
+      // Prevent blur from hiding container if click is inside container
+      positionCheckboxContainer.addEventListener('mousedown', (event) => {
+        event.preventDefault(); // Prevent input from losing focus
+      });
+
+      positionOptionRadioButtons.forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.checked) {
+            positionInput.value = radio.value;
+            // Optionally hide after selection, or keep it open until blur
+            // positionCheckboxContainer.classList.add('hidden'); 
+          }
+        });
+      });
+      
+      // If user types in the input, uncheck radio buttons
+      positionInput.addEventListener('input', () => {
+        positionOptionRadioButtons.forEach(radio => {
+            radio.checked = false;
+        });
+      });
+    }
+
+    // Speciality field with radio button options logic
+    const specialityInput = document.getElementById('speciality');
+    const specialityRadioContainer = document.getElementById('speciality-radio-container');
+    const specialityOptionRadioButtons = document.querySelectorAll('.speciality-option-rb');
+    let specialityBlurTimeout;
+
+    if (specialityInput && specialityRadioContainer) {
+      specialityInput.addEventListener('focus', () => {
+        clearTimeout(specialityBlurTimeout); // Clear any pending blur timeout
+        specialityRadioContainer.classList.remove('hidden');
+      });
+
+      specialityInput.addEventListener('blur', () => {
+        // Delay hiding to allow clicks on radio buttons
+        specialityBlurTimeout = setTimeout(() => {
+          specialityRadioContainer.classList.add('hidden');
+        }, 200); // 200ms delay
+      });
+
+      // Prevent blur from hiding container if click is inside container
+      specialityRadioContainer.addEventListener('mousedown', (event) => {
+        event.preventDefault(); // Prevent input from losing focus
+      });
+
+      specialityOptionRadioButtons.forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.checked) {
+            specialityInput.value = radio.value;
+            // Optionally hide after selection, or keep it open until blur
+            // specialityRadioContainer.classList.add('hidden'); 
+          }
+        });
+      });
+      
+      // If user types in the input, uncheck radio buttons
+      specialityInput.addEventListener('input', () => {
+        specialityOptionRadioButtons.forEach(radio => {
+            radio.checked = false;
+        });
+      });
+    }
+
   });
 </script>
 

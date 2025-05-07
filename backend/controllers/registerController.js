@@ -120,7 +120,9 @@ exports.registerParticipant = async (req, res) => {
     if (registrationFields.includes('address')) participantData.address = req.body.address;
     if (registrationFields.includes('age')) participantData.age = req.body.age;
     if (registrationFields.includes('business')) participantData.business = req.body.business;
-    if (registrationFields.includes('lunch')) participantData.lunch = req.body.lunch;
+    if (registrationFields.includes('position')) participantData.position = req.body.position;
+    if (registrationFields.includes('speciality')) participantData.speciality = req.body.speciality;
+    // if (registrationFields.includes('lunch')) participantData.lunch = req.body.lunch;
     if (registrationFields.includes('source')) participantData.source = req.body.source;
     if (registrationFields.includes('nationality')) participantData.nationality = req.body.nationality;
     if (registrationFields.includes('workunit')) participantData.workunit = req.body.workunit;
@@ -155,12 +157,14 @@ exports.registerParticipant = async (req, res) => {
           <li>Email: ${req.body.email}</li>
           <li>Phone: ${req.body.phone}</li>
           ${participantData.workunit ? `<li>Work Unit: ${participantData.workunit}</li>` : ''}
+          ${participantData.rank ? `<li>Rank: ${participantData.rank}</li>` : ''}
+          ${participantData.academic ? `<li>Academic: ${participantData.academic}</li>` : ''}
+          ${participantData.position ? `<li>Position: ${participantData.position}</li>` : ''}
+          ${participantData.speciality ? `<li>Speciality: ${participantData.speciality}</li>` : ''}
           ${participantData.address ? `<li>Address: ${participantData.address}</li>` : ''}
           ${participantData.age ? `<li>Age: ${participantData.age}</li>` : ''}
           ${participantData.business ? `<li>Business: ${participantData.business}</li>` : ''}
           ${participantData.nationality ? `<li>Nationality: ${participantData.nationality}</li>` : ''}
-          ${participantData.rank ? `<li>Rank: ${participantData.rank}</li>` : ''}
-          ${participantData.academic ? `<li>Academic: ${participantData.academic}</li>` : ''}
           ${participantData.role ? `<li>Role: ${participantData.role}</li>` : ''}
           ${participantData.speech ? `<li>Will give speech: Yes</li>` : typeof participantData.speech !== 'undefined' ? `<li>Will give speech: No</li>` : ''}
           ${participantData.lunch ? `<li>Will have lunch: Yes</li>` : typeof participantData.lunch !== 'undefined' ? `<li>Will have lunch: No</li>` : ''}
