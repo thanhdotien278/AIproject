@@ -34,11 +34,11 @@
           
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Thời gian:</h3>
-            <p class="text-gray-600"><%= conference ? conference.time : "---" %></p>
+            <p class="text-gray-600"><%= conference && conference.time ? conference.time : '---' %></p>
           </div>
           
           <div>
-            <h3 class="font-semibold text-gray-700 mb-1">Ngày:</h3>
+            <h3 class="font-semibold text-gray-700 mb-1">Ngày kết thúc:</h3>
             <p class="text-gray-600"><%= formattedDates || '---' %></p>
           </div>
           
@@ -309,235 +309,132 @@
         const docDefinition = {
           content: [
             {
-              text: '<%= conference ? conference.name : "Hội Nghị" %>',
-              style: 'header',
+              text: `PHIẾU THAM DỰ / INVITATION TICKET`,
+              style: "header",
+              alignment: "center",
+              margin: [0, 0, 0, 20],
+            },
+            {
+              canvas: [
+                {
+                  type: "rect",
+                  x: 0,
+                  y: 0,
+                  w: 515,
+                  h: 130, // Adjusted height for more content
+                  r: 5,
+                  lineColor: "#4A90E2",
+                  lineWidth: 1,
+                },
+              ],
+              absolutePosition: { x: 40, y: 70 },
+            },
+            {
+              columns: [
+                {
+                  width: "*",
+                  stack: [
+                    { text: 'THÔNG TIN NGƯỜI THAM DỰ / ATTENDEE INFORMATION', style: 'subheader', margin: [ 0, 0, 0, 10] },
+                    {
+                      columns: [
+                          { text: 'Họ tên:', style: 'fieldLabel', width: 'auto' },
+                          { text: `<%= participant ? participant.name : participantName || "---" %>`, style: 'fieldValue', width: 'auto'  }
+                      ]
+                    },
+                    {
+                      columns: [
+                          { text: 'Email:', style: 'fieldLabel', width: 'auto' },
+                          { text: `<%= participant ? participant.email : participantEmail || "---" %>`, style: 'fieldValue', width: 'auto' }
+                      ]
+                    },
+                    <% if (participant && participant.phone) { %>
+                    {
+                      columns: [
+                          { text: 'Điện thoại:', style: 'fieldLabel', width: 'auto' },
+                          { text: `<%= participant.phone %>`, style: 'fieldValue', width: 'auto' }
+                      ]
+                    },
+                    <% } %>
+                    <% if (participant && participant.workunit) { %>
+                    {
+                      columns: [
+                          { text: 'Đơn vị:', style: 'fieldLabel', width: 'auto' },
+                          { text: `<%= participant.workunit %>`, style: 'fieldValue', width: 'auto' }
+                      ]
+                    },
+                    <% } %>
+                  ],
+                },
+                {
+                  width: 100,
+                  qr: `CONF:<%= conference ? conference.code : 'N/A' %>;ID:<%= participant ? participant.id : 'N/A' %>;NAME:<%= participant ? participant.name : 'N/A' %>`,
+                  fit: "100",
+                  alignment: "right",
+                },
+              ],
+              margin: [15, 15, 15, 15], // Inner padding for the box
+              absolutePosition: { x: 50, y: 80 },
+            },
+            
+            {
+              text: "CHI TIẾT SỰ KIỆN / EVENT DETAILS",
+              style: "subheader",
+              alignment: "center",
+              margin: [0, 15, 0, 10], // y: 70 (box start) + 130 (box height) + 20 (spacing)
+              absolutePosition: { x: 40, y: 220 }
+            },
+            {
+              style: 'eventDetails',
+              table: {
+                  widths: ['*'], // Single column for now
+                  body: [
+                      [
+                          {
+                              stack: [
+                                  { text: 'Tên hội nghị:', style: 'fieldLabel' },
+                                  { text: `<%= conference ? conference.name : "Hội Nghị" %>`, style: 'fieldValue' },
+                                  { text: 'Ngày bắt đầu:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
+                                  { text: `<%= conference && conference.startDate ? new Date(conference.startDate).toLocaleDateString("vi-VN", {year: "numeric", month: "long", day: "numeric"}) : "---" %>`, style: 'fieldValue' },
+                                  { text: 'Thời gian:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
+                                  { text: `<%= conference && conference.time ? conference.time : "---" %>`, style: 'fieldValue' },
+                                  { text: 'Địa điểm:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
+                                  { text: `<%= locationName || "---" %>`, style: 'fieldValue' },
+                                  // { text: 'Địa chỉ:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
+                                  // { text: `<%= locationAddress || "---" %>`, style: 'fieldValue' }, // Keep this commented or provide data
+                                   <% if (conference && conference.mainSpeaker) { %>
+                                  { text: 'Diễn giả chính:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
+                                  { text: `<%= conference.mainSpeaker %>`, style: 'fieldValue' },
+                                  <% } %>
+                              ],
+                              border: [false, false, false, false],
+                              margin: [0,0,0,10]
+                          }
+                      ]
+                  ]
+              },
+              layout: 'noBorders',
+              absolutePosition: { x: 40, y: 250 }, // Adjust Y as needed
+          },
+          
+            {
+              text: "Trân trọng cảm ơn sự tham gia của quý vị!",
+              style: "thankYouNote",
+              alignment: "center",
+              margin: [0, 20, 0, 0],
+              absolutePosition: { x: 40, y: 400 } // Adjust Y position based on content above
+            },
+            {
+              columns: [
+                  { qr: '<%= JSON.stringify(qrData) %>', fit: '80', alignment: 'center', margin: [0, 5, 0, 0] },
+              ],
+              absolutePosition: { x: 40, y: 430 }, // Adjust Y position based on content above
               alignment: 'center'
             },
             {
-              text: 'Đăng Ký Thành Công!',
-              style: 'subheader',
+              text: `Mã đăng ký: <%= conference ? conference.code : 'CONF' %>-<%= participant ? String(participant.registrationNumber).padStart(4, '0') : '0000' %>`,
+              style: 'registrationId', 
               alignment: 'center',
-              margin: [0, 10, 0, 0]
-            },
-            {
-              text: `Cảm ơn ${participantName} đã đăng ký.`,
-              style: 'subheader',
-              alignment: 'center',
-              margin: [0, 5, 0, 10]
-            },
-            {
-              canvas: [{ type: 'line', x1: 40, y1: 0, x2: 555, y2: 0, lineWidth: 0.5 }],
-              margin: [0, 10, 0, 10]
-            },
-            {
-              text: 'Chi Tiết Sự Kiện',
-              style: 'sectionHeader',
-              alignment: 'center',
-              margin: [0, 10, 0, 10]
-            },
-            {
-              columns: [
-                {
-                  width: '40%',
-                  text: [
-                    { text: 'Tên hội nghị:\n', bold: true },
-                    { text: 'Ngày:\n', bold: true },
-                    { text: 'Thời gian:\n', bold: true },
-                    { text: 'Địa điểm:\n', bold: true },
-                    { text: 'Địa chỉ:\n', bold: true },
-                    <% if (conference && conference.mainSpeaker) { %>
-                    { text: 'Diễn giả chính:\n', bold: true },
-                    <% } %>
-                    <% if (conference && conference.contactName) { %>
-                    { text: 'Liên hệ:\n', bold: true },
-                    <% } %>
-                    <% if (conference && conference.contactPhone) { %>
-                    { text: 'SĐT liên hệ:\n', bold: true },
-                    <% } %>
-                  ]
-                },
-                {
-                  width: '60%',
-                  text: [
-                    { text: '<%= conference ? conference.name : "Hội Nghị" %>\n' },
-                    { text: '<%= formattedDates || "---" %>\n' },
-                    { text: '<%= conference ? conference.time : "---" %>\n' },
-                    { text: '<%= locationName || "---" %>\n' },
-                    { text: '<%= locationAddress || "---" %>\n' },
-                    <% if (conference && conference.mainSpeaker) { %>
-                    { text: '<%= conference.mainSpeaker %>\n' },
-                    <% } %>
-                    <% if (conference && conference.contactName) { %>
-                    { text: '<%= conference.contactName %>\n' },
-                    <% } %>
-                    <% if (conference && conference.contactPhone) { %>
-                    { text: '<%= conference.contactPhone %>\n' },
-                    <% } %>
-                  ]
-                }
-              ],
-              margin: [0, 0, 0, 20]
-            },
-            {
-              canvas: [{ type: 'line', x1: 40, y1: 0, x2: 555, y2: 0, lineWidth: 0.5 }],
-              margin: [0, 10, 0, 10]
-            },
-            {
-              text: 'Thông Tin Đăng Ký',
-              style: 'sectionHeader',
-              alignment: 'center',
-              margin: [0, 10, 0, 10]
-            },
-            {
-              columns: [
-                {
-                  width: '40%',
-                  text: [
-                    { text: 'Họ và tên:\n', bold: true },
-                    { text: 'Email:\n', bold: true },
-                    <% if (participant && participant.phone) { %>
-                    { text: 'Số điện thoại:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.workunit) { %>
-                    { text: 'Đơn vị công tác:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.address) { %>
-                    { text: 'Địa chỉ:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.age) { %>
-                    { text: 'Tuổi:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.business) { %>
-                    { text: 'Lĩnh vực kinh doanh:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.nationality) { %>
-                    { text: 'Quốc tịch:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.rank) { %>
-                    { text: 'Cấp bậc:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.academic) { %>
-                    { text: 'Học hàm học vị:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.role) { %>
-                    { text: 'Vai trò:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.position) { %>
-                    { text: 'Chức vụ:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.speciality) { %>
-                    { text: 'Chuyên ngành:\n', bold: true },
-                    <% } %>
-                    <% if (participant && typeof participant.speech !== 'undefined') { %>
-                    { text: 'Có phát biểu:\n', bold: true },
-                    <% } %>
-                    <% if (participant && typeof participant.lunch !== 'undefined') { %>
-                    { text: 'Ăn trưa:\n', bold: true },
-                    <% } %>
-                    <% if (participant && typeof participant.dinner !== 'undefined') { %>
-                    { text: 'Ăn tối:\n', bold: true },
-                    <% } %>
-                    <% if (participant && typeof participant.transport !== 'undefined') { %>
-                    { text: 'Đăng ký theo xe về học viện:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.source) { %>
-                    { text: 'Nguồn thông tin:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.feedback) { %>
-                    { text: 'Góp ý về công tác tổ chức:\n', bold: true },
-                    <% } %>
-                    <% if (participant && participant.questions) { %>
-                    { text: 'Câu hỏi:\n', bold: true },
-                    <% } %>
-                    { text: 'Ngày đăng ký:\n', bold: true }
-                  ]
-                },
-                {
-                  width: '60%',
-                  text: [
-                    { text: '<%= participant ? participant.name : participantName || "---" %>\n' },
-                    { text: '<%= participant ? participant.email : participantEmail || "---" %>\n' },
-                    <% if (participant && participant.phone) { %>
-                    { text: '<%= participant.phone %>\n' },
-                    <% } %>
-                    <% if (participant && participant.workunit) { %>
-                    { text: '<%= participant.workunit %>\n' },
-                    <% } %>
-                    <% if (participant && participant.address) { %>
-                    { text: '<%= participant.address %>\n' },
-                    <% } %>
-                    <% if (participant && participant.age) { %>
-                    { text: '<%= participant.age %>\n' },
-                    <% } %>
-                    <% if (participant && participant.business) { %>
-                    { text: '<%= participant.business %>\n' },
-                    <% } %>
-                    <% if (participant && participant.nationality) { %>
-                    { text: '<%= participant.nationality %>\n' },
-                    <% } %>
-                    <% if (participant && participant.rank) { %>
-                    { text: '<%= participant.rank %>\n' },
-                    <% } %>
-                    <% if (participant && participant.academic) { %>
-                    { text: '<%= participant.academic %>\n' },
-                    <% } %>
-                    <% if (participant && participant.role) { %>
-                    { text: '<%= participant.role %>\n' },
-                    <% } %>
-                    <% if (participant && participant.position) { %>
-                    { text: '<%= participant.position %>\n' },
-                    <% } %>
-                    <% if (participant && participant.speciality) { %>
-                    { text: '<%= participant.speciality %>\n' },
-                    <% } %>
-                    <% if (participant && typeof participant.speech !== 'undefined') { %>
-                    { text: '<%= participant.speech === true ? "Có" : "Không" %>\n' },
-                    <% } %>
-                    <% if (participant && typeof participant.lunch !== 'undefined') { %>
-                    { text: '<%= participant.lunch === true ? "Có" : "Không" %>\n' },
-                    <% } %>
-                    <% if (participant && typeof participant.dinner !== 'undefined') { %>
-                    { text: '<%= participant.dinner === true ? "Có" : "Không" %>\n' },
-                    <% } %>
-                    <% if (participant && typeof participant.transport !== 'undefined') { %>
-                    { text: '<%= participant.transport === true ? "Có" : "Không" %>\n' },
-                    <% } %>
-                    <% if (participant && participant.source) { %>
-                    { text: '<%= participant.source %>\n' },
-                    <% } %>
-                    <% if (participant && participant.feedback) { %>
-                    { text: '<%= participant.feedback %>\n' },
-                    <% } %>
-                    <% if (participant && participant.questions) { %>
-                    { text: '<%= participant.questions %>\n' },
-                    <% } %>
-                    { text: '<%= participant && participant.registrationDate ? new Date(participant.registrationDate).toLocaleDateString("vi-VN", {year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"}) : new Date().toLocaleDateString("vi-VN", {year: "numeric", month: "long", day: "numeric"}) %>\n' }
-                  ]
-                }
-              ],
-              margin: [0, 0, 0, 20]
-            },
-            {
-              canvas: [{ type: 'line', x1: 40, y1: 0, x2: 555, y2: 0, lineWidth: 0.5 }],
-              margin: [0, 10, 0, 10]
-            },
-            {
-              text: 'Vui lòng lưu lại xác nhận này để tham khảo sau này.',
-              style: 'footer',
-              alignment: 'center',
-              margin: [0, 10, 0, 5]
-            },
-            {
-              text: 'Chúng tôi mong đợi được gặp bạn tại <%= conference ? conference.name : "Hội Nghị" %>!',
-              style: 'footer',
-              alignment: 'center',
-              margin: [0, 5, 0, 5]
-            },
-            {
-              text: 'Mọi thắc mắc, liên hệ: <%= conference && conference.contactEmail ? conference.contactEmail : "thanhdt@vmmu.edu.vn" %>',
-              style: 'footer',
-              alignment: 'center',
-              margin: [0, 5, 0, 0]
+              absolutePosition: { x: 40, y: 520 } // Adjust Y based on QR code
             }
           ],
           styles: {
@@ -550,14 +447,21 @@
               fontSize: 16,
               bold: true
             },
-            sectionHeader: {
-              fontSize: 18,
+            fieldLabel: {
+              fontSize: 12,
+              bold: true
+            },
+            fieldValue: {
+              fontSize: 12
+            },
+            thankYouNote: {
+              fontSize: 14,
               bold: true,
               color: '#0056b3'
             },
-            footer: {
-              fontSize: 11,
-              color: '#666666'
+            registrationId: {
+              fontSize: 12,
+              bold: true
             }
           },
           defaultStyle: {

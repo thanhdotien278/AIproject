@@ -196,6 +196,12 @@ app.get('/thankyou', async (req, res) => {
     const locationName = conference.location ? conference.location.name : 'Sẽ được thông báo sau';
     const locationAddress = conference.location ? conference.location.address : '';
     
+    const qrDataForPdf = {
+      conferenceCode: conference ? conference.code : (conferenceCode || 'N/A'),
+      participantId: participant ? (participant.id || participant._id) : (participantData ? (participantData.id || participantData._id) : 'N/A'),
+      participantName: participant ? participant.name : (participantName || 'N/A')
+    };
+
     res.render('thankyou', { 
       participantName,
       participantEmail,
@@ -203,7 +209,8 @@ app.get('/thankyou', async (req, res) => {
       conference,
       formattedDates,
       locationName,
-      locationAddress
+      locationAddress,
+      qrData: qrDataForPdf
     });
   } catch (error) {
     console.error('Error rendering thank you page:', error);
@@ -214,6 +221,12 @@ app.get('/thankyou', async (req, res) => {
     const conferenceCode = req.session.conferenceCode;
     const participantData = req.session.participantData;
   
+  const fallbackQrData = {
+    conferenceCode: conferenceCode || 'N/A',
+    participantId: 'N/A',
+    participantName: participantName || 'N/A'
+  };
+
   res.render('thankyou', { 
     participantName,
       participantEmail,
@@ -221,7 +234,8 @@ app.get('/thankyou', async (req, res) => {
       conference: { name: conferenceName || 'Hội Nghị', code: conferenceCode },
       formattedDates: null,
       locationName: null,
-      locationAddress: null
+      locationAddress: null,
+      qrData: fallbackQrData
   });
   }
 });
