@@ -144,6 +144,13 @@ exports.registerParticipant = async (req, res) => {
     // Save participant to database
     await participant.save();
 
+    // Set the exact registration completion time
+    participant.registrationTime = new Date();
+    // Save again to store the registrationTime (or update if save() returns the doc)
+    // Note: participant.save() might return the updated doc, check mongoose docs if needed
+    // For simplicity, we save again. Alternatively, set it before the first save if that's acceptable.
+    await participant.save();
+
     // Prepare attachments
     const attachments = [];
     const downloadsPath = path.join(__dirname, '../../frontend/public/downloads');

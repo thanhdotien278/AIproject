@@ -102,6 +102,9 @@ const participantSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  registrationTime: {
+    type: Date
+  },
   emailSent: {
     type: Boolean,
     default: false

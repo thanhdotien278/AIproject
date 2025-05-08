@@ -74,9 +74,17 @@ exports.showDashboard = async (req, res) => {
     
     // Calculate participant statistics
     const totalParticipants = participants.length;
-    const inPersonCount = participants.filter(p => p.attendanceType === 'in-person').length;
-    const virtualCount = participants.filter(p => p.attendanceType === 'virtual').length;
+    // Remove old attendance stats
+    // const inPersonCount = participants.filter(p => p.attendanceType === 'in-person').length;
+    // const virtualCount = participants.filter(p => p.attendanceType === 'virtual').length;
     const emailSentCount = participants.filter(p => p.emailSent).length;
+
+    // Calculate new stats
+    const lunchCount = participants.filter(p => p.lunch === true).length;
+    const dinnerCount = participants.filter(p => p.dinner === true).length;
+    const transportCount = participants.filter(p => p.transport === true).length;
+    const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
+    const donViNgoaiCount = totalParticipants - hocVienCount;
     
     // Group participants by organization
     const organizationCounts = {};
@@ -99,10 +107,17 @@ exports.showDashboard = async (req, res) => {
       currentPath: '/admin/dashboard',
       stats: {
         totalParticipants,
-        inPersonCount,
-        virtualCount,
-        emailSentCount,
-        topOrganizations
+        // Remove old attendance stats
+        // inPersonCount,
+        // virtualCount,
+        emailSentCount, // Keep email sent count
+        // Add new stats
+        lunchCount,
+        dinnerCount,
+        transportCount,
+        hocVienCount,
+        donViNgoaiCount,
+        topOrganizations // Keep top orgs for now
       }
     });
   } catch (error) {

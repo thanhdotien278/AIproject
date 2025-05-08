@@ -59,13 +59,13 @@
 </div>
 
 <!-- Dashboard Stats -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
   <!-- Total Registrations -->
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-gray-500 text-sm">Total Registrations</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="total-registrations"><%= participants.length %></h2>
+        <h2 class="text-3xl font-bold text-gray-800" id="total-registrations"><%= stats.totalParticipants %></h2>
       </div>
       <div class="bg-blue-100 p-3 rounded-full">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,35 +75,71 @@
     </div>
   </div>
   
-  <!-- Attending -->
+  <!-- Lunch -->
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Attending</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="attending-count"><%= participants.filter(p => p.attendance === true).length || 0 %></h2>
+        <p class="text-gray-500 text-sm">Lunch Registrations</p>
+        <h2 class="text-3xl font-bold text-gray-800" id="lunch-count"><%= stats.lunchCount %></h2>
       </div>
-      <div class="bg-green-100 p-3 rounded-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+      <div class="bg-yellow-100 p-3 rounded-full">
+        <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> 
       </div>
     </div>
   </div>
   
-  <!-- Absence -->
+  <!-- Dinner -->
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Absence</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="absence-count"><%= participants.filter(p => p.attendance === false).length || participants.length %></h2>
+        <p class="text-gray-500 text-sm">Dinner Registrations</p>
+        <h2 class="text-3xl font-bold text-gray-800" id="dinner-count"><%= stats.dinnerCount %></h2>
       </div>
-      <div class="bg-red-100 p-3 rounded-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+      <div class="bg-indigo-100 p-3 rounded-full">
+        <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
       </div>
     </div>
   </div>
+  
+  <!-- Transport -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-gray-500 text-sm">Transport Registrations</p>
+        <h2 class="text-3xl font-bold text-gray-800" id="transport-count"><%= stats.transportCount %></h2>
+      </div>
+      <div class="bg-pink-100 p-3 rounded-full">
+       <svg class="h-6 w-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
+      </div>
+    </div>
+  </div>
+
+  <!-- Hoc Vien -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-gray-500 text-sm">Học viện Registrations</p>
+        <h2 class="text-3xl font-bold text-gray-800" id="hocvien-count"><%= stats.hocVienCount %></h2>
+      </div>
+      <div class="bg-teal-100 p-3 rounded-full">
+         <svg class="h-6 w-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Don Vi Ngoai -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-gray-500 text-sm">Đơn vị ngoài Registrations</p>
+        <h2 class="text-3xl font-bold text-gray-800" id="donvingoai-count"><%= stats.donViNgoaiCount %></h2>
+      </div>
+      <div class="bg-purple-100 p-3 rounded-full">
+        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Action Buttons -->
@@ -136,12 +172,12 @@
 </div>
 
 <!-- Registered Participants Table -->
-<div class="bg-white rounded-lg shadow overflow-hidden">
+<div class="bg-white rounded-lg shadow">
   <div class="px-6 py-4 border-b border-gray-200">
     <h3 class="text-lg font-semibold text-gray-800">Registered Participants</h3>
   </div>
   
-  <div class="overflow-x-auto">
+  <div>
     <% if (participants.length === 0) { %>
       <div class="p-6 text-center text-gray-500">
         <p>No participants registered yet.</p>
@@ -154,10 +190,10 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nationality</th>
+            <%/* <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th> */%>
+            <%/* <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th> */%>
+            <%/* <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th> */%>
+            <%/* <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nationality</th> */%>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Unit</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic</th>
@@ -168,8 +204,7 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transport</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feedback</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered At</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reg. Time</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email Sent</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -195,18 +230,18 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= participant.phone || '-' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.address || '-' %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.age || '-' %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.business || '-' %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.nationality || '-' %>
-              </td>
+              <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
+                <%/*= participant.address || '-' */%>
+              <%/* </td> */%>
+              <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
+                <%/*= participant.age || '-' */%>
+              <%/* </td> */%>
+              <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
+                <%/*= participant.business || '-' */%>
+              <%/* </td> */%>
+              <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
+                <%/*= participant.nationality || '-' */%>
+              <%/* </td> */%>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= participant.workunit || '-' %>
               </td>
@@ -238,10 +273,8 @@
                 <%= participant.questions || '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.source || '-' %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.createdAt ? new Date(participant.createdAt).toLocaleString() : '-' %>
+                <%# Format registrationTime. Adjust locale and options as needed %>
+                <%= participant.registrationTime ? new Date(participant.registrationTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <% if (participant.attendance) { %>
@@ -520,8 +553,11 @@
     const confLocation = document.getElementById('conf-location');
     const confTime = document.getElementById('conf-time');
     const totalRegistrations = document.getElementById('total-registrations');
-    const attendingCount = document.getElementById('attending-count');
-    const absenceCount = document.getElementById('absence-count');
+    const lunchCount = document.getElementById('lunch-count');
+    const dinnerCount = document.getElementById('dinner-count');
+    const transportCount = document.getElementById('transport-count');
+    const hocVienCount = document.getElementById('hocvien-count');
+    const donViNgoaiCount = document.getElementById('donvingoai-count');
     const participantsTableBody = document.getElementById('participants-table-body');
     
     // Store conferences data for client-side access
@@ -612,8 +648,14 @@
       
       // Update stats
       totalRegistrations.textContent = filteredParticipants.length;
-      attendingCount.textContent = filteredParticipants.filter(p => p.attendance).length;
-      absenceCount.textContent = filteredParticipants.filter(p => !p.attendance).length;
+      lunchCount.textContent = filteredParticipants.filter(p => p.lunch).length;
+      dinnerCount.textContent = filteredParticipants.filter(p => p.dinner).length;
+      transportCount.textContent = filteredParticipants.filter(p => p.transport).length;
+      hocVienCount.textContent = filteredParticipants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
+      
+      // Calculate donViNgoaiCount based on the new hocVienCount for the filtered set
+      const currentHocVienCount = filteredParticipants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
+      donViNgoaiCount.textContent = filteredParticipants.length - currentHocVienCount;
       
       // Update conference info
       if (conferenceCode !== 'all') {
