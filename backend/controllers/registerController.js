@@ -1,7 +1,7 @@
 const Participant = require('../models/Participant');
 const Conference = require('../models/Conference');
 const nodemailer = require('nodemailer');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
 // Configure nodemailer
@@ -115,7 +115,8 @@ exports.registerParticipant = async (req, res) => {
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
-      conferenceCode: confCode
+      conferenceCode: confCode,
+      registrationTime: new Date()
     };
     
     // Add other fields if they are in registrationFields
@@ -124,7 +125,6 @@ exports.registerParticipant = async (req, res) => {
     if (registrationFields.includes('business')) participantData.business = req.body.business;
     if (registrationFields.includes('position')) participantData.position = req.body.position;
     if (registrationFields.includes('speciality')) participantData.speciality = req.body.speciality;
-    // if (registrationFields.includes('lunch')) participantData.lunch = req.body.lunch;
     if (registrationFields.includes('source')) participantData.source = req.body.source;
     if (registrationFields.includes('nationality')) participantData.nationality = req.body.nationality;
     if (registrationFields.includes('workunit')) participantData.workunit = req.body.workunit;
@@ -141,34 +141,26 @@ exports.registerParticipant = async (req, res) => {
     // Create new participant
     const participant = new Participant(participantData);
     
-    // Save participant to database
+    // Save participant to database (only once for initial data + registrationTime)
     await participant.save();
 
-    // Set the exact registration completion time
-    participant.registrationTime = new Date();
-    // Save again to store the registrationTime (or update if save() returns the doc)
-    // Note: participant.save() might return the updated doc, check mongoose docs if needed
-    // For simplicity, we save again. Alternatively, set it before the first save if that's acceptable.
-    await participant.save();
-
-    // Prepare attachments
+    // Prepare attachments asynchronously
     const attachments = [];
     const downloadsPath = path.join(__dirname, '../../frontend/public/downloads');
     try {
-      if (fs.existsSync(downloadsPath)) {
-        const files = fs.readdirSync(downloadsPath);
-        files.forEach(file => {
-          if (file !== '.gitignore') { // Optional: exclude .gitignore or other specific files
-            attachments.push({
-              filename: file,
-              path: path.join(downloadsPath, file)
-            });
-          }
-        });
-      }
+      const files = await fs.readdir(downloadsPath);
+      files.forEach(file => {
+        if (file !== '.gitignore') {
+          attachments.push({
+            filename: file,
+            path: path.join(downloadsPath, file)
+          });
+        }
+      });
     } catch (attachError) {
-      console.error('Error reading attachments directory:', attachError);
-      // Proceed without attachments if there's an error
+      if (attachError.code !== 'ENOENT') {
+        console.error('Error reading attachments directory:', attachError);
+      }
     }
 
     // Send confirmation email
@@ -216,7 +208,6 @@ exports.registerParticipant = async (req, res) => {
         await participant.save();
       } catch (emailError) {
         console.error('Error sending email:', emailError);
-        // Continue with registration even if email fails
       }
     }
     
@@ -233,6 +224,9 @@ exports.registerParticipant = async (req, res) => {
       message: 'Registration successful',
       redirectUrl: '/thankyou'
     });
+
+    // After sending response, update and emit stats (fire and forget)
+    calculateAndEmitStats();
     
   } catch (error) {
     console.error('Registration error:', error);
@@ -241,4 +235,87 @@ exports.registerParticipant = async (req, res) => {
       message: 'An error occurred during registration' 
     });
   }
-}; 
+};
+
+// Show public statistics page
+exports.showPublicStatsPage = async (req, res) => {
+  try {
+    // Fetch all conferences for the dropdown
+    const allConferences = await Conference.find().sort({ name: 1 }).select('code name');
+
+    const selectedConferenceCode = req.query.conferenceCode;
+    let participants;
+    let conferenceNameForTitle = "Tất cả Hội nghị";
+
+    if (selectedConferenceCode && selectedConferenceCode !== 'all') {
+      participants = await Participant.find({ conferenceCode: selectedConferenceCode });
+      const selectedConf = allConferences.find(c => c.code === selectedConferenceCode);
+      if (selectedConf) {
+        conferenceNameForTitle = selectedConf.name;
+      }
+    } else {
+      // Fetch all participants if 'all' or no specific code is selected
+      participants = await Participant.find();
+    }
+
+    // Calculate statistics based on the fetched participants
+    const totalParticipants = participants.length;
+    const lunchCount = participants.filter(p => p.lunch === true).length;
+    const dinnerCount = participants.filter(p => p.dinner === true).length;
+    const transportCount = participants.filter(p => p.transport === true).length;
+    const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
+    const donViNgoaiCount = totalParticipants - hocVienCount;
+
+    res.render('stats', {
+      layout: 'layouts/main',
+      title: `Thống kê: ${conferenceNameForTitle}`,
+      conferences: allConferences, // Pass the list of all conferences
+      selectedConferenceCode: selectedConferenceCode || 'all', // Pass the selected code, default to 'all'
+      stats: {
+        totalParticipants,
+        lunchCount,
+        dinnerCount,
+        transportCount,
+        hocVienCount,
+        donViNgoaiCount,
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching data for public statistics page:', error);
+    res.status(500).render('error', {
+      layout: 'layouts/main',
+      message: 'Không thể tải trang thống kê.',
+      error
+    });
+  }
+};
+
+async function calculateAndEmitStats() {
+  try {
+    const participants = await Participant.find();
+    const totalParticipants = participants.length;
+    const lunchCount = participants.filter(p => p.lunch === true).length;
+    const dinnerCount = participants.filter(p => p.dinner === true).length;
+    const transportCount = participants.filter(p => p.transport === true).length;
+    const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
+    const donViNgoaiCount = totalParticipants - hocVienCount;
+
+    const newStats = {
+      totalParticipants,
+      lunchCount,
+      dinnerCount,
+      transportCount,
+      hocVienCount,
+      donViNgoaiCount,
+    };
+
+    if (global.io) {
+      global.io.emit('statsUpdated', newStats);
+      console.log('Emitted statsUpdated:', newStats);
+    } else {
+      console.log('Socket.io instance (global.io) not found. Cannot emit stats.');
+    }
+  } catch (error) {
+    console.error('Error calculating and emitting stats:', error);
+  }
+} 

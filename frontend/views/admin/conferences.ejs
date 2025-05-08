@@ -1,0 +1,388 @@
+<%- contentFor('body') %>
+
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Quản lý Hội Nghị</h1>
+  <button id="add-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white flex items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+    </svg>
+    Thêm Hội Nghị Mới
+  </button>
+</div>
+
+<%- include('../partials/flash_messages') %>
+
+<div class="bg-white rounded-lg shadow">
+  <div class="overflow-x-auto">
+    <% if (typeof conferences !== 'undefined' && conferences.length > 0) { %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Hội Nghị</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Bắt Đầu</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Kết Thúc</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa điểm</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số người tối đa</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% conferences.forEach(conference => { %>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= conference.name %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= conference.code %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= new Date(conference.startDate).toLocaleDateString('vi-VN') %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= new Date(conference.endDate).toLocaleDateString('vi-VN') %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= conference.time || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= conference.location ? conference.location.name : 'Chưa có' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"><%= conference.maxAttendees %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-indigo-600 hover:text-indigo-900 mr-2 edit-conference-btn" data-id="<%= conference._id %>">Sửa</button>
+                <button class="text-red-600 hover:text-red-900 delete-conference-btn" data-id="<%= conference._id %>">Xóa</button>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p class="p-6 text-center text-gray-500">Chưa có hội nghị nào được tạo.</p>
+    <% } %>
+  </div>
+</div>
+
+<!-- Add/Edit Conference Modal (Initially Hidden) -->
+<div id="conference-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] flex flex-col">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+      <h3 id="modal-title" class="text-xl font-bold text-gray-800">Conference Details</h3>
+      <button id="close-conference-modal-btn" type="button" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body - Form -->
+    <form id="conference-form" class="flex-1 overflow-y-auto px-6 py-4">
+      <input type="hidden" id="conference-id" name="conferenceId">
+      <div class="space-y-4">
+        <!-- Conference Name -->
+        <div>
+          <label for="conference-name" class="block text-sm font-medium text-gray-700 mb-1">Tên hội nghị <span class="text-red-500">*</span></label>
+          <input type="text" id="conference-name" name="name" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+        </div>
+
+        <!-- Conference Code -->
+        <div>
+          <label for="conference-code" class="block text-sm font-medium text-gray-700 mb-1">Mã hội nghị (4 ký tự) <span class="text-red-500">*</span></label>
+          <input type="text" id="conference-code" name="code" maxlength="4" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 uppercase" required pattern="[A-Za-z0-9]{4}" title="Chỉ dùng chữ và số, 4 ký tự.">
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu <span class="text-red-500">*</span></label>
+            <input type="date" id="start-date" name="startDate" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+          </div>
+          <div>
+            <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">Ngày kết thúc <span class="text-red-500">*</span></label>
+            <input type="date" id="end-date" name="endDate" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+          </div>
+        </div>
+
+        <!-- Time -->
+        <div>
+            <label for="conference-time" class="block text-sm font-medium text-gray-700 mb-1">Thời gian <span class="text-red-500">*</span></label>
+            <input type="text" id="conference-time" name="time" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="VD: 09:00 - 17:00" required>
+        </div>
+        
+        <!-- Location Dropdown -->
+        <div>
+            <label for="conference-location-select" class="block text-sm font-medium text-gray-700 mb-1">Địa điểm <span class="text-red-500">*</span></label>
+            <select id="conference-location-select" name="location" class="form-select block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                <option value="" disabled>Chọn địa điểm...</option>
+                <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+                    <% locations.forEach(loc => { %>
+                        <option value="<%= loc._id %>"><%= loc.name %></option>
+                    <% }); %>
+                <% } else { %>
+                    <option value="" disabled>Không có địa điểm nào</option>
+                <% } %>
+            </select>
+        </div>
+
+        <!-- Max Attendees -->
+        <div>
+            <label for="max-attendees" class="block text-sm font-medium text-gray-700 mb-1">Số người tối đa</label>
+            <input type="number" id="max-attendees" name="maxAttendees" value="100" min="1" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        </div>
+        
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+          <textarea id="description" name="description" rows="3" class="form-textarea w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+        </div>
+
+        <!-- Registration Fields -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Trường Thông Tin Đăng Ký</label>
+          <div id="registration-fields-container" class="max-h-60 overflow-y-auto border border-gray-300 rounded-md p-4 grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2">
+            <% 
+              const allFields = [
+                { value: 'name', label: 'Họ và tên', required: true },
+                { value: 'email', label: 'Email', required: true },
+                { value: 'phone', label: 'Số điện thoại', required: true },
+                { value: 'workunit', label: 'Đơn vị công tác' },
+                { value: 'rank', label: 'Cấp bậc' },
+                { value: 'academic', label: 'Học hàm/Học vị' },
+                { value: 'position', label: 'Chức vụ' },
+                { value: 'speciality', label: 'Chuyên ngành' },
+                { value: 'address', label: 'Địa chỉ' },
+                { value: 'age', label: 'Tuổi' },
+                { value: 'business', label: 'Lĩnh vực' },
+                { value: 'nationality', label: 'Quốc tịch' },
+                { value: 'role', label: 'Vai trò (Báo cáo viên/Tham dự)' },
+                { value: 'speech', label: 'Có phát biểu' },
+                { value: 'lunch', label: 'Ăn trưa' },
+                { value: 'dinner', label: 'Ăn tối' },
+                { value: 'transport', label: 'Xe đưa đón' },
+                { value: 'feedback', label: 'Góp ý' },
+                { value: 'questions', label: 'Câu hỏi' },
+                { value: 'source', label: 'Nguồn biết đến' }
+              ];
+            %>
+            <% allFields.forEach(field => { %>
+              <div class="flex items-center">
+                <input 
+                  type="checkbox" 
+                  id="field-<%= field.value %>" 
+                  name="registrationFields" 
+                  value="<%= field.value %>" 
+                  class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  <%= field.required ? 'checked disabled' : '' %>
+                >
+                <label for="field-<%= field.value %>" class="ml-2 block text-sm text-gray-700 <%= field.required ? 'text-gray-500' : '' %>">
+                  <%= field.label %> <%= field.required ? '(Bắt buộc)' : '' %>
+                </label>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 border-t border-gray-200 flex justify-end sticky bottom-0 bg-gray-50 z-10">
+      <button type="button" id="cancel-conference-btn" class="btn border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 mr-3">Hủy</button>
+      <button type="submit" form="conference-form" id="save-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white">Lưu Hội Nghị</button>
+    </div>
+  </div>
+</div>
+<!-- End Add/Edit Conference Modal -->
+
+<%- contentFor('script') %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const addConferenceBtn = document.getElementById('add-conference-btn');
+    const conferenceModal = document.getElementById('conference-modal');
+    const closeConferenceModalBtn = document.getElementById('close-conference-modal-btn');
+    const cancelConferenceBtn = document.getElementById('cancel-conference-btn');
+    const conferenceForm = document.getElementById('conference-form');
+    const conferenceIdField = document.getElementById('conference-id');
+    const modalTitle = document.getElementById('modal-title');
+    const saveConferenceBtn = document.getElementById('save-conference-btn');
+    const conferenceCodeInput = document.getElementById('conference-code');
+    const regFieldsContainer = document.getElementById('registration-fields-container');
+
+    // Function to open the modal for adding
+    const openAddModal = () => {
+      modalTitle.textContent = 'Thêm Hội Nghị Mới';
+      conferenceForm.reset();
+      conferenceIdField.value = ''; // Clear ID field
+      conferenceCodeInput.disabled = false; // Enable code input for new conferences
+      conferenceForm.action = '/admin/conferences/create'; // Set form action for create
+      // Clear location selection (set to default disabled option)
+      document.getElementById('conference-location-select').selectedIndex = 0;
+      // Reset registration field checkboxes (except required ones)
+      const checkboxes = regFieldsContainer.querySelectorAll('input[name="registrationFields"]:not(:disabled)');
+      checkboxes.forEach(cb => cb.checked = false);
+      conferenceModal.classList.remove('hidden');
+    };
+
+    // Function to close the modal
+    const closeModal = () => {
+      conferenceModal.classList.add('hidden');
+    };
+
+    // Event Listeners
+    if (addConferenceBtn) {
+      addConferenceBtn.addEventListener('click', openAddModal);
+    }
+    if (closeConferenceModalBtn) {
+      closeConferenceModalBtn.addEventListener('click', closeModal);
+    }
+    if (cancelConferenceBtn) {
+      cancelConferenceBtn.addEventListener('click', closeModal);
+    }
+
+    // Handle Form Submission (using standard form submission for now)
+    // We can enhance this with AJAX later if needed for better UX
+    conferenceForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Prevent default submission initially
+
+      // Get selected registration fields
+      const selectedFields = Array.from(regFieldsContainer.querySelectorAll('input[name="registrationFields"]:checked'))
+                                  .map(cb => cb.value);
+      
+      // Add selected fields to FormData (as multiple entries)
+      const formData = new FormData(conferenceForm);
+      
+      // Clear existing registrationFields from formData if any (from text/hidden inputs)
+      formData.delete('registrationFields'); 
+      
+      // Append each selected field
+      selectedFields.forEach(field => {
+        formData.append('registrationFields', field);
+      });
+      
+      // You might want to disable the save button here to prevent double submission
+      saveConferenceBtn.disabled = true;
+      saveConferenceBtn.textContent = 'Đang lưu...';
+
+      // Choose the correct endpoint based on whether it's an add or edit
+      const conferenceId = conferenceIdField.value;
+      const url = conferenceId ? `/admin/conferences/update/${conferenceId}` : '/admin/conferences/create';
+      const method = conferenceId ? 'POST' : 'POST'; // Using POST for update too, ensure route handles it
+
+      try {
+        // Using fetch for potential AJAX handling later, but for now just submitting
+        // To use standard form submission:
+        // conferenceForm.submit(); 
+        // return;
+
+        // --- AJAX Submission Example (replace standard submission if preferred) ---
+        const response = await fetch(url, {
+            method: method,
+            body: new URLSearchParams(formData) // Send as form-urlencoded data
+        });
+
+        if (response.ok) {
+            // Optionally parse JSON response if backend sends one
+            // const result = await response.json(); 
+            window.location.reload(); // Simple reload on success
+            // Or: add success message display, dynamic table update, close modal
+        } else {
+            // Handle errors - display message from backend if possible
+            const errorData = await response.json().catch(() => ({ message: 'Lỗi không xác định' }));
+            alert(`Lỗi lưu hội nghị: ${errorData.message || response.statusText}`);
+            saveConferenceBtn.disabled = false;
+            saveConferenceBtn.textContent = 'Lưu Hội Nghị';
+        }
+        // --- End AJAX Submission Example ---
+
+      } catch (error) {
+          console.error('Error submitting conference form:', error);
+          alert('Đã xảy ra lỗi khi gửi form.');
+          saveConferenceBtn.disabled = false;
+          saveConferenceBtn.textContent = 'Lưu Hội Nghị';
+      }
+    });
+
+    // --- Edit Conference --- 
+    const editButtons = document.querySelectorAll('.edit-conference-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const conferenceId = button.dataset.id;
+        console.log(`Editing conference ID: ${conferenceId}`);
+        
+        try {
+          const response = await fetch(`/admin/api/conferences/${conferenceId}`);
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed to fetch conference data (status ${response.status})`);
+          }
+          
+          const result = await response.json();
+          if (result.success && result.conference) {
+            const conf = result.conference;
+            console.log('Fetched conference data:', conf);
+
+            // Populate the modal
+            modalTitle.textContent = 'Chỉnh Sửa Hội Nghị';
+            conferenceIdField.value = conf._id;
+            document.getElementById('conference-name').value = conf.name || '';
+            conferenceCodeInput.value = conf.code || '';
+            conferenceCodeInput.disabled = true; // Disable code editing
+            
+            // Format dates (YYYY-MM-DD)
+            document.getElementById('start-date').value = conf.startDate ? new Date(conf.startDate).toISOString().split('T')[0] : '';
+            document.getElementById('end-date').value = conf.endDate ? new Date(conf.endDate).toISOString().split('T')[0] : '';
+            
+            document.getElementById('conference-time').value = conf.time || '';
+            document.getElementById('conference-location-select').value = conf.location ? conf.location._id : ''; // Use location ID
+            document.getElementById('max-attendees').value = conf.maxAttendees || 100;
+            document.getElementById('description').value = conf.description || '';
+
+            // Reset and check registration field checkboxes
+            const checkboxes = regFieldsContainer.querySelectorAll('input[name="registrationFields"]:not(:disabled)');
+            checkboxes.forEach(cb => {
+                cb.checked = conf.registrationFields.includes(cb.value);
+            });
+
+            // Update form action or handle update logic separately if needed
+            // conferenceForm.action = `/admin/conferences/update/${conf._id}`; 
+
+            conferenceModal.classList.remove('hidden');
+          } else {
+            throw new Error(result.message || 'Invalid data received from server');
+          }
+        } catch (error) {
+          console.error('Error fetching conference for edit:', error);
+          alert(`Lỗi tải dữ liệu hội nghị: ${error.message}`);
+        }
+      });
+    });
+
+    // --- Delete Conference --- 
+    const deleteButtons = document.querySelectorAll('.delete-conference-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const conferenceId = button.dataset.id;
+        const conferenceRow = button.closest('tr'); // Get the table row
+        const conferenceName = conferenceRow ? (conferenceRow.querySelector('td')?.textContent || 'này') : 'này';
+
+        if (confirm(`Bạn có chắc chắn muốn xóa hội nghị "${conferenceName.trim()}" không?\nHành động này không thể hoàn tác.`)) {
+          console.log(`Deleting conference ID: ${conferenceId}`);
+          try {
+            const response = await fetch(`/admin/conferences/delete/${conferenceId}`, {
+              method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+              // Option 1: Simple page reload (easiest, shows flash message)
+              window.location.reload(); 
+
+              // Option 2: Remove row dynamically (faster UX, needs separate message display)
+              // if (conferenceRow) {
+              //   conferenceRow.remove();
+              // }
+              // alert(result.message); // Show success message differently
+              
+            } else {
+              throw new Error(result.message || `Failed to delete conference (status ${response.status})`);
+            }
+          } catch (error) {
+            console.error('Error deleting conference:', error);
+            alert(`Lỗi xóa hội nghị: ${error.message}`);
+          }
+        }
+      });
+    });
+
+  });
+</script> 

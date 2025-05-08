@@ -7,6 +7,8 @@ const dotenv = require('dotenv');
 const expressLayouts = require('express-ejs-layouts');
 const QRCode = require('qrcode');
 const flash = require('connect-flash');
+const http = require('http');
+const { Server } = require("socket.io");
 
 // Load environment variables
 dotenv.config();
@@ -14,9 +16,21 @@ dotenv.config();
 // Import routes
 const registerRoutes = require('./routes/register');
 const adminRoutes = require('./routes/admin');
+// Import controllers
+const registerController = require('./controllers/registerController');
 
 // Initialize express
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+global.io = io;
+
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -70,6 +84,9 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/register', registerRoutes);
 app.use('/admin', adminRoutes);
+
+// Public statistics route
+app.get('/stats', registerController.showPublicStatsPage);
 
 // QR Code API endpoint
 app.get('/api/qrcode', async (req, res) => {
@@ -183,10 +200,10 @@ app.get('/thankyou', async (req, res) => {
     // Find the participant in database to get all registration details
     const participant = await mongoose.model('Participant').findOne({ email: participantEmail });
     
-    // Find the conference details
-    const conference = await mongoose.model('Conference').findOne({ 
-      code: participant ? participant.conferenceCode : (conferenceCode || null)
-    }).populate('location');
+    // Find the latest conference details
+    const conference = await mongoose.model('Conference').findOne()
+                              .sort({ createdAt: -1 })
+                              .populate('location');
     
     if (!conference) {
       return res.render('thankyou', { 
@@ -275,7 +292,16 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Socket.IO connection listener
+io.on('connection', (socket) => {
+  console.log('A user connected to Socket.IO for stats');
+  // Future: could send initial stats here or wait for client request
+  socket.on('disconnect', () => {
+    console.log('User disconnected from Socket.IO stats');
+  });
+});
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 }); 

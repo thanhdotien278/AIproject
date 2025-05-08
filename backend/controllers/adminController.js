@@ -6,6 +6,7 @@ const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
 const Location = require('../models/Location');
+const mongoose = require('mongoose');
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -307,15 +308,19 @@ exports.createConference = async (req, res) => {
   try {
     // Log request body for debugging
     console.log('Request body:', req.body);
-    
+
     // Extract registration fields
     let registrationFields = req.body.registrationFields || [];
-    if (!Array.isArray(registrationFields)) {
-      registrationFields = [registrationFields];
+    // Handle single value vs array from form submission
+    if (req.body.registrationFields && !Array.isArray(req.body.registrationFields)) {
+      registrationFields = [req.body.registrationFields];
+    } else if (!req.body.registrationFields) {
+      registrationFields = [];
     }
-    
-    console.log('Registration fields:', registrationFields);
-    
+
+    console.log('Raw Registration fields:', req.body.registrationFields);
+    console.log('Initial registrationFields array:', registrationFields);
+
     // Make sure required fields are always included
     const requiredFields = ['name', 'email', 'phone'];
     requiredFields.forEach(field => {
@@ -323,47 +328,69 @@ exports.createConference = async (req, res) => {
         registrationFields.push(field);
       }
     });
-    
+    // Remove duplicates
+    registrationFields = [...new Set(registrationFields)]; 
+
     console.log('Processed registration fields:', registrationFields);
-    
+
+    // Check for conference code uniqueness
+    const conferenceCodeUpper = req.body.code.toUpperCase();
+    const existingConference = await Conference.findOne({ code: conferenceCodeUpper });
+    if (existingConference) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mã hội nghị này đã tồn tại. Vui lòng chọn mã khác.'
+      });
+    }
+
     // Create a new conference document
     const conference = new Conference({
-      code: req.body.code.toUpperCase(),
+      code: conferenceCodeUpper,
       name: req.body.name,
       startDate: req.body.startDate,
       endDate: req.body.endDate,
-      time: req.body.time, // Make sure this is included
+      time: req.body.time,
       location: req.body.location,
       mainSpeaker: req.body.mainSpeaker || '',
       maxAttendees: parseInt(req.body.maxAttendees) || 100,
       description: req.body.description || '',
       registrationFields: registrationFields
     });
-    
+
     console.log('Conference object before save:', conference);
-    
+
     // Save the conference to the database
     await conference.save();
-    
-    res.status(201).json({
-      success: true,
-      message: 'Conference created successfully',
-      conference
-    });
+
+    // Redirect with flash message on success
+    req.flash('success_msg', 'Hội nghị đã được tạo thành công!');
+    // For AJAX response (frontend currently reloads, but keeps this structure)
+    // Sending a success status might be enough if frontend handles reload
+    res.status(201).json({ 
+        success: true, 
+        message: 'Hội nghị đã được tạo thành công!'
+        // redirectUrl: '/admin/conferences' // Or let frontend handle reload 
+    }); 
+    // If not using AJAX fetch on frontend:
+    // res.redirect('/admin/conferences');
+
   } catch (error) {
     console.error('Detailed error creating conference:', error);
-    
-    // Log specific validation errors
-    if (error.errors) {
-      for (let field in error.errors) {
-        console.error(`Validation error for ${field}:`, error.errors[field]);
-      }
+    let errorMessage = 'Lỗi tạo hội nghị: ';
+    if (error.name === 'ValidationError') {
+        let errors = Object.values(error.errors).map(el => el.message);
+        errorMessage += errors.join(', ');
+    } else {
+         errorMessage += (error.message || 'Lỗi không xác định');
     }
-    
+    // Send JSON error response for fetch API
     res.status(400).json({
       success: false,
-      message: 'Error creating conference: ' + (error.message || 'Unknown error')
+      message: errorMessage
     });
+    // If not using AJAX on frontend:
+    // req.flash('error_msg', errorMessage);
+    // res.redirect('/admin/conferences'); 
   }
 };
 
@@ -792,6 +819,160 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting user'
+    });
+  }
+};
+
+// Show Conferences Page
+exports.showConferencesPage = async (req, res) => {
+  try {
+    const conferences = await Conference.find()
+      .populate('location') // Populate location details
+      .sort({ createdAt: -1 });
+      
+    // Fetch all locations for the "Add/Edit Conference" modal dropdown
+    const locations = await Location.find().sort({ name: 1 });
+
+    res.render('admin/conferences', {
+      layout: 'layouts/admin',
+      username: req.session.username,
+      currentPath: '/admin/conferences',
+      conferences: conferences,
+      locations: locations, // Pass locations for the modal
+      title: 'Quản lý Hội Nghị'
+    });
+  } catch (error) {
+    console.error('Error fetching conferences page data:', error);
+    req.flash('error_msg', 'Không thể tải trang quản lý hội nghị.');
+    res.redirect('/admin/dashboard');
+  }
+};
+
+// Get specific conference details (for editing)
+exports.getConferenceDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Validate if ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'ID Hội nghị không hợp lệ' });
+    }
+
+    const conference = await Conference.findById(id).populate('location');
+
+    if (!conference) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy hội nghị' });
+    }
+    
+    res.status(200).json({ success: true, conference: conference }); 
+
+  } catch (error) {
+    console.error('Error fetching conference details:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin hội nghị' });
+  }
+};
+
+// Update Conference
+exports.updateConference = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'ID Hội nghị không hợp lệ' });
+    }
+
+    const conference = await Conference.findById(id);
+    if (!conference) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy hội nghị' });
+    }
+
+    // Extract and process registration fields
+    let registrationFields = req.body.registrationFields || [];
+    if (req.body.registrationFields && !Array.isArray(req.body.registrationFields)) {
+      registrationFields = [req.body.registrationFields];
+    } else if (!req.body.registrationFields) {
+      registrationFields = [];
+    }
+    const requiredFields = ['name', 'email', 'phone'];
+    requiredFields.forEach(field => {
+      if (!registrationFields.includes(field)) {
+        registrationFields.push(field);
+      }
+    });
+    registrationFields = [...new Set(registrationFields)];
+
+    // Update conference properties (cannot update code)
+    conference.name = req.body.name || conference.name;
+    conference.startDate = req.body.startDate || conference.startDate;
+    conference.endDate = req.body.endDate || conference.endDate;
+    conference.time = req.body.time || conference.time;
+    conference.location = req.body.location || conference.location;
+    conference.mainSpeaker = req.body.mainSpeaker || conference.mainSpeaker;
+    conference.maxAttendees = parseInt(req.body.maxAttendees) || conference.maxAttendees;
+    conference.description = req.body.description || conference.description;
+    conference.registrationFields = registrationFields; // Update the fields
+
+    // Save the updated conference
+    await conference.save();
+
+    req.flash('success_msg', 'Hội nghị đã được cập nhật thành công!');
+    res.status(200).json({ 
+        success: true, 
+        message: 'Hội nghị đã được cập nhật thành công!'
+        // redirectUrl: '/admin/conferences' 
+    });
+
+  } catch (error) {
+    console.error('Detailed error updating conference:', error);
+    let errorMessage = 'Lỗi cập nhật hội nghị: ';
+    if (error.name === 'ValidationError') {
+        let errors = Object.values(error.errors).map(el => el.message);
+        errorMessage += errors.join(', ');
+    } else {
+         errorMessage += (error.message || 'Lỗi không xác định');
+    }
+    res.status(400).json({
+      success: false,
+      message: errorMessage
+    });
+  }
+};
+
+// Delete Conference
+exports.deleteConference = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'ID Hội nghị không hợp lệ' });
+    }
+
+    const conference = await Conference.findById(id);
+    if (!conference) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy hội nghị' });
+    }
+
+    // Check if participants are registered for this conference
+    const participantCount = await Participant.countDocuments({ conferenceCode: conference.code });
+
+    if (participantCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Không thể xóa hội nghị này vì có ${participantCount} người đã đăng ký.`
+      });
+    }
+
+    // Delete the conference if no participants are linked
+    await Conference.findByIdAndDelete(id);
+
+    req.flash('success_msg', 'Hội nghị đã được xóa thành công!');
+    res.status(200).json({
+      success: true,
+      message: 'Hội nghị đã được xóa thành công!'
+    });
+
+  } catch (error) {
+    console.error('Error deleting conference:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi xóa hội nghị: ' + (error.message || 'Lỗi không xác định')
     });
   }
 }; 

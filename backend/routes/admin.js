@@ -32,8 +32,14 @@ router.post('/settings', adminController.isAuthenticated, adminController.update
 // POST /admin/conferences/create - Create new conference (protected)
 router.post('/conferences/create', adminController.isAuthenticated, adminController.createConference);
 
-// GET /admin/conferences - Get all conferences (protected) 
-router.get('/conferences', adminController.isAuthenticated, adminController.getConferences);
+// GET /admin/conferences - Show conference management page (protected) 
+router.get('/conferences', adminController.isAuthenticated, adminController.showConferencesPage);
+
+// POST /admin/conferences/update/:id - Update conference (protected)
+router.post('/conferences/update/:id', adminController.isAuthenticated, adminController.updateConference);
+
+// DELETE /admin/conferences/delete/:id - Delete conference (protected)
+router.delete('/conferences/delete/:id', adminController.isAuthenticated, adminController.deleteConference);
 
 // Add routes for locations
 router.get('/locations', adminController.isAuthenticated, adminController.getLocations);
@@ -47,6 +53,9 @@ router.get('/api/users', adminController.isAuthenticated, adminController.getUse
 router.post('/api/users', adminController.isAuthenticated, adminController.createUser);
 router.put('/api/users/:id', adminController.isAuthenticated, adminController.updateUser);
 router.delete('/api/users/:id', adminController.isAuthenticated, adminController.deleteUser);
+
+// API route to get single conference details (for editing)
+router.get('/api/conferences/:id', adminController.isAuthenticated, adminController.getConferenceDetails);
 
 // Import speaker routes
 const speakerRoutes = require('./speaker'); 
