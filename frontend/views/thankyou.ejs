@@ -424,13 +424,6 @@
               absolutePosition: { x: 40, y: 400 } // Adjust Y position based on content above
             },
             {
-              columns: [
-                  { qr: '<%= JSON.stringify(qrData) %>', fit: '80', alignment: 'center', margin: [0, 5, 0, 0] },
-              ],
-              absolutePosition: { x: 40, y: 430 }, // Adjust Y position based on content above
-              alignment: 'center'
-            },
-            {
               text: `Mã đăng ký: <%= conference ? conference.code : 'CONF' %>-<%= participant ? String(participant.registrationNumber).padStart(4, '0') : '0000' %>`,
               style: 'registrationId', 
               alignment: 'center',
