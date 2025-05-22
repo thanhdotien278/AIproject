@@ -84,7 +84,7 @@ exports.showDashboard = async (req, res) => {
     const lunchCount = participants.filter(p => p.lunch === true).length;
     const dinnerCount = participants.filter(p => p.dinner === true).length;
     const transportCount = participants.filter(p => p.transport === true).length;
-    const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
+    const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().includes('học viện')).length;
     const donViNgoaiCount = totalParticipants - hocVienCount;
     
     // Group participants by organization
@@ -130,21 +130,32 @@ exports.showDashboard = async (req, res) => {
 // Export participants to Excel
 exports.exportToExcel = async (req, res) => {
   try {
-    const participants = await Participant.find().sort({ registrationDate: -1 });
+    const conferenceCode = req.query.conferenceCode || 'all';
+    const query = conferenceCode !== 'all' ? { conferenceCode } : {};
+
+    const participants = await Participant.find(query).sort({ registrationDate: -1 });
     
     // Create workbook and worksheet
     const workbook = XLSX.utils.book_new();
     
     // Convert participants to array of objects for Excel
     const worksheetData = participants.map(p => ({
+      ID: p.participantId || 'N/A', // Use participantId instead of old ID
       Name: p.name,
       Email: p.email,
       Phone: p.phone || '',
-      Organization: p.organization || '',
-      'Attendance Type': p.attendanceType,
-      Questions: p.questions || '',
-      'Registration Date': p.registrationDate.toLocaleString(),
-      'Email Sent': p.emailSent ? 'Yes' : 'No'
+      WorkUnit: p.workunit || '',
+      Position: p.position || '', 
+      Rank: p.rank || '',
+      Academic: p.academic || '',
+      Role: p.role || '',
+      Speech: p.speech ? 'Yes' : 'No',
+      Lunch: p.lunch ? 'Yes' : 'No',
+      Dinner: p.dinner ? 'Yes' : 'No',
+      Transport: p.transport ? 'Yes' : 'No',
+      'Registration Date': p.registrationDate ? new Date(p.registrationDate).toLocaleString() : '',
+      'Email Sent': p.emailSent ? 'Yes' : 'No',
+      'Conference': p.conferenceCode
     }));
     
     // Create worksheet
@@ -973,6 +984,300 @@ exports.deleteConference = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Lỗi xóa hội nghị: ' + (error.message || 'Lỗi không xác định')
+    });
+  }
+};
+
+// API route to get dashboard data
+exports.getDashboardData = async (req, res) => {
+  try {
+    const { conferenceCode } = req.query;
+    console.log(`Fetching dashboard data for conferenceCode: ${conferenceCode || 'all'}`);
+    
+    let conferenceDetails = null;
+    let query = {};
+
+    if (conferenceCode && conferenceCode !== 'all') {
+      query.conferenceCode = conferenceCode;
+      console.log(`Filtering participants by conference code: ${conferenceCode}`);
+      
+      conferenceDetails = await Conference.findOne({ code: conferenceCode }).populate('location');
+      if (conferenceDetails) {
+        // Format dates for display
+        const startDate = new Date(conferenceDetails.startDate);
+        const endDate = new Date(conferenceDetails.endDate);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        conferenceDetails.formattedDates = `${startDate.toLocaleDateString('vi-VN', options)} - ${endDate.toLocaleDateString('vi-VN', options)}`;
+      } else {
+        console.log(`Warning: Conference not found for code: ${conferenceCode}`);
+      }
+    } else {
+      console.log('Fetching all participants (no conference filter)');
+    }
+
+    // Sort by registration time descending for consistent ordering
+    const participants = await Participant.find(query).sort({ registrationTime: -1 });
+    console.log(`Found ${participants.length} participants matching the query`);
+    
+    const totalParticipants = participants.length;
+    const emailSentCount = participants.filter(p => p.emailSent).length;
+    const lunchCount = participants.filter(p => p.lunch === true).length;
+    const dinnerCount = participants.filter(p => p.dinner === true).length;
+    const transportCount = participants.filter(p => p.transport === true).length;
+    const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().includes('học viện')).length;
+    const donViNgoaiCount = totalParticipants - hocVienCount;
+    
+    const participantsWithFormattedId = participants.map(p => {
+      // Use the participantId field directly (it should be already formatted as a 4-digit string)
+      const displayId = p.participantId || 'N/A';
+      return {
+        ...p.toObject(), // Spread the rest of the participant data
+        displayId: displayId // This will be used in the dashboard table
+      };
+    });
+
+    // Get all conferences with their active status for UI display
+    const allConferences = await Conference.find().select('code name isActive').sort({ createdAt: -1 });
+    console.log(`Found ${allConferences.length} conferences to display in dropdown`);
+
+    const responseData = {
+      success: true,
+      participants: participantsWithFormattedId, // Send participants with the new displayId
+      conferenceDetails: conferenceDetails ? conferenceDetails.toObject() : null,
+      conferences: allConferences, // Include all conferences with active status
+      conferenceCode: conferenceCode || 'all', // Return the selected code for confirmation
+      stats: {
+        totalParticipants,
+        emailSentCount,
+        lunchCount,
+        dinnerCount,
+        transportCount,
+        hocVienCount,
+        donViNgoaiCount
+      }
+    };
+
+    console.log(`Sending response with ${participantsWithFormattedId.length} participants`);
+    res.json(responseData);
+
+  } catch (error) {
+    console.error('Error fetching API dashboard data:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching dashboard data from API',
+      error: error.message
+    });
+  }
+};
+
+// Activate Conference
+exports.activateConference = async (req, res) => {
+  try {
+    const { conferenceCode } = req.params;
+    
+    if (!conferenceCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Conference code is required'
+      });
+    }
+
+    // Deactivate all conferences first
+    await Conference.updateMany({}, { isActive: false });
+    
+    // Find and activate the selected conference
+    const conference = await Conference.findOne({ code: conferenceCode });
+    
+    if (!conference) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conference not found'
+      });
+    }
+    
+    conference.isActive = true;
+    await conference.save();
+    
+    res.status(200).json({
+      success: true,
+      message: `Conference "${conference.name}" has been activated successfully`
+    });
+  } catch (error) {
+    console.error('Error activating conference:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error activating conference: ' + (error.message || 'Unknown error')
+    });
+  }
+};
+
+// Deactivate Conference
+exports.deactivateConference = async (req, res) => {
+  try {
+    const { conferenceCode } = req.params;
+    
+    if (!conferenceCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Conference code is required'
+      });
+    }
+    
+    // Find and deactivate the selected conference
+    const conference = await Conference.findOne({ code: conferenceCode });
+    
+    if (!conference) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conference not found'
+      });
+    }
+    
+    if (!conference.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: 'Conference is already inactive'
+      });
+    }
+    
+    conference.isActive = false;
+    await conference.save();
+    
+    res.status(200).json({
+      success: true,
+      message: `Conference "${conference.name}" has been deactivated successfully`
+    });
+  } catch (error) {
+    console.error('Error deactivating conference:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deactivating conference: ' + (error.message || 'Unknown error')
+    });
+  }
+};
+
+// Get participant details (for editing)
+exports.getParticipantDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid participant ID' 
+      });
+    }
+
+    const participant = await Participant.findById(id);
+    if (!participant) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Participant not found' 
+      });
+    }
+    
+    res.status(200).json({ 
+      success: true, 
+      participant 
+    });
+  } catch (error) {
+    console.error('Error fetching participant details:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching participant details' 
+    });
+  }
+};
+
+// Update participant
+exports.updateParticipant = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid participant ID' 
+      });
+    }
+
+    // Find participant first to verify it exists
+    const participant = await Participant.findById(id);
+    if (!participant) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Participant not found' 
+      });
+    }
+    
+    // Create updated data object (preserving the participantId)
+    const updatedData = { ...req.body };
+    
+    // Never change participantId or conferenceCode through update
+    delete updatedData.participantId;
+    delete updatedData.conferenceCode;
+    delete updatedData._id;
+    
+    // Handle boolean fields properly
+    ['speech', 'lunch', 'dinner', 'transport', 'emailSent'].forEach(field => {
+      if (updatedData[field] !== undefined) {
+        updatedData[field] = updatedData[field] === true || updatedData[field] === 'true';
+      }
+    });
+    
+    // Update the participant
+    const updatedParticipant = await Participant.findByIdAndUpdate(
+      id, 
+      { $set: updatedData },
+      { new: true, runValidators: true }
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: 'Participant updated successfully',
+      participant: updatedParticipant
+    });
+  } catch (error) {
+    console.error('Error updating participant:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating participant: ' + (error.message || 'Unknown error')
+    });
+  }
+};
+
+// Delete participant
+exports.deleteParticipant = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid participant ID' 
+      });
+    }
+
+    const participant = await Participant.findById(id);
+    if (!participant) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Participant not found' 
+      });
+    }
+    
+    // We don't reassign IDs, just delete the participant
+    await Participant.findByIdAndDelete(id);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Participant deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting participant:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting participant: ' + (error.message || 'Unknown error')
     });
   }
 }; 

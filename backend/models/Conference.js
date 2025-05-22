@@ -15,6 +15,10 @@ const conferenceSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  isActive: {
+    type: Boolean,
+    default: false
+  },
   startDate: {
     type: Date,
     required: true

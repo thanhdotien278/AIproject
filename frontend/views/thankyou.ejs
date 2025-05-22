@@ -84,21 +84,29 @@
         <% if (conference && conference.description) { %>
         <div class="mb-6">
           <h3 class="font-semibold text-gray-700 mb-1">Mô tả hội nghị:</h3>
-          <p class="text-gray-600"><%= conference.description %></p>
+          <p class="text-gray-600"><%- conference.description %></p>
         </div>
         <% } %>
         
         <h2 class="text-2xl font-bold text-gray-800 my-6 text-center">Thông Tin Đăng Ký</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <% if (typeof participantId !== 'undefined' && participantId) { %>
+            <div class="md:col-span-2">
+              <h3 class="font-semibold text-gray-700 mb-1">Mã đăng ký:</h3>
+              <p class="text-xl font-bold text-blue-600"><%= participantId %></p>
+              <p class="text-xs text-gray-500">Mã đăng ký theo thứ tự trong hội nghị này</p>
+            </div>
+          <% } %>
+          
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Họ và tên:</h3>
-            <p class="text-gray-600"><%= participant ? participant.name : participantName || '---' %></p>
+            <p class="text-gray-600"><%= (participant && participant.name) ? participant.name : (typeof participantName !== 'undefined' ? participantName : '---') %></p>
           </div>
           
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Email:</h3>
-            <p class="text-gray-600"><%= participant ? participant.email : participantEmail || '---' %></p>
+            <p class="text-gray-600"><%= (participant && participant.email) ? participant.email : (typeof participantEmail !== 'undefined' ? participantEmail : '---') %></p>
           </div>
           
           <% if (participant && participant.phone) { %>
@@ -216,20 +224,20 @@
           <% if (participant && participant.feedback) { %>
           <div class="md:col-span-2">
             <h3 class="font-semibold text-gray-700 mb-1">Góp ý về công tác tổ chức:</h3>
-            <p class="text-gray-600"><%= participant.feedback %></p>
+            <p class="text-gray-600"><%- participant.feedback %></p>
           </div>
           <% } %>
           
           <% if (participant && participant.questions) { %>
           <div class="md:col-span-2">
             <h3 class="font-semibold text-gray-700 mb-1">Câu hỏi:</h3>
-            <p class="text-gray-600"><%= participant.questions %></p>
+            <p class="text-gray-600"><%- participant.questions %></p>
           </div>
           <% } %>
           
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Ngày đăng ký:</h3>
-            <p class="text-gray-600"><%= participant && participant.registrationDate ? new Date(participant.registrationDate).toLocaleDateString('vi-VN', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : new Date().toLocaleDateString('vi-VN', {year: 'numeric', month: 'long', day: 'numeric'}) %></p>
+            <p class="text-gray-600"><%= (participant && participant.registrationDate) ? new Date(participant.registrationDate).toLocaleDateString('vi-VN', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : new Date().toLocaleDateString('vi-VN', {year: 'numeric', month: 'long', day: 'numeric'}) %></p>
           </div>
         </div>
       </div>
@@ -301,175 +309,193 @@
   document.addEventListener('DOMContentLoaded', function() {
     const downloadBtn = document.getElementById('download-ticket');
     
-    downloadBtn.addEventListener('click', function() {
-      try {
-        // Get participant info
-        const participantName = '<%= participant ? participant.name : (typeof participantName !== "undefined" ? participantName : "Quý vị") %>';
-        
-        // Define document content
-        const docDefinition = {
-          content: [
+    // Ensure all EJS variables are defined and JS-escaped before being used in the script
+    const pdfParticipantName = <%- JSON.stringify((participant && participant.name) ? participant.name : (typeof participantName !== 'undefined' ? participantName : "Quý vị")) %>;
+    const pdfParticipantEmail = <%- JSON.stringify((participant && participant.email) ? participant.email : (typeof participantEmail !== 'undefined' ? participantEmail : "---")) %>;
+    const pdfParticipantPhone = <%- JSON.stringify(participant && participant.phone ? participant.phone : "") %>;
+    const pdfParticipantWorkunit = <%- JSON.stringify(participant && participant.workunit ? participant.workunit : "") %>;
+    const pdfConferenceCode = <%- JSON.stringify(conference && conference.code ? conference.code : "N/A") %>;
+    const pdfParticipantId = <%- JSON.stringify(typeof participantId !== 'undefined' ? participantId : "N/A") %>; // Using the new participantId
+    const pdfConferenceName = <%- JSON.stringify(conference ? conference.name : "Hội Nghị") %>;
+    const pdfConferenceStartDate = <%- JSON.stringify(conference && conference.startDate ? new Date(conference.startDate).toLocaleDateString("vi-VN", {year: "numeric", month: "long", day: "numeric"}) : "---") %>;
+    const pdfConferenceTime = <%- JSON.stringify(conference && conference.time ? conference.time : "---") %>;
+    const pdfLocationName = <%- JSON.stringify(typeof locationName !== 'undefined' ? locationName : "---") %>;
+    const pdfMainSpeaker = <%- JSON.stringify(conference && conference.mainSpeaker ? conference.mainSpeaker : "") %>;
+
+
+    if (downloadBtn) { // Check if the button exists before adding event listener
+      downloadBtn.addEventListener('click', function() {
+        try {
+          const ticketContent = [
             {
-              text: `PHIẾU THAM DỰ / INVITATION TICKET`,
-              style: "header",
-              alignment: "center",
-              margin: [0, 0, 0, 20],
-            },
-            {
-              canvas: [
-                {
-                  type: "rect",
-                  x: 0,
-                  y: 0,
-                  w: 515,
-                  h: 130, // Adjusted height for more content
-                  r: 5,
-                  lineColor: "#4A90E2",
-                  lineWidth: 1,
-                },
-              ],
-              absolutePosition: { x: 40, y: 70 },
+              columns: [
+                  { text: 'Họ tên:', style: 'fieldLabel', width: 'auto' },
+                  { text: pdfParticipantName, style: 'fieldValue', width: '*' }
+              ]
             },
             {
               columns: [
-                {
-                  width: "*",
-                  stack: [
-                    { text: 'THÔNG TIN NGƯỜI THAM DỰ / ATTENDEE INFORMATION', style: 'subheader', margin: [ 0, 0, 0, 10] },
-                    {
-                      columns: [
-                          { text: 'Họ tên:', style: 'fieldLabel', width: 'auto' },
-                          { text: `<%= participant ? participant.name : participantName || "---" %>`, style: 'fieldValue', width: 'auto'  }
-                      ]
-                    },
-                    {
-                      columns: [
-                          { text: 'Email:', style: 'fieldLabel', width: 'auto' },
-                          { text: `<%= participant ? participant.email : participantEmail || "---" %>`, style: 'fieldValue', width: 'auto' }
-                      ]
-                    },
-                    <% if (participant && participant.phone) { %>
-                    {
-                      columns: [
-                          { text: 'Điện thoại:', style: 'fieldLabel', width: 'auto' },
-                          { text: `<%= participant.phone %>`, style: 'fieldValue', width: 'auto' }
-                      ]
-                    },
-                    <% } %>
-                    <% if (participant && participant.workunit) { %>
-                    {
-                      columns: [
-                          { text: 'Đơn vị:', style: 'fieldLabel', width: 'auto' },
-                          { text: `<%= participant.workunit %>`, style: 'fieldValue', width: 'auto' }
-                      ]
-                    },
-                    <% } %>
-                  ],
+                  { text: 'Email:', style: 'fieldLabel', width: 'auto' },
+                  { text: pdfParticipantEmail, style: 'fieldValue', width: '*' }
+              ]
+            },
+          ];
+
+          if (pdfParticipantPhone) {
+            ticketContent.push({
+              columns: [
+                  { text: 'Điện thoại:', style: 'fieldLabel', width: 'auto' },
+                  { text: pdfParticipantPhone, style: 'fieldValue', width: '*' }
+              ]
+            });
+          }
+          if (pdfParticipantWorkunit) {
+            ticketContent.push({
+              columns: [
+                  { text: 'Đơn vị:', style: 'fieldLabel', width: 'auto' },
+                  { text: pdfParticipantWorkunit, style: 'fieldValue', width: '*' }
+              ]
+            });
+          }
+          
+          const eventDetailsContent = [
+            { text: 'Tên hội nghị:', style: 'fieldLabel' },
+            { text: pdfConferenceName, style: 'fieldValue' },
+            { text: 'Ngày bắt đầu:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
+            { text: pdfConferenceStartDate, style: 'fieldValue' },
+            { text: 'Thời gian:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
+            { text: pdfConferenceTime, style: 'fieldValue' },
+            { text: 'Địa điểm:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
+            { text: pdfLocationName, style: 'fieldValue' },
+          ];
+
+          if (pdfMainSpeaker) {
+            eventDetailsContent.push({ text: 'Diễn giả chính:', style: 'fieldLabel', margin: [0, 5, 0, 0] });
+            eventDetailsContent.push({ text: pdfMainSpeaker, style: 'fieldValue' });
+          }
+
+          const docDefinition = {
+            content: [
+              {
+                text: `PHIẾU THAM DỰ / INVITATION TICKET`,
+                style: "header",
+                alignment: "center",
+                margin: [0, 0, 0, 20],
+              },
+              {
+                canvas: [
+                  {
+                    type: "rect",
+                    x: 0,
+                    y: 0,
+                    w: 515,
+                    h: 130, 
+                    r: 5,
+                    lineColor: "#4A90E2",
+                    lineWidth: 1,
+                  },
+                ],
+                absolutePosition: { x: 40, y: 70 },
+              },
+              {
+                columns: [
+                  {
+                    width: "*",
+                    stack: [
+                      { text: 'THÔNG TIN NGƯỜI THAM DỰ / ATTENDEE INFORMATION', style: 'subheader', margin: [ 0, 0, 0, 10] },
+                      ...ticketContent
+                    ],
+                  },
+                  {
+                    width: 100,
+                    qr: `CONF:${pdfConferenceCode};ID:${pdfParticipantId};NAME:${pdfParticipantName}`,
+                    fit: "100",
+                    alignment: "right",
+                  },
+                ],
+                margin: [15, 15, 15, 15], 
+                absolutePosition: { x: 50, y: 80 },
+              },
+              
+              {
+                text: "CHI TIẾT SỰ KIỆN / EVENT DETAILS",
+                style: "subheader",
+                alignment: "center",
+                margin: [0, 15, 0, 10], 
+                absolutePosition: { x: 40, y: 220 }
+              },
+              {
+                style: 'eventDetails',
+                table: {
+                    widths: ['*'], 
+                    body: [
+                        [
+                            {
+                                stack: eventDetailsContent,
+                                border: [false, false, false, false],
+                                margin: [0,0,0,10]
+                            }
+                        ]
+                    ]
                 },
-                {
-                  width: 100,
-                  qr: `CONF:<%= conference ? conference.code : 'N/A' %>;ID:<%= participant ? participant.id : 'N/A' %>;NAME:<%= participant ? participant.name : 'N/A' %>`,
-                  fit: "100",
-                  alignment: "right",
-                },
-              ],
-              margin: [15, 15, 15, 15], // Inner padding for the box
-              absolutePosition: { x: 50, y: 80 },
+                layout: 'noBorders',
+                absolutePosition: { x: 40, y: 250 }, 
             },
             
-            {
-              text: "CHI TIẾT SỰ KIỆN / EVENT DETAILS",
-              style: "subheader",
-              alignment: "center",
-              margin: [0, 15, 0, 10], // y: 70 (box start) + 130 (box height) + 20 (spacing)
-              absolutePosition: { x: 40, y: 220 }
-            },
-            {
-              style: 'eventDetails',
-              table: {
-                  widths: ['*'], // Single column for now
-                  body: [
-                      [
-                          {
-                              stack: [
-                                  { text: 'Tên hội nghị:', style: 'fieldLabel' },
-                                  { text: `<%= conference ? conference.name : "Hội Nghị" %>`, style: 'fieldValue' },
-                                  { text: 'Ngày bắt đầu:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
-                                  { text: `<%= conference && conference.startDate ? new Date(conference.startDate).toLocaleDateString("vi-VN", {year: "numeric", month: "long", day: "numeric"}) : "---" %>`, style: 'fieldValue' },
-                                  { text: 'Thời gian:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
-                                  { text: `<%= conference && conference.time ? conference.time : "---" %>`, style: 'fieldValue' },
-                                  { text: 'Địa điểm:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
-                                  { text: `<%= locationName || "---" %>`, style: 'fieldValue' },
-                                  // { text: 'Địa chỉ:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
-                                  // { text: `<%= locationAddress || "---" %>`, style: 'fieldValue' }, // Keep this commented or provide data
-                                   <% if (conference && conference.mainSpeaker) { %>
-                                  { text: 'Diễn giả chính:', style: 'fieldLabel', margin: [0, 5, 0, 0] },
-                                  { text: `<%= conference.mainSpeaker %>`, style: 'fieldValue' },
-                                  <% } %>
-                              ],
-                              border: [false, false, false, false],
-                              margin: [0,0,0,10]
-                          }
-                      ]
-                  ]
+              {
+                text: "Trân trọng cảm ơn sự tham gia của quý vị!",
+                style: "thankYouNote",
+                alignment: "center",
+                margin: [0, 20, 0, 0],
+                absolutePosition: { x: 40, y: 450 } // Adjusted Y position
               },
-              layout: 'noBorders',
-              absolutePosition: { x: 40, y: 250 }, // Adjust Y as needed
-          },
+              {
+                text: `Mã đăng ký: ${pdfParticipantId}`, // Use the new participantId
+                style: 'registrationId', 
+                alignment: 'center',
+                absolutePosition: { x: 40, y: 480 } // Adjusted Y position
+              }
+            ],
+            styles: {
+              header: {
+                fontSize: 24,
+                bold: true,
+                color: '#0056b3'
+              },
+              subheader: {
+                fontSize: 16,
+                bold: true
+              },
+              fieldLabel: {
+                fontSize: 12,
+                bold: true,
+                margin: [0,0,5,0] // Add some right margin to label
+              },
+              fieldValue: {
+                fontSize: 12
+              },
+              thankYouNote: {
+                fontSize: 14,
+                bold: true,
+                color: '#0056b3'
+              },
+              registrationId: {
+                fontSize: 12,
+                bold: true
+              }
+            },
+            defaultStyle: {
+              font: 'Roboto'
+            }
+          };
           
-            {
-              text: "Trân trọng cảm ơn sự tham gia của quý vị!",
-              style: "thankYouNote",
-              alignment: "center",
-              margin: [0, 20, 0, 0],
-              absolutePosition: { x: 40, y: 400 } // Adjust Y position based on content above
-            },
-            {
-              text: `Mã đăng ký: <%= conference ? conference.code : 'CONF' %>-<%= participant ? String(participant.registrationNumber).padStart(4, '0') : '0000' %>`,
-              style: 'registrationId', 
-              alignment: 'center',
-              absolutePosition: { x: 40, y: 520 } // Adjust Y based on QR code
-            }
-          ],
-          styles: {
-            header: {
-              fontSize: 24,
-              bold: true,
-              color: '#0056b3'
-            },
-            subheader: {
-              fontSize: 16,
-              bold: true
-            },
-            fieldLabel: {
-              fontSize: 12,
-              bold: true
-            },
-            fieldValue: {
-              fontSize: 12
-            },
-            thankYouNote: {
-              fontSize: 14,
-              bold: true,
-              color: '#0056b3'
-            },
-            registrationId: {
-              fontSize: 12,
-              bold: true
-            }
-          },
-          defaultStyle: {
-            font: 'Roboto'
-          }
-        };
-        
-        // Create and download the PDF
-        pdfMake.createPdf(docDefinition).download(`xac_nhan_dang_ky_${participantName.replace(/\s+/g, '_')}.pdf`);
-        
-      } catch (error) {
-        console.error('Lỗi khi tạo PDF:', error);
-        alert('Lỗi khi tạo PDF. Vui lòng thử lại sau.');
-      }
-    });
+          pdfMake.createPdf(docDefinition).download(`xac_nhan_dang_ky_${pdfParticipantName.replace(/\s+/g, '_')}.pdf`);
+          
+        } catch (error) {
+          console.error('Lỗi khi tạo PDF:', error);
+          alert('Lỗi khi tạo PDF. Vui lòng thử lại sau.');
+        }
+      });
+    }
   });
 </script> 

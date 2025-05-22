@@ -78,8 +78,68 @@ app.use(express.static(path.join(__dirname, '../frontend/public')));
 // Connect to MongoDB
 // mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/conference-registration')
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(() => {
+    console.log('Connected to MongoDB');
+    // Check for participants without proper participantIds
+    checkParticipantIds();
+    // Check and set active conference if none exists
+    setActiveConferenceIfNone();
+  })
   .catch(err => console.error('Could not connect to MongoDB', err));
+
+/**
+ * Check if any participants need their IDs updated and show a warning
+ */
+async function checkParticipantIds() {
+  try {
+    const Participant = mongoose.model('Participant');
+    const participantsWithoutId = await Participant.countDocuments({ $or: [
+      { participantId: { $exists: false } },
+      { participantId: null },
+      { participantId: '' }
+    ]});
+    
+    if (participantsWithoutId > 0) {
+      console.warn('\n🟡 WARNING: ' + 
+        `Found ${participantsWithoutId} participants without a proper participantId.` +
+        '\nYou should run the migration script to ensure all participants have IDs:' +
+        '\n   node backend/migrations/updateParticipantIdsByConference.js\n'
+      );
+    }
+  } catch (error) {
+    console.error('Error checking participant IDs:', error);
+  }
+}
+
+/**
+ * Check if any conference is active; if not, set the most recent one as active
+ */
+async function setActiveConferenceIfNone() {
+  try {
+    const Conference = mongoose.model('Conference');
+    
+    // Check if any conference is currently active
+    const activeConferenceCount = await Conference.countDocuments({ isActive: true });
+    
+    if (activeConferenceCount === 0) {
+      // No active conferences, get most recent one by creation date
+      const mostRecentConference = await Conference.findOne().sort({ createdAt: -1 });
+      
+      if (mostRecentConference) {
+        // Set this conference as active
+        mostRecentConference.isActive = true;
+        await mostRecentConference.save();
+        console.log(`\n🟢 Set conference "${mostRecentConference.name}" (${mostRecentConference.code}) as active by default`);
+      } else {
+        console.log('\n🟡 No conferences found in the database. No active conference set.');
+      }
+    } else {
+      console.log('\n🟢 Found active conference(s) in the database. No changes needed.');
+    }
+  } catch (error) {
+    console.error('Error setting active conference:', error);
+  }
+}
 
 // Routes
 app.use('/register', registerRoutes);
@@ -97,7 +157,9 @@ app.get('/api/qrcode', async (req, res) => {
     // Build the registration URL
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     let registrationUrl = `${baseUrl}/register`;
-    registrationUrl = `http://192.168.1.130:3000/register`;
+    // registrationUrl = `http://192.168.1.130:3000/register`;
+    registrationUrl = `http://192.168.2.245:3000/register`;
+    
     // registrationUrl = `http://172.20.10.7:3000/register`;
     // Add the conference code if provided
     // if (code) {

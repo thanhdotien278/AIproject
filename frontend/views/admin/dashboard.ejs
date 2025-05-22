@@ -4,35 +4,48 @@
 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
   <div class="flex-1">
     <h1 class="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
-    <div class="flex items-center">
-      <label for="conference-select" class="text-gray-700 font-medium mr-4">Choose Conference:</label>
-      <div class="relative flex-1 max-w-md">
-        <select id="conference-select" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-          <option value="all">All Conferences</option>
-          <% if (typeof conferences !== 'undefined' && conferences.length > 0) { %>
-            <% conferences.forEach((conference, index) => { %>
-              <option value="<%= conference.code %>" <%= index === 0 ? 'selected' : '' %>><%= conference.name %></option>
-            <% }); %>
-          <% } else { %>
-            <option value="conf2024" disabled>No conferences available</option>
-          <% } %>
-        </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-          </svg>
+    <div class="flex flex-col md:flex-row md:items-center gap-2">
+      <div class="flex items-center">
+        <label for="conference-select" class="text-gray-700 font-medium mr-4">Choose Conference:</label>
+        <div class="relative flex-1">
+          <select id="conference-select" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+            <% if (typeof conferences !== 'undefined' && conferences.length > 0) { %>
+              <% conferences.forEach((conference, index) => { %>
+                <option value="<%= conference.code %>" <%= index === 0 ? 'selected' : '' %>><%= conference.name %></option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled>No conferences available</option>
+            <% } %>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+            </svg>
+          </div>
         </div>
+      </div>
+      
+      <!-- Conference Action Buttons moved next to dropdown -->
+      <div class="flex items-center gap-2 mt-2 md:mt-0">
+        <button id="select-conference-btn" class="conference-action-btn btn bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75">
+          Select
+        </button>
+        <button id="stop-conference-btn" class="conference-action-btn btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75">
+          Stop
+        </button>
       </div>
     </div>
   </div>
   
-  <!-- New Conference Button -->
-  <button id="new-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white flex items-center">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-    </svg>
-    New Conference
-  </button>
+  <div class="flex items-center justify-end mt-4 md:mt-0">
+    <!-- New Conference Button -->
+    <button id="new-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white flex items-center px-4 py-2 rounded-lg shadow-md">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      New Conference
+    </button>
+  </div>
 </div>
 
 <!-- Conference Information -->
@@ -175,6 +188,9 @@
 <div class="bg-white rounded-lg shadow">
   <div class="px-6 py-4 border-b border-gray-200">
     <h3 class="text-lg font-semibold text-gray-800">Registered Participants</h3>
+    <p class="text-sm text-gray-600 mt-1">
+      Participant IDs are conference-specific: each conference starts from "0001" regardless of other conferences.
+    </p>
   </div>
   
   <div>
@@ -211,15 +227,12 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200" id="participants-table-body">
-          <% participants.forEach((participant, index) => { 
-              // Generate a participant ID based on conference code and registration number
-              const conferenceCode = participant.conferenceCode || 'CONF';
-              const registrationNumber = (index + 1).toString().padStart(5, '0');
-              const participantId = conferenceCode + registrationNumber;
-          %>
+          <% participants.forEach((participant, index) => { %>
+            <%# participant.displayId is now directly available from the controller %>
+            <% const participantIdToDisplay = participant.displayId || 'N/A'; %>
             <tr data-id="<%= participant._id %>" data-conference="<%= participant.conferenceCode || 'CONF' %>">
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                <%= participantId %>
+                <%= participantIdToDisplay %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 <%= participant.name %>
@@ -255,69 +268,92 @@
                 <%= participant.role || '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.speech || '-' %>
+                <% if (participant.speech) { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Yes
+                  </span>
+                <% } else { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    No
+                  </span>
+                <% } %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.lunch || '-' %>
+                <% if (participant.lunch) { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Yes
+                  </span>
+                <% } else { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    No
+                  </span>
+                <% } %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.dinner || '-' %>
+                <% if (participant.dinner) { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Yes
+                  </span>
+                <% } else { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    No
+                  </span>
+                <% } %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= participant.transport || '-' %>
+                <% if (participant.transport) { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Yes
+                  </span>
+                <% } else { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    No
+                  </span>
+                <% } %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">
                 <%= participant.feedback || '-' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">
                 <%= participant.questions || '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%# Format registrationTime. Adjust locale and options as needed %>
-                <%= participant.registrationTime ? new Date(participant.registrationTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-' %>
+                <%= new Date(participant.registrationTime).toLocaleString('vi-VN') %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <% if (participant.attendance) { %>
-                  <span class="text-green-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <% if (participant.attendanceStatus === 'attended') { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Attended
+                  </span>
+                <% } else if (participant.attendanceStatus === 'absent') { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    Absent
                   </span>
                 <% } else { %>
-                  <span class="text-red-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </span>
-                <% } %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <% if (participant.emailSent) { %>
-                  <span class="text-green-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </span>
-                <% } else { %>
-                  <span class="text-red-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </span>
+                  <button class="mark-attendance-btn btn btn-sm bg-gray-200 hover:bg-gray-300 text-gray-700" data-action="attended">Mark Attended</button>
+                  <button class="mark-attendance-btn btn btn-sm bg-gray-200 hover:bg-gray-300 text-gray-700 mt-1" data-action="absent">Mark Absent</button>
                 <% } %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <% if (participant.emailSent) { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Sent
+                  </span>
+                <% } else { %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                    Pending
+                  </span>
+                <% } %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                  <button class="send-email-btn text-blue-600 hover:text-blue-800" <%= participant.emailSent ? 'disabled' : '' %>>
-                    <% if (participant.emailSent) { %>
-                      Email Sent
-                    <% } else { %>
+                  <% if (!participant.emailSent) { %>
+                    <button class="send-email-btn text-blue-600 hover:text-blue-800">
                       Send Email
-                    <% } %>
-                  </button>
-                  <button class="view-participant-btn text-gray-600 hover:text-gray-800">
-                    View
-                  </button>
+                    </button>
+                  <% } %>
+                  <button class="edit-participant-btn text-indigo-600 hover:text-indigo-900">Edit</button>
+                  <button class="delete-participant-btn text-red-600 hover:text-red-900">Delete</button>
                 </div>
               </td>
             </tr>
@@ -511,9 +547,9 @@
 
 <!-- Modal to view participant details -->
 <div id="participant-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg max-w-lg w-full mx-4">
-    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-      <h3 class="text-lg font-semibold text-gray-800">Participant Details</h3>
+  <div class="bg-white rounded-lg max-w-3xl w-full mx-4 max-h-[90vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+      <h3 class="text-lg font-semibold text-gray-800" id="modal-title">Participant Details</h3>
       <button id="close-modal" class="text-gray-500 hover:text-gray-700">
         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
           <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
@@ -521,460 +557,930 @@
       </button>
     </div>
     
-    <div class="px-6 py-4">
-      <div id="modal-content" class="space-y-4">
-        <!-- Content will be dynamically populated -->
-      </div>
+    <div class="overflow-y-auto px-6 py-4 flex-1">
+      <form id="edit-participant-form" class="space-y-4">
+        <input type="hidden" id="participant-id" name="_id">
+        <input type="hidden" id="conference-code" name="conferenceCode">
+        
+        <!-- Basic Information -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="participant-id-display" class="block text-sm font-medium text-gray-700 mb-1">Participant ID</label>
+            <input type="text" id="participant-id-display" class="form-input w-full bg-gray-100 border border-gray-300 rounded-md py-2 px-3 text-gray-700" readonly>
+            <p class="text-xs text-gray-500 mt-1">ID cannot be changed</p>
+          </div>
+          
+          <div>
+            <label for="participant-name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
+            <input type="text" id="participant-name" name="name" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700" required>
+          </div>
+          
+          <div>
+            <label for="participant-email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+            <input type="email" id="participant-email" name="email" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700" required>
+          </div>
+          
+          <div>
+            <label for="participant-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone <span class="text-red-500">*</span></label>
+            <input type="tel" id="participant-phone" name="phone" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700" required>
+          </div>
+          
+          <div>
+            <label for="participant-workunit" class="block text-sm font-medium text-gray-700 mb-1">Work Unit</label>
+            <input type="text" id="participant-workunit" name="workunit" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+          </div>
+          
+          <div>
+            <label for="participant-rank" class="block text-sm font-medium text-gray-700 mb-1">Rank</label>
+            <input type="text" id="participant-rank" name="rank" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+          </div>
+          
+          <div>
+            <label for="participant-academic" class="block text-sm font-medium text-gray-700 mb-1">Academic</label>
+            <input type="text" id="participant-academic" name="academic" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+          </div>
+          
+          <div>
+            <label for="participant-position" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+            <input type="text" id="participant-position" name="position" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+          </div>
+          
+          <div>
+            <label for="participant-role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <input type="text" id="participant-role" name="role" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+          </div>
+          
+          <div>
+            <label for="participant-speciality" class="block text-sm font-medium text-gray-700 mb-1">Speciality</label>
+            <input type="text" id="participant-speciality" name="speciality" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+          </div>
+        </div>
+        
+        <!-- Additional Information -->
+        <div class="mt-6">
+          <h4 class="text-md font-medium text-gray-700 mb-2">Options</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <label class="inline-flex items-center">
+              <input type="checkbox" id="participant-speech" name="speech" class="form-checkbox h-4 w-4 text-blue-600">
+              <span class="ml-2 text-sm text-gray-700">Speech</span>
+            </label>
+            <label class="inline-flex items-center">
+              <input type="checkbox" id="participant-lunch" name="lunch" class="form-checkbox h-4 w-4 text-blue-600">
+              <span class="ml-2 text-sm text-gray-700">Lunch</span>
+            </label>
+            <label class="inline-flex items-center">
+              <input type="checkbox" id="participant-dinner" name="dinner" class="form-checkbox h-4 w-4 text-blue-600">
+              <span class="ml-2 text-sm text-gray-700">Dinner</span>
+            </label>
+            <label class="inline-flex items-center">
+              <input type="checkbox" id="participant-transport" name="transport" class="form-checkbox h-4 w-4 text-blue-600">
+              <span class="ml-2 text-sm text-gray-700">Transport</span>
+            </label>
+            <label class="inline-flex items-center">
+              <input type="checkbox" id="participant-email-sent" name="emailSent" class="form-checkbox h-4 w-4 text-blue-600">
+              <span class="ml-2 text-sm text-gray-700">Email Sent</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="participant-feedback" class="block text-sm font-medium text-gray-700 mb-1">Feedback</label>
+            <textarea id="participant-feedback" name="feedback" rows="3" class="form-textarea w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"></textarea>
+          </div>
+          
+          <div>
+            <label for="participant-questions" class="block text-sm font-medium text-gray-700 mb-1">Questions</label>
+            <textarea id="participant-questions" name="questions" rows="3" class="form-textarea w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"></textarea>
+          </div>
+        </div>
+        
+        <!-- Registration Time (read-only) -->
+        <div>
+          <label for="participant-registration-time" class="block text-sm font-medium text-gray-700 mb-1">Registration Time</label>
+          <input type="text" id="participant-registration-time" class="form-input w-full bg-gray-100 border border-gray-300 rounded-md py-2 px-3 text-gray-700" readonly>
+        </div>
+      </form>
     </div>
     
-    <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
-      <button id="close-modal-btn" class="btn bg-gray-600 hover:bg-gray-700 text-white">Close</button>
+    <div class="px-6 py-4 border-t border-gray-200 flex justify-end sticky bottom-0 bg-white z-10">
+      <button id="close-modal-btn" class="btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded mr-2">Cancel</button>
+      <button id="save-participant-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Save Changes</button>
     </div>
   </div>
 </div>
 
 <%- contentFor('script') %>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const sendBulkEmailsBtn = document.getElementById('send-bulk-emails');
-    const alertContainer = document.getElementById('alert-container');
-    const alertBox = document.getElementById('alert-box');
-    const alertMessage = document.getElementById('alert-message');
-    const closeAlert = document.getElementById('close-alert');
-    const newConferenceBtn = document.getElementById('new-conference-btn');
-    const newConferenceModal = document.getElementById('new-conference-modal');
-    const closeConferenceModal = document.getElementById('close-conference-modal');
-    const cancelConferenceBtn = document.getElementById('cancel-conference-btn');
-    const saveConferenceBtn = document.getElementById('save-conference-btn');
+document.addEventListener('DOMContentLoaded', function() {
+    // Existing dashboard JavaScript (event listeners for conference select, buttons, etc.)
     const conferenceSelect = document.getElementById('conference-select');
-    const conferenceInfo = document.getElementById('conference-info');
-    const confName = document.getElementById('conf-name');
-    const confDates = document.getElementById('conf-dates');
-    const confLocation = document.getElementById('conf-location');
-    const confTime = document.getElementById('conf-time');
-    const totalRegistrations = document.getElementById('total-registrations');
-    const lunchCount = document.getElementById('lunch-count');
-    const dinnerCount = document.getElementById('dinner-count');
-    const transportCount = document.getElementById('transport-count');
-    const hocVienCount = document.getElementById('hocvien-count');
-    const donViNgoaiCount = document.getElementById('donvingoai-count');
     const participantsTableBody = document.getElementById('participants-table-body');
+    const totalRegistrationsEl = document.getElementById('total-registrations');
+    const lunchCountEl = document.getElementById('lunch-count');
+    const dinnerCountEl = document.getElementById('dinner-count');
+    const transportCountEl = document.getElementById('transport-count');
+    const hocVienCountEl = document.getElementById('hocvien-count');
+    const donViNgoaiCountEl = document.getElementById('donvingoai-count');
+
+    const confNameEl = document.getElementById('conf-name');
+    const confLocationEl = document.getElementById('conf-location');
+    const confTimeEl = document.getElementById('conf-time');
+    const confDatesEl = document.getElementById('conf-dates');
+    const conferenceInfoDiv = document.getElementById('conference-info');
+
+    const newConferenceBtn = document.getElementById('new-conference-btn');
+    const exportExcelBtn = document.querySelector('a[href="/admin/export"]'); // Assuming this is the export button
+
+    // New buttons for Select/Stop Conference
+    const selectConferenceBtn = document.getElementById('select-conference-btn');
+    const stopConferenceBtn = document.getElementById('stop-conference-btn');
+    const conferenceActionBtns = document.querySelectorAll('.conference-action-btn');
     
-    // Store conferences data for client-side access
-    const conferencesData = <%- JSON.stringify(conferences || []) %>;
+    // Important: Make sure we use the same variable throughout the code for the conference select dropdown
+    // conferenceSelectDropdown should refer to the same element as conferenceSelect
+    const conferenceSelectDropdown = conferenceSelect;
     
-    // Store participants data for filtering
-    const participantsData = <%- JSON.stringify(participants || []) %>;
+    // Add this line to help debug
+    console.log('Conference select found:', conferenceSelect ? 'Yes' : 'No');
     
-    // Store locations data
-    let locationsData = [];
-    
-    // Fetch locations
-    const fetchLocations = async () => {
-      try {
-        const response = await fetch('/admin/locations');
-        const data = await response.json();
-        
-        if (data.success) {
-          locationsData = data.locations;
-          populateLocationDropdown();
-        } else {
-          showAlert('Failed to load locations', 'error');
-        }
-      } catch (error) {
-        console.error('Error fetching locations:', error);
-        showAlert('Error loading locations', 'error');
-      }
-    };
-    
-    // Populate the location dropdown
-    const populateLocationDropdown = () => {
-      const locationSelect = document.getElementById('location');
-      
-      // Clear existing options except the default one
-      while (locationSelect.options.length > 1) {
-        locationSelect.remove(1);
-      }
-      
-      // Add location options
-      locationsData.forEach((location, index) => {
-        const option = document.createElement('option');
-        option.value = location._id;
-        option.textContent = location.name;
-        locationSelect.appendChild(option);
-        
-        // Select the first location by default
-        if (index === 0) {
-          option.selected = true;
-        }
-      });
-    };
-    
-    // Set up date field synchronization
-    const startDateField = document.getElementById('start-date');
-    const endDateField = document.getElementById('end-date');
-    
-    if (startDateField && endDateField) {
-      startDateField.addEventListener('change', function() {
-        // When start date changes, set end date to same value
-        endDateField.value = this.value;
-      });
+    // Ensure the dropdown exists before continuing
+    if (!conferenceSelect) {
+        console.error('Conference select dropdown not found in the DOM');
+        return;
     }
-    
-    // Open new conference modal
-    newConferenceBtn.addEventListener('click', function() {
-      // Fetch locations before showing the modal
-      fetchLocations();
-      
-      newConferenceModal.classList.remove('hidden');
+
+    // Active state classes for new buttons
+    const selectActiveClasses = ['bg-sky-700', 'ring-2', 'ring-sky-400', 'ring-offset-1', 'shadow-lg'];
+    const stopActiveClasses = ['bg-red-700', 'ring-2', 'ring-red-400', 'ring-offset-1', 'shadow-lg'];
+
+    // Default state classes for new buttons
+    const selectDefaultClasses = ['bg-sky-500', 'hover:bg-sky-600'];
+    const stopDefaultClasses = ['bg-red-500', 'hover:bg-red-600'];
+
+    // --- Logic for Select/Stop Conference Buttons ---
+    conferenceActionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const isAlreadyActive = this.dataset.active === 'true';
+            const selectedConferenceCode = conferenceSelectDropdown.value;
+            const selectedConferenceName = conferenceSelectDropdown.selectedOptions[0] ? 
+                conferenceSelectDropdown.selectedOptions[0].text : 'N/A';
+
+            // Deactivate all conference action buttons first
+            conferenceActionBtns.forEach(b => {
+                b.dataset.active = 'false';
+                if (b.id === 'select-conference-btn') {
+                    b.classList.remove(...selectActiveClasses);
+                    b.classList.add(...selectDefaultClasses);
+                } else if (b.id === 'stop-conference-btn') {
+                    b.classList.remove(...stopActiveClasses);
+                    b.classList.add(...stopDefaultClasses);
+                }
+            });
+
+            if (!isAlreadyActive) {
+                if (!selectedConferenceCode) {
+                    showAdminAlert('Please select a conference first', 'error');
+                    return;
+                }
+
+                this.dataset.active = 'true';
+                if (this.id === 'select-conference-btn') {
+                    this.classList.remove(...selectDefaultClasses);
+                    this.classList.add(...selectActiveClasses);
+                    
+                    // Call API to activate the selected conference
+                    fetch(`/admin/api/conferences/${selectedConferenceCode}/activate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAdminAlert(`Conference "${selectedConferenceName}" is now active and available for registration`, 'success');
+                            // Refresh data to show updated status
+                            fetchDashboardData(selectedConferenceCode);
+                        } else {
+                            showAdminAlert(data.message || 'Failed to activate conference', 'error');
+                            this.dataset.active = 'false';
+                            this.classList.remove(...selectActiveClasses);
+                            this.classList.add(...selectDefaultClasses);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error activating conference:', error);
+                        showAdminAlert('Error activating conference', 'error');
+                        this.dataset.active = 'false';
+                        this.classList.remove(...selectActiveClasses);
+                        this.classList.add(...selectDefaultClasses);
+                    });
+                } else if (this.id === 'stop-conference-btn') {
+                    this.classList.remove(...stopDefaultClasses);
+                    this.classList.add(...stopActiveClasses);
+                    
+                    // Call API to deactivate the selected conference
+                    fetch(`/admin/api/conferences/${selectedConferenceCode}/deactivate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAdminAlert(`Conference "${selectedConferenceName}" has been deactivated. Users can no longer register.`, 'warning');
+                            // Refresh data to show updated status
+                            fetchDashboardData(selectedConferenceCode);
+                        } else {
+                            showAdminAlert(data.message || 'Failed to deactivate conference', 'error');
+                            this.dataset.active = 'false';
+                            this.classList.remove(...stopActiveClasses);
+                            this.classList.add(...stopDefaultClasses);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deactivating conference:', error);
+                        showAdminAlert('Error deactivating conference', 'error');
+                        this.dataset.active = 'false';
+                        this.classList.remove(...stopActiveClasses);
+                        this.classList.add(...stopDefaultClasses);
+                    });
+                }
+            } else {
+                // If clicking an already active button, cancel the action
+                if (this.id === 'select-conference-btn') {
+                    showAdminAlert('Selection canceled', 'info');
+                } else if (this.id === 'stop-conference-btn') {
+                    showAdminAlert('Stop action canceled', 'info');
+                }
+            }
+        });
     });
-    
-    // Close new conference modal
-    [closeConferenceModal, cancelConferenceBtn].forEach(el => {
-      el.addEventListener('click', function() {
-        newConferenceModal.classList.add('hidden');
-        // Reset form
-        document.getElementById('new-conference-form').reset();
-      });
+
+    const socket = io();
+
+    socket.on('connect', () => {
+        console.log('Connected to Socket.IO server from admin dashboard');
+        // Request initial stats for the default selected conference
+        const initialConferenceCode = conferenceSelect.value;
+        fetchDashboardData(initialConferenceCode);
     });
-    
-    // Function to update dashboard stats based on selected conference
-    function updateDashboardStats(conferenceCode) {
-      // Filter participants by conference code if specific conference is selected
-      let filteredParticipants = participantsData;
-      if (conferenceCode !== 'all') {
-        filteredParticipants = participantsData.filter(p => p.conferenceCode === conferenceCode);
-      }
-      
-      // Update stats
-      totalRegistrations.textContent = filteredParticipants.length;
-      lunchCount.textContent = filteredParticipants.filter(p => p.lunch).length;
-      dinnerCount.textContent = filteredParticipants.filter(p => p.dinner).length;
-      transportCount.textContent = filteredParticipants.filter(p => p.transport).length;
-      hocVienCount.textContent = filteredParticipants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
-      
-      // Calculate donViNgoaiCount based on the new hocVienCount for the filtered set
-      const currentHocVienCount = filteredParticipants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
-      donViNgoaiCount.textContent = filteredParticipants.length - currentHocVienCount;
-      
-      // Update conference info
-      if (conferenceCode !== 'all') {
-        const conference = conferencesData.find(c => c.code === conferenceCode);
+
+    socket.on('statsUpdated', (updatedStats) => {
+        console.log('Received statsUpdated event:', updatedStats);
+        const currentSelectedConference = conferenceSelect.value;
+        // Update stats only if they are for the currently selected conference or 'all'
+        if (updatedStats.conferenceCode === currentSelectedConference || currentSelectedConference === 'all') {
+            updateStatsDisplay(updatedStats.stats);
+            if (updatedStats.participants) {
+                 // If a specific conference is selected and matches, or if 'all' is selected, update table
+                if (currentSelectedConference === 'all' || updatedStats.conferenceCode === currentSelectedConference) {
+                    renderParticipantsTable(updatedStats.participants);
+                }
+            }
+            if (updatedStats.conferenceDetails && updatedStats.conferenceCode !== 'all') {
+                updateConferenceInfoDisplay(updatedStats.conferenceDetails);
+            }
+        }
+    });
+
+    function updateConferenceInfoDisplay(conference) {
         if (conference) {
-          conferenceInfo.classList.remove('hidden');
-          confName.textContent = conference.name;
-          
-          // Format dates
-          const startDate = new Date(conference.startDate);
-          const endDate = new Date(conference.endDate);
-          const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-          confDates.textContent = `${startDate.toLocaleDateString(undefined, formatOptions)} - ${endDate.toLocaleDateString(undefined, formatOptions)}`;
-          
-          // Get location name properly
-          confLocation.textContent = conference.location && conference.location.name ? conference.location.name : 'Unknown';
-          
-          // Get time
-          const time = conference.time || 'Not specified';
-          confTime.textContent = time;
-        }
-      } else {
-        conferenceInfo.classList.add('hidden');
-      }
-      
-      // Update table rows visibility
-      const rows = participantsTableBody.querySelectorAll('tr');
-      rows.forEach(row => {
-        const rowConference = row.dataset.conference;
-        if (conferenceCode === 'all' || rowConference === conferenceCode) {
-          row.classList.remove('hidden');
+            confNameEl.textContent = conference.name || '-';
+            confLocationEl.textContent = conference.location ? conference.location.name : (conference.locationName || '-');
+            confTimeEl.textContent = conference.time || '-';
+            confDatesEl.textContent = conference.formattedDates || '-';
+            conferenceInfoDiv.classList.remove('hidden');
         } else {
-          row.classList.add('hidden');
+            conferenceInfoDiv.classList.add('hidden');
         }
-      });
+    }
+
+    function fetchDashboardData(conferenceCode) {
+        console.log(`Fetching data for conference: ${conferenceCode}`);
+        
+        // Check if the conference code is valid
+        if (!conferenceCode) {
+            console.error('Invalid conference code provided to fetchDashboardData');
+            showAdminAlert('Invalid conference selection', 'error');
+            return;
+        }
+        
+        // Show loading indicator in the participants table
+        participantsTableBody.innerHTML = `
+            <tr>
+                <td colspan="18" class="text-center py-4">
+                    <div class="flex justify-center items-center">
+                        <svg class="animate-spin h-5 w-5 mr-3 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-gray-500">Loading participants...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        fetch(`/admin/api/dashboard-data?conferenceCode=${conferenceCode}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log('Dashboard data received:', data);
+                    console.log(`Received ${data.participants ? data.participants.length : 0} participants`);
+                    
+                    // Update stats
+                    updateStatsDisplay(data.stats);
+                    
+                    // Update participants table
+                    renderParticipantsTable(data.participants);
+                    
+                    // Update conference options to show active status if the data includes conference list
+                    if (data.conferences && data.conferences.length > 0) {
+                        updateConferenceDropdown(data.conferences, conferenceCode);
+                    }
+                    
+                    // Update conference details display
+                    if (data.conferenceDetails) {
+                        updateConferenceInfoDisplay(data.conferenceDetails);
+                        conferenceInfoDiv.classList.remove('hidden');
+                    } else {
+                        conferenceInfoDiv.classList.add('hidden');
+                    }
+                    
+                    // Update export URL
+                    if (exportExcelBtn) {
+                        exportExcelBtn.href = `/admin/export?conferenceCode=${conferenceCode}`;
+                    }
+                } else {
+                    showAdminAlert(data.message || 'Error fetching dashboard data.', 'error');
+                    participantsTableBody.innerHTML = '<tr><td colspan="18" class="text-center py-4 text-red-500">Error loading participants</td></tr>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching dashboard data:', error);
+                showAdminAlert('Network error or server issue while fetching dashboard data.', 'error');
+                participantsTableBody.innerHTML = '<tr><td colspan="18" class="text-center py-4 text-red-500">Error: Could not load participants</td></tr>';
+            });
+    }
+
+    function updateConferenceDropdown(conferences, currentSelection) {
+        console.log(`Updating conference dropdown with selection: ${currentSelection}`);
+        
+        // Store current scroll position
+        const scrollPosition = window.scrollY;
+        
+        // Save the current selection if not provided
+        if (!currentSelection && conferenceSelect.selectedOptions.length > 0) {
+            currentSelection = conferenceSelect.value;
+            console.log(`Using existing selection: ${currentSelection}`);
+        }
+        
+        // Clear existing options
+        while (conferenceSelect.options.length > 0) {
+            conferenceSelect.remove(0);
+        }
+        
+        // Add conferences to dropdown
+        if (conferences.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.text = 'No conferences available';
+            option.disabled = true;
+            conferenceSelect.appendChild(option);
+        } else {
+            conferences.forEach(conference => {
+                const option = document.createElement('option');
+                option.value = conference.code;
+                // Add a marker for active conferences
+                option.text = conference.name + (conference.isActive ? ' (Active)' : '');
+                option.selected = conference.code === currentSelection;
+                // Add data attributes for the active status
+                option.dataset.isActive = conference.isActive;
+                conferenceSelect.appendChild(option);
+                
+                if (conference.code === currentSelection) {
+                    console.log(`Selected option created: ${option.text}`);
+                }
+            });
+            
+            // If the current selection is not in the list, select the first option
+            if (conferenceSelect.selectedIndex === -1 && conferenceSelect.options.length > 0) {
+                conferenceSelect.selectedIndex = 0;
+                console.log(`Selection not found, defaulting to first option: ${conferenceSelect.options[0].text}`);
+            }
+        }
+        
+        console.log(`Dropdown updated with ${conferenceSelect.options.length} options, selected: ${conferenceSelect.selectedIndex}`);
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollPosition);
+    }
+
+    function updateStatsDisplay(stats) {
+        totalRegistrationsEl.textContent = stats.totalParticipants || 0;
+        lunchCountEl.textContent = stats.lunchCount || 0;
+        dinnerCountEl.textContent = stats.dinnerCount || 0;
+        transportCountEl.textContent = stats.transportCount || 0;
+        hocVienCountEl.textContent = stats.hocVienCount || 0;
+        donViNgoaiCountEl.textContent = stats.donViNgoaiCount || 0;
+    }
+
+    function renderParticipantsTable(participants) {
+        console.log(`Rendering ${participants ? participants.length : 0} participants in table`);
+        
+        // Clear existing rows
+        participantsTableBody.innerHTML = ''; 
+        
+        // If no participants, show a message
+        if (!participants || participants.length === 0) {
+            participantsTableBody.innerHTML = '<tr><td colspan="18" class="text-center py-4 text-gray-500">No participants for this conference.</td></tr>';
+            return;
+        }
+        
+        // Loop through participants and create table rows
+        participants.forEach((participant, index) => {
+            // Use participant.displayId which is already formatted as 4-digit string by the controller
+            const participantIdToDisplay = participant.displayId || 'N/A'; 
+            
+            const row = `
+                <tr data-id="${participant._id}" data-conference="${participant.conferenceCode || 'CONF'}">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${participantIdToDisplay}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${participant.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${participant.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${participant.phone || '-'}</td>
+                    <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
+                      <%/*= participant.address || '-' */%>
+                    <%/* </td> */%>
+                    <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
+                      <%/*= participant.age || '-' */%>
+                    <%/* </td> */%>
+                    <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
+                      <%/*= participant.business || '-' */%>
+                    <%/* </td> */%>
+                    <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
+                      <%/*= participant.nationality || '-' */%>
+                    <%/* </td> */%>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${participant.workunit || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${participant.rank || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${participant.academic || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${participant.role || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${participant.speech ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${participant.speech ? 'Yes' : 'No'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${participant.lunch ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${participant.lunch ? 'Yes' : 'No'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${participant.dinner ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${participant.dinner ? 'Yes' : 'No'}
+                        </span>
+                    </td>
+                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${participant.transport ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${participant.transport ? 'Yes' : 'No'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">${participant.feedback || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">${participant.questions || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(participant.registrationTime || participant.registrationDate || participant.createdAt).toLocaleString('vi-VN')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${participant.attendanceStatus === 'attended' ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Attended</span>' : 
+                          participant.attendanceStatus === 'absent' ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Absent</span>' : 
+                          '<button class="mark-attendance-btn btn btn-sm bg-gray-200 hover:bg-gray-300 text-gray-700" data-action="attended">Mark Attended</button><button class="mark-attendance-btn btn btn-sm bg-gray-200 hover:bg-gray-300 text-gray-700 mt-1" data-action="absent">Mark Absent</button>'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="email-status-${participant._id} px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${participant.emailSent ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${participant.emailSent ? 'Sent' : 'Pending'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <button class="send-email-btn text-blue-600 hover:text-blue-800" ${participant.emailSent ? 'disabled' : ''} >
+                                ${participant.emailSent ? 'Email Sent' : 'Send Email'}
+                            </button>
+                            <button class="edit-participant-btn text-indigo-600 hover:text-indigo-900">Edit</button>
+                            <button class="delete-participant-btn text-red-600 hover:text-red-900">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            participantsTableBody.insertAdjacentHTML('beforeend', row);
+        });
+        
+        // Add event listeners to the newly created table rows
+        addTableActionListeners();
+        console.log('Table updated and event listeners attached');
+    }
+
+    function addTableActionListeners() {
+        document.querySelectorAll('.send-email-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.disabled) return;
+                const participantId = this.closest('tr').dataset.id;
+                sendSingleEmail(participantId, this);
+            });
+        });
+
+        document.querySelectorAll('.edit-participant-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const participantId = this.closest('tr').dataset.id;
+                openEditParticipantModal(participantId);
+            });
+        });
+
+        document.querySelectorAll('.delete-participant-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const participantId = this.closest('tr').dataset.id;
+                const participantName = this.closest('tr').querySelector('td:nth-child(2)').textContent.trim();
+                confirmAndDeleteParticipant(participantId, participantName);
+            });
+        });
+        document.querySelectorAll('.mark-attendance-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const participantId = this.closest('tr').dataset.id;
+                const action = this.dataset.action;
+                markAttendance(participantId, action, this);
+            });
+        });
     }
     
-    // Conference selection changes
-    conferenceSelect.addEventListener('change', function() {
-      const selectedConference = conferenceSelect.value;
-      updateDashboardStats(selectedConference);
-    });
-    
-    // Initialize dashboard with the selected conference
-    if (conferencesData.length > 0) {
-      fetchLocations().then(() => {
-        updateDashboardStats(conferenceSelect.value);
-      });
-    } else {
-      fetchLocations();
+    async function markAttendance(participantId, action, button) {
+        try {
+            const response = await fetch(`/admin/api/participants/${participantId}/attendance`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ attendanceStatus: action })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showAdminAlert('Attendance updated successfully!', 'success');
+                // Visually update the cell
+                const cell = button.parentElement;
+                if (action === 'attended') {
+                    cell.innerHTML = '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Attended</span>';
+                } else if (action === 'absent') {
+                    cell.innerHTML = '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Absent</span>';
+                }
+                fetchDashboardData(conferenceSelect.value); // Refresh stats and potentially table
+            } else {
+                showAdminAlert(result.message || 'Failed to update attendance.', 'error');
+            }
+        } catch (error) {
+            console.error('Error updating attendance:', error);
+            showAdminAlert('An error occurred while updating attendance.', 'error');
+        }
     }
-    
-    // Get selected registration fields
-    const getSelectedRegistrationFields = () => {
-      const checkboxes = document.querySelectorAll('input[name="registrationFields"]:checked');
-      const fields = Array.from(checkboxes).map(cb => cb.value);
-      console.log('Selected registration fields:', fields);
-      return fields;
-    };
-    
-    // Save new conference
-    saveConferenceBtn.addEventListener('click', async function() {
-      try {
-        // Get form data
-        const form = document.getElementById('new-conference-form');
-        const formData = new FormData(form);
-        const conferenceData = {};
-        
-        // Conference code validation (4 characters)
-        const codeInput = document.getElementById('conference-code');
-        const code = codeInput.value.trim().toUpperCase();
-        if (!code || code.length !== 4) {
-          showAlert('Conference code must be exactly 4 characters', 'error');
-          codeInput.focus();
-          return;
+
+    async function sendSingleEmail(participantId, button) {
+        button.disabled = true;
+        button.textContent = 'Sending...';
+        try {
+            const response = await fetch(`/admin/api/participants/${participantId}/send-email`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+            if (result.success) {
+                showAdminAlert('Email sent successfully!', 'success');
+                button.textContent = 'Email Sent';
+                const emailStatusSpan = document.querySelector(`.email-status-${participantId}`);
+                if (emailStatusSpan) {
+                    emailStatusSpan.classList.remove('bg-yellow-100', 'text-yellow-800');
+                    emailStatusSpan.classList.add('bg-green-100', 'text-green-800');
+                    emailStatusSpan.textContent = 'Sent';
+                }
+                 fetchDashboardData(conferenceSelect.value); // Refresh stats and potentially table
+            } else {
+                showAdminAlert(result.message || 'Failed to send email.', 'error');
+                button.disabled = false;
+                button.textContent = 'Send Email';
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            showAdminAlert('An error occurred while sending the email.', 'error');
+            button.disabled = false;
+            button.textContent = 'Send Email';
         }
-        
-        // Location validation
-        const locationSelect = document.getElementById('location');
-        if (!locationSelect.value) {
-          showAlert('Please select a location', 'error');
-          locationSelect.focus();
-          return;
-        }
-        
-        // Description validation - đã bỏ yêu cầu bắt buộc
-        
-        // Convert form data to JSON
-        formData.forEach((value, key) => {
-          conferenceData[key] = value;
-        });
-        
-        // Get selected registration fields with careful checking
-        const regFields = getSelectedRegistrationFields();
-        console.log('Selected registration fields:', regFields);
-        
-        // Make sure required fields are included
-        if (!regFields.includes('name')) regFields.push('name');
-        if (!regFields.includes('email')) regFields.push('email');
-        if (!regFields.includes('phone')) regFields.push('phone');
-        
-        conferenceData.registrationFields = regFields;
-        
-        console.log('Form data being submitted:', JSON.stringify(conferenceData, null, 2));
-        
-        // Disable save button during submission
-        saveConferenceBtn.disabled = true;
-        saveConferenceBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
-        
-        // Submit to the server
-        const response = await fetch('/admin/conferences/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(conferenceData)
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          // Show success message
-          showAlert('Conference created successfully!', 'success');
-          
-          // Add new conference to the dropdown
-          const newOption = document.createElement('option');
-          newOption.value = data.conference.code;
-          newOption.text = data.conference.name;
-          conferenceSelect.add(newOption, 1); // Add after "All Conferences" option
-          
-          // Select the new conference
-          conferenceSelect.value = data.conference.code;
-          
-          // Close the modal and reset form
-          newConferenceModal.classList.add('hidden');
-          form.reset();
-          
-          // Reload the page after a short delay to update all data
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          // Show error message
-          console.error('Error response from server:', data);
-          showAlert(data.message || 'Error creating conference', 'error');
-          saveConferenceBtn.disabled = false;
-          saveConferenceBtn.innerHTML = 'Create';
-        }
-      } catch (error) {
-        console.error('Error creating conference:', error);
-        showAlert('An error occurred while creating the conference. Check the console for details.', 'error');
-        saveConferenceBtn.disabled = false;
-        saveConferenceBtn.innerHTML = 'Create';
-      }
-    });
-    
-    // Send bulk emails
-    sendBulkEmailsBtn.addEventListener('click', async function() {
-      try {
-        sendBulkEmailsBtn.disabled = true;
-        sendBulkEmailsBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sending...';
-        
-        const response = await fetch('/admin/send-bulk-emails', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          showAlert(data.message, 'success');
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
-        } else {
-          showAlert(data.message, 'error');
-          sendBulkEmailsBtn.disabled = false;
-          sendBulkEmailsBtn.innerHTML = 'Send Bulk Emails';
-        }
-      } catch (error) {
-        console.error('Error sending bulk emails:', error);
-        showAlert('An error occurred while sending bulk emails', 'error');
-        sendBulkEmailsBtn.disabled = false;
-        sendBulkEmailsBtn.innerHTML = 'Send Bulk Emails';
-      }
-    });
-    
-    // Send individual email
-    const sendEmailBtns = document.querySelectorAll('.send-email-btn');
-    
-    // Close alert
-    closeAlert.addEventListener('click', function() {
-      alertContainer.classList.add('hidden');
-    });
-    
-    // View participant details
-    const viewParticipantBtns = document.querySelectorAll('.view-participant-btn');
-    
-    viewParticipantBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const row = this.closest('tr');
-        const participantId = row.dataset.id;
-        
-        // Find participant data
-        const participant = participantsData.find(p => p._id === participantId);
-        
-        if (participant) {
-          const modalContent = document.getElementById('modal-content');
-          
-          // Format registration date
-          const registrationDate = new Date(participant.registrationDate);
-          const dateOptions = { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          };
-          
-          // Create content
-          modalContent.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p class="text-gray-500 mb-1">Name</p>
-                <p class="text-lg font-medium">${participant.name}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Email</p>
-                <p class="text-lg">${participant.email}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Phone</p>
-                <p class="text-lg">${participant.phone || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Address</p>
-                <p class="text-lg">${participant.address || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Age</p>
-                <p class="text-lg">${participant.age || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Business</p>
-                <p class="text-lg">${participant.business || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Lunch</p>
-                <p class="text-lg">${participant.lunch || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Source</p>
-                <p class="text-lg">${participant.source || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Nationality</p>
-                <p class="text-lg">${participant.nationality || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Organization</p>
-                <p class="text-lg">${participant.organization || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Registration Date</p>
-                <p class="text-lg">${registrationDate.toLocaleString(undefined, dateOptions)}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Attendance</p>
-                <p class="text-lg">${participant.attendance ? 'Yes' : 'No'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Email Sent</p>
-                <p class="text-lg">${participant.emailSent ? 'Yes' : 'No'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Questions/Comments</p>
-                <p class="text-lg">${participant.questions || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 mb-1">Conference</p>
-                <p class="text-lg">${participant.conferenceCode}</p>
-              </div>
+    }
+
+    async function confirmAndDeleteParticipant(participantId, participantName) {
+        // Create a custom confirmation box
+        const confirmBox = document.createElement('div');
+        confirmBox.className = 'fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50';
+        confirmBox.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Confirm Deletion</h3>
+                <p class="text-gray-700 mb-4">Are you sure you want to delete participant <strong>${participantName}</strong>? This action cannot be undone.</p>
+                <div class="flex justify-end">
+                    <button class="btn-cancel bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded mr-2">Cancel</button>
+                    <button class="btn-confirm bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded">Delete</button>
+                </div>
             </div>
-          `;
-          
-          // Show modal
-          document.getElementById('participant-modal').classList.remove('hidden');
-        }
-      });
-    });
-    
-    // Close participant modal
-    [document.getElementById('close-modal'), document.getElementById('close-modal-btn')].forEach(el => {
-      el.addEventListener('click', function() {
-        document.getElementById('participant-modal').classList.add('hidden');
-      });
-    });
-    
-    // Helper function to show alert
-    function showAlert(message, type) {
-      alertMessage.textContent = message;
-      alertBox.className = 'px-4 py-3 rounded relative';
-      
-      if (type === 'success') {
-        alertBox.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-400');
-      } else {
-        alertBox.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-400');
-      }
-      
-      alertContainer.classList.remove('hidden');
-      
-      // Auto-close success alert after 5 seconds
-      if (type === 'success') {
-        setTimeout(() => {
-          alertContainer.classList.add('hidden');
-        }, 5000);
-      }
+        `;
+        
+        document.body.appendChild(confirmBox);
+        
+        // Handle button clicks
+        confirmBox.querySelector('.btn-cancel').addEventListener('click', () => {
+            document.body.removeChild(confirmBox);
+        });
+        
+        confirmBox.querySelector('.btn-confirm').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/admin/api/participants/${participantId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAdminAlert('Participant deleted successfully', 'success');
+                    // Refresh the data to reflect deletion
+                    fetchDashboardData(conferenceSelect.value);
+                } else {
+                    showAdminAlert(result.message || 'Failed to delete participant', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting participant:', error);
+                showAdminAlert('An error occurred while deleting participant', 'error');
+            } finally {
+                document.body.removeChild(confirmBox);
+            }
+        });
     }
-  });
+    
+    async function openEditParticipantModal(participantId) {
+        try {
+            const response = await fetch(`/admin/api/participants/${participantId}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                const participant = result.participant;
+                
+                // Set modal title and switch to edit mode
+                modalTitle.textContent = 'Edit Participant';
+                
+                // Fill hidden fields
+                document.getElementById('participant-id').value = participant._id;
+                document.getElementById('conference-code').value = participant.conferenceCode;
+                
+                // Fill visible fields
+                document.getElementById('participant-id-display').value = participant.participantId || 'N/A';
+                document.getElementById('participant-name').value = participant.name || '';
+                document.getElementById('participant-email').value = participant.email || '';
+                document.getElementById('participant-phone').value = participant.phone || '';
+                document.getElementById('participant-workunit').value = participant.workunit || '';
+                document.getElementById('participant-rank').value = participant.rank || '';
+                document.getElementById('participant-academic').value = participant.academic || '';
+                document.getElementById('participant-position').value = participant.position || '';
+                document.getElementById('participant-speciality').value = participant.speciality || '';
+                document.getElementById('participant-role').value = participant.role || '';
+                document.getElementById('participant-feedback').value = participant.feedback || '';
+                document.getElementById('participant-questions').value = participant.questions || '';
+                
+                // Set checkboxes
+                document.getElementById('participant-speech').checked = participant.speech || false;
+                document.getElementById('participant-lunch').checked = participant.lunch || false;
+                document.getElementById('participant-dinner').checked = participant.dinner || false;
+                document.getElementById('participant-transport').checked = participant.transport || false;
+                document.getElementById('participant-email-sent').checked = participant.emailSent || false;
+                
+                // Format and set registration time
+                let registrationTime = participant.registrationTime || participant.registrationDate || participant.createdAt;
+                if (registrationTime) {
+                    registrationTime = new Date(registrationTime).toLocaleString();
+                }
+                document.getElementById('participant-registration-time').value = registrationTime || 'Unknown';
+                
+                // Show modal
+                participantModal.classList.remove('hidden');
+            } else {
+                showAdminAlert(result.message || 'Failed to load participant details', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading participant details:', error);
+            showAdminAlert('An error occurred while loading participant details', 'error');
+        }
+    }
+    
+    // Save participant changes
+    saveParticipantBtn.addEventListener('click', async function() {
+        if (!editParticipantForm.checkValidity()) {
+            // Trigger native form validation
+            editParticipantForm.reportValidity();
+            return;
+        }
+        
+        try {
+            const participantId = document.getElementById('participant-id').value;
+            
+            // Create form data object
+            const formData = new FormData(editParticipantForm);
+            const participantData = {};
+            
+            // Convert form data to JSON object
+            formData.forEach((value, key) => {
+                // Handle checkboxes
+                if (key === 'speech' || key === 'lunch' || key === 'dinner' || 
+                    key === 'transport' || key === 'emailSent') {
+                    participantData[key] = true; // Checked checkboxes are included in formData
+                } else {
+                    participantData[key] = value;
+                }
+            });
+            
+            // For unchecked checkboxes, they won't be in formData, so add them explicitly
+            ['speech', 'lunch', 'dinner', 'transport', 'emailSent'].forEach(field => {
+                if (!participantData.hasOwnProperty(field)) {
+                    participantData[field] = false;
+                }
+            });
+            
+            saveParticipantBtn.disabled = true;
+            saveParticipantBtn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
+            
+            const response = await fetch(`/admin/api/participants/${participantId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(participantData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                closeModal();
+                showAdminAlert('Participant updated successfully', 'success');
+                
+                // Refresh the data to reflect changes
+                fetchDashboardData(conferenceSelect.value);
+            } else {
+                showAdminAlert(result.message || 'Failed to update participant', 'error');
+            }
+        } catch (error) {
+            console.error('Error updating participant:', error);
+            showAdminAlert('An error occurred while updating participant', 'error');
+        } finally {
+            saveParticipantBtn.disabled = false;
+            saveParticipantBtn.innerHTML = 'Save Changes';
+        }
+    });
+    
+    // Close modal when clicking close buttons or outside
+    [closeModalBtn, closeModalFooterBtn].forEach(btn => {
+        btn.addEventListener('click', closeModal);
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', e => {
+        if (e.target === participantModal) {
+            closeModal();
+        }
+    });
+    
+    function closeModal() {
+        participantModal.classList.add('hidden');
+        // Clear form when modal is closed
+        editParticipantForm.reset();
+    }
+
+    const sendBulkEmailsBtn = document.getElementById('send-bulk-emails');
+    if (sendBulkEmailsBtn) {
+        sendBulkEmailsBtn.addEventListener('click', async () => {
+            const selectedConference = conferenceSelect.value;
+            if (!selectedConference || selectedConference === 'all') {
+                showAdminAlert('Please select a specific conference to send bulk emails.', 'warning');
+                return;
+            }
+            if (!confirm(`Are you sure you want to send bulk emails for conference: ${conferenceSelect.options[conferenceSelect.selectedIndex].text}? This will only send to participants who haven't received an email yet.`)) {
+                return;
+            }
+            sendBulkEmailsBtn.disabled = true;
+            sendBulkEmailsBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sending...';
+
+            try {
+                const response = await fetch(`/admin/api/conferences/${selectedConference}/send-bulk-emails`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showAdminAlert(result.message || 'Bulk emails sent successfully!', 'success');
+                    fetchDashboardData(selectedConference); // Refresh data
+                } else {
+                    showAdminAlert(result.message || 'Failed to send bulk emails.', 'error');
+                }
+            } catch (error) {
+                console.error('Error sending bulk emails:', error);
+                showAdminAlert('An error occurred while sending bulk emails.', 'error');
+            } finally {
+                sendBulkEmailsBtn.disabled = false;
+                sendBulkEmailsBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg> Send Bulk Emails';
+            }
+        });
+    }
+
+    if (conferenceSelect) {
+        conferenceSelect.addEventListener('change', function() {
+            const selectedConferenceCode = this.value;
+            console.log('Conference selection changed to:', selectedConferenceCode);
+            
+            // Update UI elements to show which conference is selected
+            document.querySelectorAll('#conference-select option').forEach(option => {
+                if (option.value === selectedConferenceCode) {
+                    console.log(`Selected conference: ${option.text}`);
+                }
+            });
+            
+            // Call the fetch function to update the dashboard with the new selection
+            fetchDashboardData(selectedConferenceCode);
+        });
+    } else {
+        console.error('Conference select element not found - cannot attach change event handler');
+    }
+
+    // Function to show admin alerts (generic)
+    function showAdminAlert(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('alert-container');
+        const alertBox = document.getElementById('alert-box');
+        const alertMessage = document.getElementById('alert-message');
+        const closeButton = document.getElementById('close-alert');
+
+        if (!container || !alertBox || !alertMessage || !closeButton) {
+            console.error('Alert elements not found in the DOM.');
+            return;
+        }
+
+        alertMessage.textContent = message;
+
+        alertBox.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700', 'bg-green-100', 'border-green-500', 'text-green-700', 'bg-yellow-100', 'border-yellow-500', 'text-yellow-700', 'bg-red-100', 'border-red-500', 'text-red-700');
+
+        if (type === 'success') {
+            alertBox.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
+        } else if (type === 'error') {
+            alertBox.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
+        } else if (type === 'warning') {
+            alertBox.classList.add('bg-yellow-100', 'border-yellow-500', 'text-yellow-700');
+        } else {
+            alertBox.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-700');
+        }
+
+        container.classList.remove('hidden');
+        let alertTimeout = container.dataset.alertTimeout;
+        if(alertTimeout) clearTimeout(alertTimeout);
+
+        alertTimeout = setTimeout(() => {
+            container.classList.add('hidden');
+        }, duration);
+        container.dataset.alertTimeout = alertTimeout;
+
+        const closeAlertHandler = () => {
+            clearTimeout(alertTimeout);
+            container.classList.add('hidden');
+            closeButton.removeEventListener('click', closeAlertHandler); 
+        };
+        closeButton.removeEventListener('click', closeAlertHandler); // Remove previous before adding new
+        closeButton.addEventListener('click', closeAlertHandler);
+    }
+
+    if (newConferenceBtn) {
+        newConferenceBtn.addEventListener('click', () => {
+            window.location.href = '/admin/conferences/new'; 
+        });
+    }
+
+    // Initial fetch based on selected conference (if any)
+    if (conferenceSelect && conferenceSelect.value) {
+        fetchDashboardData(conferenceSelect.value);
+    } else {
+        // If no conference is selected, fetch all conferences to populate the dropdown
+        fetch('/admin/api/dashboard-data')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.conferences && data.conferences.length > 0) {
+                    updateConferenceDropdown(data.conferences);
+                    // Select the first conference
+                    if (conferenceSelect.options.length > 0) {
+                        fetchDashboardData(conferenceSelect.options[0].value);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching initial data:', error);
+            });
+    }
+});
 </script> 

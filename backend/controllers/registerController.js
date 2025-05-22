@@ -1,5 +1,6 @@
 const Participant = require('../models/Participant');
 const Conference = require('../models/Conference');
+const Counter = require('../models/Counter');
 const nodemailer = require('nodemailer');
 const fs = require('fs').promises;
 const path = require('path');
@@ -23,9 +24,29 @@ exports.showRegisterForm = async (req, res) => {
     let conference;
     if (conferenceCode) {
       conference = await Conference.findOne({ code: conferenceCode }).populate('location');
+      // If specific conference requested, check if it's active
+      if (conference && !conference.isActive) {
+        return res.render('registration_closed', {
+          message: 'Đã hết thời gian đăng kí. Xin cảm ơn!',
+          layout: false
+        });
+      }
     } else {
-      // Fallback to latest conference if no code provided
-      conference = await Conference.findOne().sort({ createdAt: -1 }).populate('location');
+      // Fallback to active conference if no code provided
+      conference = await Conference.findOne({ isActive: true }).populate('location');
+      
+      // If no active conference, try to get latest one (for admins to preview)
+      if (!conference) {
+        conference = await Conference.findOne().sort({ createdAt: -1 }).populate('location');
+        
+        // If found but not active, show registration closed message
+        if (conference) {
+          return res.render('registration_closed', {
+            message: 'Đã hết thời gian đăng kí. Xin cảm ơn!',
+            layout: false
+          });
+        }
+      }
     }
     
     if (!conference) {
@@ -74,16 +95,19 @@ exports.registerParticipant = async (req, res) => {
     // Find the conference by code from form
     let conference;
     if (req.body.conferenceCode) {
-      conference = await Conference.findOne({ code: req.body.conferenceCode });
+      conference = await Conference.findOne({ 
+        code: req.body.conferenceCode,
+        isActive: true // Only allow registration for active conferences
+      });
     } else {
-      // Fallback to latest conference if no code provided
-      conference = await Conference.findOne().sort({ createdAt: -1 });
+      // Fallback to active conference if no code provided
+      conference = await Conference.findOne({ isActive: true });
     }
     
     if (!conference) {
       return res.status(400).json({ 
         success: false, 
-        message: 'No conferences available for registration' 
+        message: 'Registration is currently closed or no active conferences available' 
       });
     }
     
@@ -110,12 +134,17 @@ exports.registerParticipant = async (req, res) => {
       });
     }
     
+    // Generate unique, conference-specific 4-digit participant ID using atomic Counter operation
+    const nextSequenceValue = await Counter.getNextSequenceValue(confCode);
+    const participantId = nextSequenceValue.toString().padStart(4, '0');
+    
     // Create participant data object with only the fields that are in registrationFields
     const participantData = {
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
       conferenceCode: confCode,
+      participantId: participantId, // Use the new 4-digit conference-specific ID
       registrationTime: new Date()
     };
     
@@ -216,7 +245,8 @@ exports.registerParticipant = async (req, res) => {
     req.session.participantEmail = req.body.email;
     req.session.conferenceName = conference.name;
     req.session.conferenceCode = conference.code;
-    req.session.participantData = participantData;
+    req.session.participantId = participantId; // Store the new ID in session
+    req.session.participantData = participantData; // participantData now contains participantId
     
     // Redirect to thank you page
     res.status(201).json({ 

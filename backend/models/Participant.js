@@ -113,8 +113,14 @@ const participantSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  
-  
+  participantId: { // Stores the 4-digit string ID (e.g., "0001")
+    type: String,
+    unique: true,
+    required: true,
+    index: true,
+    minLength: 4,
+    maxLength: 4
+  }
 });
 
 const Participant = mongoose.model('Participant', participantSchema);

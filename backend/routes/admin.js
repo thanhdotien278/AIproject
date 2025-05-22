@@ -57,6 +57,21 @@ router.delete('/api/users/:id', adminController.isAuthenticated, adminController
 // API route to get single conference details (for editing)
 router.get('/api/conferences/:id', adminController.isAuthenticated, adminController.getConferenceDetails);
 
+// API route to get dashboard data
+router.get('/api/dashboard-data', adminController.isAuthenticated, adminController.getDashboardData);
+
+// Routes for activating and deactivating conferences
+router.post('/api/conferences/:conferenceCode/activate', adminController.isAuthenticated, adminController.activateConference);
+router.post('/api/conferences/:conferenceCode/deactivate', adminController.isAuthenticated, adminController.deactivateConference);
+
+// API routes for participant management
+router.get('/api/participants/:id', adminController.isAuthenticated, adminController.getParticipantDetails);
+router.put('/api/participants/:id', adminController.isAuthenticated, adminController.updateParticipant);
+router.delete('/api/participants/:id', adminController.isAuthenticated, adminController.deleteParticipant);
+
+// Send confirmation email to a participant
+router.post('/api/participants/:participantId/send-email', adminController.isAuthenticated, adminController.sendEmail);
+
 // Import speaker routes
 const speakerRoutes = require('./speaker'); 
 
