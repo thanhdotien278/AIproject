@@ -172,73 +172,6 @@ exports.registerParticipant = async (req, res) => {
     
     // Save participant to database (only once for initial data + registrationTime)
     await participant.save();
-
-    // Prepare attachments asynchronously
-    const attachments = [];
-    const downloadsPath = path.join(__dirname, '../../frontend/public/downloads');
-    try {
-      const files = await fs.readdir(downloadsPath);
-      files.forEach(file => {
-        if (file !== '.gitignore') {
-          attachments.push({
-            filename: file,
-            path: path.join(downloadsPath, file)
-          });
-        }
-      });
-    } catch (attachError) {
-      if (attachError.code !== 'ENOENT') {
-        console.error('Error reading attachments directory:', attachError);
-      }
-    }
-
-    // Send confirmation email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: req.body.email,
-      subject: `Xác nhận đăng ký tham dự ${conference.name}`,
-      html: `
-        <p>Kính gửi Ông/Bà ${req.body.name},</p>
-        <p>Chúng tôi xác nhận bạn đã đăng ký thành công tham dự hội nghị <strong>${conference.name}</strong>.</p>
-        <p><strong>Thông tin đăng ký của bạn:</strong></p>
-        <ul>
-          <li>Họ và tên: ${req.body.name}</li>
-          <li>Email: ${req.body.email}</li>
-          <li>Điện thoại: ${req.body.phone}</li>
-          ${participantData.workunit ? `<li>Đơn vị công tác: ${participantData.workunit}</li>` : ''}
-          ${participantData.rank ? `<li>Cấp bậc: ${participantData.rank}</li>` : ''}
-          ${participantData.academic ? `<li>Học hàm/Học vị: ${participantData.academic}</li>` : ''}
-          ${participantData.position ? `<li>Chức vụ: ${participantData.position}</li>` : ''}
-          ${participantData.speciality ? `<li>Chuyên ngành: ${participantData.speciality}</li>` : ''}
-          ${participantData.address ? `<li>Địa chỉ: ${participantData.address}</li>` : ''}
-          ${participantData.age ? `<li>Tuổi: ${participantData.age}</li>` : ''}
-          ${participantData.business ? `<li>Lĩnh vực: ${participantData.business}</li>` : ''}
-          ${participantData.nationality ? `<li>Quốc tịch: ${participantData.nationality}</li>` : ''}
-          ${participantData.role ? `<li>Vai trò tham dự: ${participantData.role}</li>` : ''}
-          ${registrationFields.includes('speech') ? `<li>Đăng ký phát biểu: ${participantData.speech ? 'Có' : 'Không'}</li>` : ''}
-          ${registrationFields.includes('lunch') ? `<li>Đăng ký ăn trưa: ${participantData.lunch ? 'Có' : 'Không'}</li>` : ''}
-          ${registrationFields.includes('dinner') ? `<li>Đăng ký ăn tối: ${participantData.dinner ? 'Có' : 'Không'}</li>` : ''}
-          ${registrationFields.includes('transport') ? `<li>Đăng ký xe đưa đón: ${participantData.transport ? 'Có' : 'Không'}</li>` : ''}
-          ${participantData.feedback ? `<li>Góp ý: ${participantData.feedback}</li>` : ''}
-          ${participantData.questions ? `<li>Câu hỏi cho BTC: ${participantData.questions}</li>` : ''}
-          ${participantData.source ? `<li>Nguồn biết đến hội nghị: ${participantData.source}</li>` : ''}
-        </ul>
-        <p>Chúng tôi rất mong được đón tiếp bạn tại sự kiện.</p>
-        ${attachments.length > 0 ? '<p><strong>Vui lòng kiểm tra các tài liệu quan trọng được đính kèm trong email này.</strong></p>' : ''}
-        <p>Trân trọng,<br>Ban tổ chức ${conference.name}</p>
-      `,
-      attachments: attachments
-    };
-
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      try {
-        await transporter.sendMail(mailOptions);
-        participant.emailSent = true;
-        await participant.save();
-      } catch (emailError) {
-        console.error('Error sending email:', emailError);
-      }
-    }
     
     // Save participant data and conference info in session for thank you page
     req.session.participantName = req.body.name;
@@ -248,7 +181,7 @@ exports.registerParticipant = async (req, res) => {
     req.session.participantId = participantId; // Store the new ID in session
     req.session.participantData = participantData; // participantData now contains participantId
     
-    // Redirect to thank you page
+    // Redirect to thank you page immediately without waiting for email
     res.status(201).json({ 
       success: true,
       message: 'Registration successful',
@@ -257,6 +190,81 @@ exports.registerParticipant = async (req, res) => {
 
     // After sending response, update and emit stats (fire and forget)
     calculateAndEmitStats();
+    
+    // Send confirmation email in the background (without blocking the response)
+    setImmediate(async () => {
+      try {
+        // Prepare attachments asynchronously
+        const attachments = [];
+        const downloadsPath = path.join(__dirname, '../../frontend/public/downloads');
+        try {
+          const files = await fs.readdir(downloadsPath);
+          files.forEach(file => {
+            if (file !== '.gitignore') {
+              attachments.push({
+                filename: file,
+                path: path.join(downloadsPath, file)
+              });
+            }
+          });
+        } catch (attachError) {
+          if (attachError.code !== 'ENOENT') {
+            console.error('Error reading attachments directory:', attachError);
+          }
+        }
+    
+        // Send confirmation email
+        const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: req.body.email,
+          subject: `Xác nhận đăng ký tham dự ${conference.name}`,
+          html: `
+            <p>Kính gửi Ông/Bà ${req.body.name},</p>
+            <p>Chúng tôi xác nhận bạn đã đăng ký thành công tham dự hội nghị <strong>${conference.name}</strong>.</p>
+            <p><strong>Thông tin đăng ký của bạn:</strong></p>
+            <ul>
+              <li>Họ và tên: ${req.body.name}</li>
+              <li>Email: ${req.body.email}</li>
+              <li>Điện thoại: ${req.body.phone}</li>
+              ${participantData.workunit ? `<li>Đơn vị công tác: ${participantData.workunit}</li>` : ''}
+              ${participantData.rank ? `<li>Cấp bậc: ${participantData.rank}</li>` : ''}
+              ${participantData.academic ? `<li>Học hàm/Học vị: ${participantData.academic}</li>` : ''}
+              ${participantData.position ? `<li>Chức vụ: ${participantData.position}</li>` : ''}
+              ${participantData.speciality ? `<li>Chuyên ngành: ${participantData.speciality}</li>` : ''}
+              ${participantData.address ? `<li>Địa chỉ: ${participantData.address}</li>` : ''}
+              ${participantData.age ? `<li>Tuổi: ${participantData.age}</li>` : ''}
+              ${participantData.business ? `<li>Lĩnh vực: ${participantData.business}</li>` : ''}
+              ${participantData.nationality ? `<li>Quốc tịch: ${participantData.nationality}</li>` : ''}
+              ${participantData.role ? `<li>Vai trò tham dự: ${participantData.role}</li>` : ''}
+              ${registrationFields.includes('speech') ? `<li>Đăng ký phát biểu: ${participantData.speech ? 'Có' : 'Không'}</li>` : ''}
+              ${registrationFields.includes('lunch') ? `<li>Đăng ký ăn trưa: ${participantData.lunch ? 'Có' : 'Không'}</li>` : ''}
+              ${registrationFields.includes('dinner') ? `<li>Đăng ký ăn tối: ${participantData.dinner ? 'Có' : 'Không'}</li>` : ''}
+              ${registrationFields.includes('transport') ? `<li>Đăng ký xe đưa đón: ${participantData.transport ? 'Có' : 'Không'}</li>` : ''}
+              ${participantData.feedback ? `<li>Góp ý: ${participantData.feedback}</li>` : ''}
+              ${participantData.questions ? `<li>Câu hỏi cho BTC: ${participantData.questions}</li>` : ''}
+              ${participantData.source ? `<li>Nguồn biết đến hội nghị: ${participantData.source}</li>` : ''}
+            </ul>
+            <p>Chúng tôi rất mong được đón tiếp bạn tại sự kiện.</p>
+            ${attachments.length > 0 ? '<p><strong>Vui lòng kiểm tra các tài liệu quan trọng được đính kèm trong email này.</strong></p>' : ''}
+            <p>Trân trọng,<br>Ban tổ chức ${conference.name}</p>
+          `,
+          attachments: attachments
+        };
+    
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+          try {
+            await transporter.sendMail(mailOptions);
+            // Update participant's emailSent flag
+            await Participant.findByIdAndUpdate(participant._id, { emailSent: true });
+            console.log(`Confirmation email sent successfully to ${req.body.email}`);
+          } catch (emailError) {
+            console.error('Error sending confirmation email:', emailError);
+          }
+        }
+      } catch (error) {
+        console.error('Error in background email sending:', error);
+      }
+    });
     
   } catch (error) {
     console.error('Registration error:', error);

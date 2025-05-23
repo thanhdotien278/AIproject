@@ -158,7 +158,7 @@ app.get('/api/qrcode', async (req, res) => {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     let registrationUrl = `${baseUrl}/register`;
     // registrationUrl = `http://192.168.1.130:3000/register`;
-    registrationUrl = `http://192.168.2.245:3000/register`;
+    registrationUrl = `http://192.168.2.250:3000/register`;
     
     // registrationUrl = `http://172.20.10.7:3000/register`;
     // Add the conference code if provided
@@ -247,6 +247,7 @@ app.get('/', async (req, res) => {
 
 // Thank you route
 app.get('/thankyou', async (req, res) => {
+  console.time('Total /thankyou route time');
   try {
     // Get participant data from session
     const participantName = req.session.participantName;
@@ -256,19 +257,25 @@ app.get('/thankyou', async (req, res) => {
     const participantData = req.session.participantData;
     
     if (!participantEmail) {
+      console.timeEnd('Total /thankyou route time');
       return res.redirect('/');
     }
     
+    console.time('Find participant by email');
     // Find the participant in database to get all registration details
     const participant = await mongoose.model('Participant').findOne({ email: participantEmail });
+    console.timeEnd('Find participant by email');
     
+    console.time('Find latest conference');
     // Find the latest conference details
     const conference = await mongoose.model('Conference').findOne()
                               .sort({ createdAt: -1 })
                               .populate('location');
+    console.timeEnd('Find latest conference');
     
     if (!conference) {
-      return res.render('thankyou', { 
+      console.time('Render thankyou page');
+      res.render('thankyou', { 
         participantName,
         participantEmail,
         participant: participantData || null, // Use session data as fallback
@@ -277,6 +284,9 @@ app.get('/thankyou', async (req, res) => {
         locationName: null,
         locationAddress: null
       });
+      console.timeEnd('Render thankyou page');
+      console.timeEnd('Total /thankyou route time');
+      return;
     }
     
     // Format dates for display
@@ -299,6 +309,7 @@ app.get('/thankyou', async (req, res) => {
       participantName: participant ? participant.name : (participantName || 'N/A')
     };
 
+    console.time('Render thankyou page');
     res.render('thankyou', { 
       participantName,
       participantEmail,
@@ -309,23 +320,26 @@ app.get('/thankyou', async (req, res) => {
       locationAddress,
       qrData: qrDataForPdf
     });
+    console.timeEnd('Render thankyou page');
+    console.timeEnd('Total /thankyou route time');
   } catch (error) {
     console.error('Error rendering thank you page:', error);
     // Use session data as fallback in case of error
-  const participantName = req.session.participantName;
-  const participantEmail = req.session.participantEmail;
+    const participantName = req.session.participantName;
+    const participantEmail = req.session.participantEmail;
     const conferenceName = req.session.conferenceName;
     const conferenceCode = req.session.conferenceCode;
     const participantData = req.session.participantData;
   
-  const fallbackQrData = {
-    conferenceCode: conferenceCode || 'N/A',
-    participantId: 'N/A',
-    participantName: participantName || 'N/A'
-  };
+    const fallbackQrData = {
+      conferenceCode: conferenceCode || 'N/A',
+      participantId: 'N/A',
+      participantName: participantName || 'N/A'
+    };
 
-  res.render('thankyou', { 
-    participantName,
+    console.time('Render thankyou page');
+    res.render('thankyou', { 
+      participantName,
       participantEmail,
       participant: participantData || null,
       conference: { name: conferenceName || 'Hội Nghị', code: conferenceCode },
@@ -333,7 +347,9 @@ app.get('/thankyou', async (req, res) => {
       locationName: null,
       locationAddress: null,
       qrData: fallbackQrData
-  });
+    });
+    console.timeEnd('Render thankyou page');
+    console.timeEnd('Total /thankyou route time');
   }
 });
 
