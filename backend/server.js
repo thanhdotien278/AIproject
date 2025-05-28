@@ -6,9 +6,11 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 const expressLayouts = require('express-ejs-layouts');
 const QRCode = require('qrcode');
+const sharp = require('sharp');
 const flash = require('connect-flash');
 const http = require('http');
-const { Server } = require("socket.io");
+const { Server } = require('socket.io');
+const os = require('os');
 
 // Load environment variables
 dotenv.config();
@@ -87,60 +89,6 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch(err => console.error('Could not connect to MongoDB', err));
 
-/**
- * Check if any participants need their IDs updated and show a warning
- */
-async function checkParticipantIds() {
-  try {
-    const Participant = mongoose.model('Participant');
-    const participantsWithoutId = await Participant.countDocuments({ $or: [
-      { participantId: { $exists: false } },
-      { participantId: null },
-      { participantId: '' }
-    ]});
-    
-    if (participantsWithoutId > 0) {
-      console.warn('\n🟡 WARNING: ' + 
-        `Found ${participantsWithoutId} participants without a proper participantId.` +
-        '\nYou should run the migration script to ensure all participants have IDs:' +
-        '\n   node backend/migrations/updateParticipantIdsByConference.js\n'
-      );
-    }
-  } catch (error) {
-    console.error('Error checking participant IDs:', error);
-  }
-}
-
-/**
- * Check if any conference is active; if not, set the most recent one as active
- */
-async function setActiveConferenceIfNone() {
-  try {
-    const Conference = mongoose.model('Conference');
-    
-    // Check if any conference is currently active
-    const activeConferenceCount = await Conference.countDocuments({ isActive: true });
-    
-    if (activeConferenceCount === 0) {
-      // No active conferences, get most recent one by creation date
-      const mostRecentConference = await Conference.findOne().sort({ createdAt: -1 });
-      
-      if (mostRecentConference) {
-        // Set this conference as active
-        mostRecentConference.isActive = true;
-        await mostRecentConference.save();
-        console.log(`\n🟢 Set conference "${mostRecentConference.name}" (${mostRecentConference.code}) as active by default`);
-      } else {
-        console.log('\n🟡 No conferences found in the database. No active conference set.');
-      }
-    } else {
-      console.log('\n🟢 Found active conference(s) in the database. No changes needed.');
-    }
-  } catch (error) {
-    console.error('Error setting active conference:', error);
-  }
-}
-
 // Routes
 app.use('/register', registerRoutes);
 app.use('/admin', adminRoutes);
@@ -154,35 +102,69 @@ app.get('/api/qrcode', async (req, res) => {
     // Get the conference code from query parameters
     const { code } = req.query;
     
-    // Build the registration URL
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    let registrationUrl = `${baseUrl}/register`;
-    // registrationUrl = `http://192.168.1.130:3000/register`;
-    registrationUrl = `http://192.168.2.250:3000/register`;
+    // Build the registration URL using dynamic IP detection
+    const ip = getLocalIpAddress();
+    let registrationUrl = `http://${ip}:3000/register`;
     
-    // registrationUrl = `http://172.20.10.7:3000/register`;
     // Add the conference code if provided
-    // if (code) {
-    //   registrationUrl += `?code=${code}`;
-    // }
+    if (code) {
+      registrationUrl += `?code=${code}`;
+    }
     
-    // registrationUrl = `https://dev.3tsmart.org/2`;
-    // Generate QR code as data URL
-    const qrCodeDataUrl = await QRCode.toDataURL(registrationUrl, {
+    console.log('QR Code Registration URL:', registrationUrl);
+    
+    // Generate QR code as buffer first
+    const qrCodeBuffer = await QRCode.toBuffer(registrationUrl, {
       width: 300,
-      margin: 1,
+      margin: 2,
       color: {
-        dark: '#2563eb', // Blue color for QR code
+        dark: '#000000', // Black for better scanning
         light: '#ffffff' // White background
       }
     });
     
-    // Send the QR code data URL
-    res.send({ qrCodeDataUrl });
+    try {
+      // Load the favicon and overlay it on the QR code
+      const faviconPath = path.join(__dirname, '../frontend/public/images/favicon.png');
+      const logoSize = 60; // Logo size for better visibility but still scannable
+      
+      const faviconBuffer = await sharp(faviconPath)
+        .resize(logoSize, logoSize)
+        .png()
+        .toBuffer();
+      
+      // Overlay favicon on QR code
+      const finalQRCode = await sharp(qrCodeBuffer)
+        .composite([
+          {
+            input: faviconBuffer,
+            top: Math.floor((300 - logoSize) / 2), // Center vertically
+            left: Math.floor((300 - logoSize) / 2), // Center horizontally
+          }
+        ])
+        .png()
+        .toBuffer();
+      
+      // Convert to data URL
+      const qrCodeDataUrl = `data:image/png;base64,${finalQRCode.toString('base64')}`;
+      
+      // Send the QR code data URL
+      res.send({ qrCodeDataUrl });
+    } catch (logoError) {
+      console.warn('Error adding logo to QR code, falling back to plain QR code:', logoError);
+      // If logo processing fails, fall back to plain QR code
+      const qrCodeDataUrl = `data:image/png;base64,${qrCodeBuffer.toString('base64')}`;
+      res.send({ qrCodeDataUrl });
+    }
   } catch (error) {
     console.error('Error generating QR code:', error);
     res.status(500).send({ error: 'Failed to generate QR code' });
   }
+});
+
+// Route for printable QR code page
+app.get('/qrcode', async (req, res) => {
+  res.render('qrcode');
 });
 
 // Home route
@@ -382,4 +364,57 @@ io.on('connection', (socket) => {
 // Start server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-}); 
+});
+
+// Function to get local IP address
+function getLocalIpAddress() {
+  const interfaces = os.networkInterfaces();
+  for (let iface of Object.values(interfaces)) {
+    for (let config of iface) {
+      if (config.family === 'IPv4' && !config.internal) {
+        return config.address;
+      }
+    }
+  }
+  return 'localhost'; // fallback
+}
+
+// Check for participants without proper participantIds (utility function)
+async function checkParticipantIds() {
+  try {
+    const Participant = mongoose.model('Participant');
+    const participantsWithoutIds = await Participant.find({
+      $or: [
+        { participantId: { $exists: false } },
+        { participantId: null },
+        { participantId: '' }
+      ]
+    });
+    
+    if (participantsWithoutIds.length > 0) {
+      console.log(`Found ${participantsWithoutIds.length} participants without proper IDs`);
+      // Could add logic here to fix IDs if needed
+    }
+  } catch (error) {
+    console.error('Error checking participant IDs:', error);
+  }
+}
+
+// Set active conference if none exists (utility function)
+async function setActiveConferenceIfNone() {
+  try {
+    const Conference = mongoose.model('Conference');
+    const activeConference = await Conference.findOne({ isActive: true });
+    
+    if (!activeConference) {
+      const latestConference = await Conference.findOne().sort({ createdAt: -1 });
+      if (latestConference) {
+        latestConference.isActive = true;
+        await latestConference.save();
+        console.log(`Set conference ${latestConference.code} as active`);
+      }
+    }
+  } catch (error) {
+    console.error('Error setting active conference:', error);
+  }
+} 

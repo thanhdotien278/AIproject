@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - Conference Registration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .qr-code {
+            max-width: 400px;
+            max-height: 400px;
+            width: 100%;
+            height: auto;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .qr-title {
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .qr-subtitle {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #6b7280;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .qr-container {
+                padding: 0;
+            }
+            
+            .qr-code {
+                border: none;
+                box-shadow: none;
+                max-width: none;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="qr-container">
+        <h1 class="qr-title">Conference Registration</h1>
+        <img id="qr-code" class="qr-code" src="" alt="Registration QR Code">
+        <p class="qr-subtitle">Scan to register for the conference</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const qrCodeElement = document.getElementById('qr-code');
+            let qrCodeUrl = '/api/qrcode';
+            
+            // Get conference code from URL parameters if available
+            const urlParams = new URLSearchParams(window.location.search);
+            const conferenceCode = urlParams.get('code');
+            if (conferenceCode) {
+                qrCodeUrl += `?code=${conferenceCode}`;
+            }
+
+            fetch(qrCodeUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (qrCodeElement && data.qrCodeDataUrl) {
+                        qrCodeElement.src = data.qrCodeDataUrl;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching QR code:', error);
+                    if (qrCodeElement) {
+                        qrCodeElement.alt = "Error loading QR Code";
+                        qrCodeElement.style.display = 'none';
+                    }
+                });
+        });
+    </script>
+</body>
+</html> 
