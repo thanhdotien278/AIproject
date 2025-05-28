@@ -129,7 +129,7 @@ ISC License
 
 ## Author
 
-Time format: "9:00 - 12:00, 14:00 - 17:00". Good   ok
+Time format: "9:00 - 12:00, 14:00 - 17:00". Good   ok 2
 
 ## Acknowledgements
 
