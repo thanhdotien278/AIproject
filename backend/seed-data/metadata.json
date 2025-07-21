@@ -1,0 +1,21 @@
+{
+  "exportDate": "2025-07-21T11:26:33.794Z",
+  "databaseName": "conference-registration",
+  "collections": {
+    "users": 2,
+    "locations": 4,
+    "conferences": 4,
+    "participants": 210,
+    "speakers": 6,
+    "counters": 16
+  },
+  "totalRecords": 242,
+  "instructions": {
+    "import": "To import this data on a new PC, use: npm run seed:import",
+    "requirements": [
+      "Make sure MongoDB is running",
+      "Update .env file with correct MONGODB_URI",
+      "Run 'npm install' to install dependencies"
+    ]
+  }
+}

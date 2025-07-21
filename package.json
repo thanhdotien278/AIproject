@@ -11,6 +11,8 @@
     "watch:css": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css --watch",
     "seed": "node backend/config/seedAdmin.js",
     "seed:locations": "node backend/seedLocations.js",
+    "seed:export": "node backend/seedExport.js",
+    "seed:import": "node backend/seedImport.js",
     "dev:all": "concurrently \"npm run watch:css\" \"npm run dev\""
   },
   "keywords": [

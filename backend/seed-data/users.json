@@ -1,0 +1,30 @@
+[
+  {
+    "_id": "680a3f0a6bd6ba92460f635f",
+    "username": "admin",
+    "password": "$2b$10$CQm5LnPn1EAfQRnPAIJcdudBVbsiGIK3TjC7LkmsqvLIcLnBRDwhC",
+    "isAdmin": true,
+    "createdAt": "2025-04-24T13:39:22.137Z",
+    "__v": 0,
+    "email": "thanhdt@vmmu.edu.vn",
+    "fullName": "Đỗ Tiến Thành",
+    "updatedAt": "2025-04-28T03:01:47.886Z",
+    "shortBio": "Trung tá, Giảng viên K80",
+    "userRole": "admin",
+    "userPhone": "0985834366"
+  },
+  {
+    "_id": "680b9fd368b97c70982f5920",
+    "username": "rec1",
+    "password": "$2b$10$Vg1fttXTWYoKVvtp5OWcB.0v4n8sXEa.xZfx/eMLXUjiTHSe9cTLi",
+    "fullName": "Nguyễn Thị A",
+    "email": "nguyena@vmmu.edu.vn",
+    "userRole": "receptionist",
+    "shortBio": "Thiếu tá, Cán bộ K80",
+    "isAdmin": false,
+    "createdAt": "2025-04-25T14:44:35.018Z",
+    "updatedAt": "2025-04-25T14:59:25.713Z",
+    "__v": 0,
+    "userPhone": "0986668888"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "680b55d58bff7ed741cffb63",
+    "name": "Hội trường tầng 9",
+    "address": "Tầng 9, Tòa nhà chính",
+    "capacity": 200,
+    "createdAt": "2025-04-25T09:28:53.158Z",
+    "updatedAt": "2025-04-25T09:30:13.192Z",
+    "__v": 0
+  },
+  {
+    "_id": "680b55d58bff7ed741cffb64",
+    "name": "Hội trường Đỗ Xuân Hợp",
+    "address": "Giảng đường trung tâm",
+    "capacity": 150,
+    "createdAt": "2025-04-25T09:28:53.158Z",
+    "updatedAt": "2025-04-25T09:30:34.215Z",
+    "__v": 0
+  },
+  {
+    "_id": "680de8605fbfc8a0a7b460c7",
+    "name": "Hội trường Hệ 4",
+    "address": "Hội trường Hệ 4",
+    "capacity": 300,
+    "createdAt": "2025-04-27T08:18:40.516Z",
+    "updatedAt": "2025-04-27T08:18:40.520Z",
+    "__v": 0
+  },
+  {
+    "_id": "681b25e09e146843fc8a9c4f",
+    "name": "Nhà khách Học viện Quân y",
+    "address": "60 Nguyễn Du, TP. Sầm Sơn, Tỉnh Thanh Hóa",
+    "capacity": 300,
+    "createdAt": "2025-05-07T09:20:32.902Z",
+    "updatedAt": "2025-05-07T09:20:32.903Z",
+    "__v": 0
+  }
+]
