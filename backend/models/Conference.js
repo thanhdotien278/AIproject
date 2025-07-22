@@ -75,6 +75,16 @@ const conferenceSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  targetAudience: [{
+    type: String,
+    enum: [
+      'Sĩ quan',
+      'Quân nhân chuyên nghiệp',
+      'Viên chức quốc phòng',
+      'Hạ sĩ quan binh sĩ',
+      'Học viên'
+    ]
+  }],
   registrationFields: [{
     type: String,
     enum: [
@@ -95,9 +105,11 @@ const conferenceSchema = new mongoose.Schema({
       'lunch',
       'dinner',
       'transport',
+      'qime',
       'feedback',
       'questions',
-      'source'
+      'source',
+      'targetAudience'
     ]
   }],
   createdAt: {

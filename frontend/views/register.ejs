@@ -124,6 +124,38 @@
         </div>
       <% } %>
 
+      <!-- Target Audience -->
+      <% if (registrationFields.includes('targetAudience')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>👥</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Đối tượng</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Target</div>
+            </div>
+            <div class="relative flex-grow">
+              <select id="targetAudience" name="targetAudience" class="w-full bg-transparent focus:outline-none text-gray-700 px-4 py-3 text-sm appearance-none">
+                <option value="">Đối tượng</option>
+                <% if (conference.targetAudience && conference.targetAudience.length > 0) { %>
+                  <% conference.targetAudience.forEach(audience => { %>
+                    <option value="<%= audience %>"><%= audience %></option>
+                  <% }); %>
+                <% } else { %>
+                  <option value="Sĩ quan">Sĩ quan</option>
+                  <option value="Quân nhân chuyên nghiệp">Quân nhân chuyên nghiệp</option>
+                  <option value="Viên chức quốc phòng">Viên chức quốc phòng</option>
+                  <option value="Hạ sĩ quan binh sĩ">Hạ sĩ quan binh sĩ</option>
+                  <option value="Học viên">Học viên</option>
+                <% } %>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-gray-700">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
       <!-- Rank -->
       <% if (registrationFields.includes('rank')) { %>
         <div class="flex items-center space-x-3">
@@ -368,7 +400,7 @@
       <% } %>
 
       <% /* --- Textarea Fields --- */ %>
-       <% if (registrationFields.some(field => ['feedback', 'questions', 'source'].includes(field))) { %>
+       <% if (registrationFields.some(field => ['feedback', 'questions', 'source', 'qime'].includes(field))) { %>
         <hr class="my-6 border-gray-300">
         <h3 class="text-lg font-semibold text-center text-gray-700 mb-4">Thông tin khác / Other Info</h3>
       <% } %>
@@ -411,6 +443,23 @@
             </div>
             <input type="text" id="source" name="source" class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm" placeholder="Bạn biết hội nghị từ đâu? / Source">
             <div class="pr-4"></div> <!-- Right padding -->
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Qime Field -->
+      <% if (registrationFields.includes('qime')) { %>
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>💬</span></div>
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+              <div class="font-bold text-sm leading-tight whitespace-nowrap">Qime App</div>
+              <div class="text-xs leading-tight whitespace-nowrap">Messaging</div>
+            </div>
+            <input type="text" id="qime-display" readonly class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm cursor-default" placeholder="Bạn đã cài Qime chưa?">
+            <div class="flex items-center flex-shrink-0 pr-4 pl-2">
+              <input type="checkbox" id="qime" name="qime" value="true" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+            </div>
           </div>
         </div>
       <% } %>
@@ -486,7 +535,7 @@
         }
         
         // Ensure boolean conversion for specific checkbox fields expected by backend
-        const booleanFields = ['speech', 'lunch', 'dinner', 'transport'];
+        const booleanFields = ['speech', 'lunch', 'dinner', 'transport', 'qime'];
         booleanFields.forEach(field => {
            if (data.hasOwnProperty(field)) { // Check if the field was included in registrationFields
              data[field] = !!data[field]; // Convert to strict boolean

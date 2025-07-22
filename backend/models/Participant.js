@@ -41,6 +41,17 @@ const participantSchema = new mongoose.Schema({
     enum: ['Báo cáo viên', 'Tham dự'],
     default: 'Tham dự'
   },
+  targetAudience: {
+    type: String,
+    enum: [
+      'Sĩ quan',
+      'Quân nhân chuyên nghiệp',
+      'Viên chức quốc phòng',
+      'Hạ sĩ quan binh sĩ',
+      'Học viên'
+    ],
+    trim: true
+  },
   speech: {
     type: Boolean,
     default: false
@@ -55,6 +66,10 @@ const participantSchema = new mongoose.Schema({
     default: false
   },
   dinner: {
+    type: Boolean,
+    default: false
+  },
+  qime: {
     type: Boolean,
     default: false
   },

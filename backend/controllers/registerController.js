@@ -161,11 +161,13 @@ exports.registerParticipant = async (req, res) => {
     if (registrationFields.includes('rank')) participantData.rank = req.body.rank;
     if (registrationFields.includes('academic')) participantData.academic = req.body.academic;
     if (registrationFields.includes('role')) participantData.role = req.body.role;
+    if (registrationFields.includes('targetAudience')) participantData.targetAudience = req.body.targetAudience;
     if (registrationFields.includes('speech')) participantData.speech = req.body.speech === true || req.body.speech === 'true';
     if (registrationFields.includes('lunch')) participantData.lunch = req.body.lunch === true || req.body.lunch === 'true';
     if (registrationFields.includes('dinner')) participantData.dinner = req.body.dinner === true || req.body.dinner === 'true';
-    if (registrationFields.includes('feedback')) participantData.feedback = req.body.feedback;
     if (registrationFields.includes('transport')) participantData.transport = req.body.transport === true || req.body.transport === 'true';
+    if (registrationFields.includes('qime')) participantData.qime = req.body.qime === true || req.body.qime === 'true';
+    if (registrationFields.includes('feedback')) participantData.feedback = req.body.feedback;
     
     // Create new participant
     const participant = new Participant(participantData);
@@ -231,6 +233,7 @@ exports.registerParticipant = async (req, res) => {
           ${participantData.academic ? `<li>Học hàm/Học vị: ${participantData.academic}</li>` : ''}
           ${participantData.position ? `<li>Chức vụ: ${participantData.position}</li>` : ''}
           ${participantData.speciality ? `<li>Chuyên ngành: ${participantData.speciality}</li>` : ''}
+          ${participantData.targetAudience ? `<li>Đối tượng: ${participantData.targetAudience}</li>` : ''}
           ${participantData.address ? `<li>Địa chỉ: ${participantData.address}</li>` : ''}
           ${participantData.age ? `<li>Tuổi: ${participantData.age}</li>` : ''}
           ${participantData.business ? `<li>Lĩnh vực: ${participantData.business}</li>` : ''}

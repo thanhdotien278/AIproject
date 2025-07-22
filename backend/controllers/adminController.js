@@ -148,6 +148,7 @@ exports.exportToExcel = async (req, res) => {
       Position: p.position || '', 
       Rank: p.rank || '',
       Academic: p.academic || '',
+      'Target Audience': p.targetAudience || '',
       Role: p.role || '',
       Speech: p.speech ? 'Yes' : 'No',
       Lunch: p.lunch ? 'Yes' : 'No',
@@ -329,8 +330,18 @@ exports.createConference = async (req, res) => {
       registrationFields = [];
     }
 
+    // Extract target audience
+    let targetAudience = req.body.targetAudience || [];
+    // Handle single value vs array from form submission
+    if (req.body.targetAudience && !Array.isArray(req.body.targetAudience)) {
+      targetAudience = [req.body.targetAudience];
+    } else if (!req.body.targetAudience) {
+      targetAudience = [];
+    }
+
     console.log('Raw Registration fields:', req.body.registrationFields);
     console.log('Initial registrationFields array:', registrationFields);
+    console.log('Target audience:', targetAudience);
 
     // Make sure required fields are always included
     const requiredFields = ['name', 'email', 'phone'];
@@ -365,6 +376,7 @@ exports.createConference = async (req, res) => {
       mainSpeaker: req.body.mainSpeaker || '',
       maxAttendees: parseInt(req.body.maxAttendees) || 100,
       description: req.body.description || '',
+      targetAudience: targetAudience,
       registrationFields: registrationFields
     });
 
@@ -910,6 +922,14 @@ exports.updateConference = async (req, res) => {
     });
     registrationFields = [...new Set(registrationFields)];
 
+    // Extract and process target audience
+    let targetAudience = req.body.targetAudience || [];
+    if (req.body.targetAudience && !Array.isArray(req.body.targetAudience)) {
+      targetAudience = [req.body.targetAudience];
+    } else if (!req.body.targetAudience) {
+      targetAudience = [];
+    }
+
     // Update conference properties (cannot update code)
     conference.name = req.body.name || conference.name;
     conference.startDate = req.body.startDate || conference.startDate;
@@ -919,6 +939,7 @@ exports.updateConference = async (req, res) => {
     conference.mainSpeaker = req.body.mainSpeaker || conference.mainSpeaker;
     conference.maxAttendees = parseInt(req.body.maxAttendees) || conference.maxAttendees;
     conference.description = req.body.description || conference.description;
+    conference.targetAudience = targetAudience; // Update target audience
     conference.registrationFields = registrationFields; // Update the fields
 
     // Save the updated conference
