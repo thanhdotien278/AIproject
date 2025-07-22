@@ -451,13 +451,13 @@
       <% if (registrationFields.includes('qime')) { %>
         <div class="flex items-center space-x-3">
           <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg shadow"><span>💬</span></div>
-          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner overflow-hidden">
-            <div class="flex-shrink-0 bg-blue-600 text-white px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
+          <div class="flex-grow bg-gray-200 rounded-full flex items-stretch shadow-inner">
+            <div class="flex-shrink-0 bg-blue-600 text-white px-3 sm:px-4 flex flex-col justify-center items-center shadow-sm" style="min-width: 110px;">
               <div class="font-bold text-sm leading-tight whitespace-nowrap">Qime App</div>
               <div class="text-xs leading-tight whitespace-nowrap">Messaging</div>
             </div>
-            <input type="text" id="qime-display" readonly class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-4 py-3 text-sm cursor-default" placeholder="Bạn đã cài Qime chưa?">
-            <div class="flex items-center flex-shrink-0 pr-4 pl-2">
+            <input type="text" id="qime-display" readonly class="flex-grow bg-transparent focus:outline-none text-gray-700 placeholder-gray-500 px-3 sm:px-4 py-3 text-sm cursor-default" placeholder="Bạn đã cài Qime chưa?">
+            <div class="flex items-center justify-center flex-shrink-0 px-3 sm:px-4 min-w-[50px]">
               <input type="checkbox" id="qime" name="qime" value="true" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
             </div>
           </div>
