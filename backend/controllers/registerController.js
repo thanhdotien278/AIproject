@@ -243,12 +243,17 @@ exports.registerParticipant = async (req, res) => {
           ${registrationFields.includes('lunch') ? `<li>Đăng ký ăn trưa: ${participantData.lunch ? 'Có' : 'Không'}</li>` : ''}
           ${registrationFields.includes('dinner') ? `<li>Đăng ký ăn tối: ${participantData.dinner ? 'Có' : 'Không'}</li>` : ''}
           ${registrationFields.includes('transport') ? `<li>Đăng ký xe đưa đón: ${participantData.transport ? 'Có' : 'Không'}</li>` : ''}
+          ${registrationFields.includes('qime') ? `<li>Đã cài Qime: ${participantData.qime ? 'Có' : 'Không'}</li>` : ''}
           ${participantData.feedback ? `<li>Góp ý: ${participantData.feedback}</li>` : ''}
           ${participantData.questions ? `<li>Câu hỏi cho BTC: ${participantData.questions}</li>` : ''}
           ${participantData.source ? `<li>Nguồn biết đến hội nghị: ${participantData.source}</li>` : ''}
         </ul>
         <p>Chúng tôi rất mong được đón tiếp bạn tại sự kiện.</p>
         ${attachments.length > 0 ? '<p><strong>Vui lòng kiểm tra các tài liệu quan trọng được đính kèm trong email này.</strong></p>' : ''}
+        <p><strong>Link để tải tài liệu hội nghị:</strong><br>
+        <a href="https://www.dropbox.com/scl/fo/wvlnthsjp3hd2a3t2j6qd/AAaL4k0Ni9upYGqsUvkiVrc?rlkey=nyzhcwqm3isuwoqwu77me3ljx&st=t9q4pydu&dl=0" target="_blank" style="color: #007bff; text-decoration: none;">
+        Tài liệu hội nghị - Dropbox
+        </a></p>
         <p>Trân trọng,<br>Ban tổ chức ${conference.name}</p>
       `,
       attachments: attachments
