@@ -3,6 +3,8 @@ module.exports = {
   content: [
     "./frontend/views/**/*.ejs",
     "./frontend/public/js/**/*.js",
+    "./frontend/components/**/*.{js,jsx,ts,tsx}",
+    "./frontend/react-dashboard/src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {

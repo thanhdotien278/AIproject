@@ -36,23 +36,23 @@ exports.showLoginPage = (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     // Find user by username
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-    
+
     // Compare password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-    
+
     // Set session
     req.session.isAuthenticated = true;
     req.session.username = user.username;
-    
+
     res.status(200).json({ success: true, redirectUrl: '/admin/dashboard' });
   } catch (error) {
     console.error('Login error:', error);
@@ -72,7 +72,7 @@ exports.showDashboard = async (req, res) => {
     // Fetch participants and conferences from database
     const participants = await Participant.find().sort({ registrationDate: -1 });
     const conferences = await Conference.find().populate('location').sort({ createdAt: -1 });
-    
+
     // Calculate participant statistics
     const totalParticipants = participants.length;
     // Remove old attendance stats
@@ -86,21 +86,21 @@ exports.showDashboard = async (req, res) => {
     const transportCount = participants.filter(p => p.transport === true).length;
     const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().includes('học viện')).length;
     const donViNgoaiCount = totalParticipants - hocVienCount;
-    
+
     // Group participants by organization
     const organizationCounts = {};
     participants.forEach(p => {
       const org = p.organization || 'Not Specified';
       organizationCounts[org] = (organizationCounts[org] || 0) + 1;
     });
-    
+
     // Sort organizations by participant count
     const topOrganizations = Object.entries(organizationCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([name, count]) => ({ name, count }));
-    
-    res.render('admin/dashboard', { 
+
+    res.render('admin/dashboard', {
       participants,
       conferences,
       username: req.session.username,
@@ -134,10 +134,10 @@ exports.exportToExcel = async (req, res) => {
     const query = conferenceCode !== 'all' ? { conferenceCode } : {};
 
     const participants = await Participant.find(query).sort({ registrationDate: -1 });
-    
+
     // Create workbook and worksheet
     const workbook = XLSX.utils.book_new();
-    
+
     // Convert participants to array of objects for Excel
     const worksheetData = participants.map(p => ({
       ID: p.participantId || 'N/A', // Use participantId instead of old ID
@@ -145,7 +145,7 @@ exports.exportToExcel = async (req, res) => {
       Email: p.email,
       Phone: p.phone || '',
       WorkUnit: p.workunit || '',
-      Position: p.position || '', 
+      Position: p.position || '',
       Rank: p.rank || '',
       Academic: p.academic || '',
       'Target Audience': p.targetAudience || '',
@@ -158,32 +158,32 @@ exports.exportToExcel = async (req, res) => {
       'Email Sent': p.emailSent ? 'Yes' : 'No',
       'Conference': p.conferenceCode
     }));
-    
+
     // Create worksheet
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-    
+
     // Add worksheet to workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Participants');
-    
+
     // Generate Excel file
     const filename = `conference_participants_${Date.now()}.xlsx`;
     const filePath = path.join(__dirname, '../../frontend/public/downloads', filename);
-    
+
     // Ensure directory exists
     const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     // Write file
     XLSX.writeFile(workbook, filePath);
-    
+
     // Send file
     res.download(filePath, (err) => {
       if (err) {
         console.error('Error sending file:', err);
       }
-      
+
       // Delete file after sending
       fs.unlinkSync(filePath);
     });
@@ -197,20 +197,20 @@ exports.exportToExcel = async (req, res) => {
 exports.sendEmail = async (req, res) => {
   try {
     const { participantId } = req.params;
-    
+
     const participant = await Participant.findById(participantId);
     if (!participant) {
       return res.status(404).json({ success: false, message: 'Participant not found' });
     }
-    
+
     // Check if email configuration exists
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Email not configured. Please set EMAIL_USER and EMAIL_PASS in .env' 
+      return res.status(400).json({
+        success: false,
+        message: 'Email not configured. Please set EMAIL_USER and EMAIL_PASS in .env'
       });
     }
-    
+
     // Create email content
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -232,14 +232,14 @@ exports.sendEmail = async (req, res) => {
         <p>Best regards,<br>Conference Team</p>
       `
     };
-    
+
     // Send email
     await transporter.sendMail(mailOptions);
-    
+
     // Update participant record
     participant.emailSent = true;
     await participant.save();
-    
+
     res.status(200).json({ success: true, message: 'Email sent successfully' });
   } catch (error) {
     console.error('Error sending email:', error);
@@ -251,22 +251,22 @@ exports.sendEmail = async (req, res) => {
 exports.sendBulkEmails = async (req, res) => {
   try {
     const participants = await Participant.find({ emailSent: false });
-    
+
     if (participants.length === 0) {
-      return res.status(200).json({ 
-        success: true, 
-        message: 'No pending emails to send' 
+      return res.status(200).json({
+        success: true,
+        message: 'No pending emails to send'
       });
     }
-    
+
     // Check if email configuration exists
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Email not configured. Please set EMAIL_USER and EMAIL_PASS in .env' 
+      return res.status(400).json({
+        success: false,
+        message: 'Email not configured. Please set EMAIL_USER and EMAIL_PASS in .env'
       });
     }
-    
+
     // Send emails to each participant
     let successCount = 0;
     for (const participant of participants) {
@@ -291,23 +291,23 @@ exports.sendBulkEmails = async (req, res) => {
             <p>Best regards,<br>Conference Team</p>
           `
         };
-        
+
         await transporter.sendMail(mailOptions);
-        
+
         // Update participant record
         participant.emailSent = true;
         await participant.save();
-        
+
         successCount++;
       } catch (error) {
         console.error(`Error sending email to ${participant.email}:`, error);
         // Continue with next participant
       }
     }
-    
-    res.status(200).json({ 
-      success: true, 
-      message: `Successfully sent ${successCount} of ${participants.length} emails` 
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully sent ${successCount} of ${participants.length} emails`
     });
   } catch (error) {
     console.error('Error sending bulk emails:', error);
@@ -351,7 +351,7 @@ exports.createConference = async (req, res) => {
       }
     });
     // Remove duplicates
-    registrationFields = [...new Set(registrationFields)]; 
+    registrationFields = [...new Set(registrationFields)];
 
     console.log('Processed registration fields:', registrationFields);
 
@@ -389,11 +389,11 @@ exports.createConference = async (req, res) => {
     req.flash('success_msg', 'Hội nghị đã được tạo thành công!');
     // For AJAX response (frontend currently reloads, but keeps this structure)
     // Sending a success status might be enough if frontend handles reload
-    res.status(201).json({ 
-        success: true, 
+    res.status(201).json({
+        success: true,
         message: 'Hội nghị đã được tạo thành công!'
-        // redirectUrl: '/admin/conferences' // Or let frontend handle reload 
-    }); 
+        // redirectUrl: '/admin/conferences' // Or let frontend handle reload
+    });
     // If not using AJAX fetch on frontend:
     // res.redirect('/admin/conferences');
 
@@ -413,7 +413,7 @@ exports.createConference = async (req, res) => {
     });
     // If not using AJAX on frontend:
     // req.flash('error_msg', errorMessage);
-    // res.redirect('/admin/conferences'); 
+    // res.redirect('/admin/conferences');
   }
 };
 
@@ -421,15 +421,15 @@ exports.createConference = async (req, res) => {
 exports.getConferences = async (req, res) => {
   try {
     const conferences = await Conference.find().populate('location').sort({ createdAt: -1 });
-    res.status(200).json({ 
-      success: true, 
-      conferences 
+    res.status(200).json({
+      success: true,
+      conferences
     });
   } catch (error) {
     console.error('Error fetching conferences:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching conferences' 
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching conferences'
     });
   }
 };
@@ -439,12 +439,12 @@ exports.showSettings = async (req, res) => {
   try {
     // Get the current user
     const user = await User.findOne({ username: req.session.username });
-    
+
     if (!user) {
       req.flash('error', 'User not found');
       return res.redirect('/admin/dashboard');
     }
-    
+
     res.render('admin/settings', {
       username: user.username,
       fullName: user.fullName || '',
@@ -464,32 +464,32 @@ exports.showSettings = async (req, res) => {
 exports.updateSettings = async (req, res) => {
   try {
     const { fullName, email, bio, currentPassword, password } = req.body;
-    
+
     // Get the current user
     const user = await User.findOne({ username: req.session.username });
-    
+
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    
+
     // Update basic user info
     user.fullName = fullName || user.fullName;
     user.email = email || user.email;
     user.bio = bio || user.bio;
-    
+
     // If password is being changed, verify the current password first
     if (password && currentPassword) {
       const isMatch = await user.comparePassword(currentPassword);
-      
+
       if (!isMatch) {
         return res.status(400).json({ success: false, message: 'Current password is incorrect' });
       }
-      
+
       user.password = password;
     }
-    
+
     await user.save();
-    
+
     res.status(200).json({ success: true, message: 'Settings updated successfully' });
   } catch (error) {
     console.error('Error updating settings:', error);
@@ -501,15 +501,15 @@ exports.updateSettings = async (req, res) => {
 exports.getLocations = async (req, res) => {
   try {
     const locations = await Location.find().sort({ name: 1 });
-    res.status(200).json({ 
-      success: true, 
-      locations 
+    res.status(200).json({
+      success: true,
+      locations
     });
   } catch (error) {
     console.error('Error fetching locations:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching locations' 
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching locations'
     });
   }
 };
@@ -518,7 +518,7 @@ exports.getLocations = async (req, res) => {
 exports.createLocation = async (req, res) => {
   try {
     const { name, address, capacity } = req.body;
-    
+
     // Check if required fields are provided
     if (!name) {
       return res.status(400).json({
@@ -526,7 +526,7 @@ exports.createLocation = async (req, res) => {
         message: 'Location name is required'
       });
     }
-    
+
     // Check if location with the same name already exists
     const existingLocation = await Location.findOne({ name });
     if (existingLocation) {
@@ -535,16 +535,16 @@ exports.createLocation = async (req, res) => {
         message: 'A location with this name already exists'
       });
     }
-    
+
     // Create and save new location
     const location = new Location({
       name,
       address,
       capacity: capacity || 0
     });
-    
+
     await location.save();
-    
+
     res.status(201).json({
       success: true,
       message: 'Location created successfully',
@@ -564,7 +564,7 @@ exports.updateLocation = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, address, capacity } = req.body;
-    
+
     // Check if location exists
     const location = await Location.findById(id);
     if (!location) {
@@ -573,7 +573,7 @@ exports.updateLocation = async (req, res) => {
         message: 'Location not found'
       });
     }
-    
+
     // Check if updating with a name that already exists in another location
     if (name && name !== location.name) {
       const existingLocation = await Location.findOne({ name });
@@ -584,14 +584,14 @@ exports.updateLocation = async (req, res) => {
         });
       }
     }
-    
+
     // Update fields
     if (name) location.name = name;
     if (address !== undefined) location.address = address;
     if (capacity !== undefined) location.capacity = capacity;
-    
+
     await location.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'Location updated successfully',
@@ -610,7 +610,7 @@ exports.updateLocation = async (req, res) => {
 exports.deleteLocation = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if location exists
     const location = await Location.findById(id);
     if (!location) {
@@ -619,7 +619,7 @@ exports.deleteLocation = async (req, res) => {
         message: 'Location not found'
       });
     }
-    
+
     // Check if location is in use by any conference
     const conferenceUsingLocation = await Conference.findOne({ location: id });
     if (conferenceUsingLocation) {
@@ -628,10 +628,10 @@ exports.deleteLocation = async (req, res) => {
         message: 'Cannot delete location because it is in use by at least one conference'
       });
     }
-    
+
     // Delete location
     await Location.findByIdAndDelete(id);
-    
+
     res.status(200).json({
       success: true,
       message: 'Location deleted successfully'
@@ -650,8 +650,8 @@ exports.showUsers = async (req, res) => {
   try {
     // Fetch all users from database
     const users = await User.find().sort({ createdAt: -1 });
-    
-    res.render('admin/users', { 
+
+    res.render('admin/users', {
       users,
       username: req.session.username,
       layout: 'layouts/admin',
@@ -667,7 +667,7 @@ exports.showUsers = async (req, res) => {
 exports.getUsers = async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
-    
+
     res.status(200).json({
       success: true,
       users
@@ -685,7 +685,7 @@ exports.getUsers = async (req, res) => {
 exports.createUser = async (req, res) => {
   try {
     const { username, password, fullName, email, userPhone, userRole, shortBio } = req.body;
-    
+
     // Validate required fields
     if (!username || !password) {
       return res.status(400).json({
@@ -693,7 +693,7 @@ exports.createUser = async (req, res) => {
         message: 'Username and password are required'
       });
     }
-    
+
     // Check if user with the same username already exists
     const existingUser = await User.findOne({ username });
     if (existingUser) {
@@ -702,7 +702,7 @@ exports.createUser = async (req, res) => {
         message: 'A user with this username already exists'
       });
     }
-    
+
     // Create new user
     const user = new User({
       username,
@@ -714,9 +714,9 @@ exports.createUser = async (req, res) => {
       shortBio: shortBio || '',
       isAdmin: userRole === 'admin'
     });
-    
+
     await user.save();
-    
+
     res.status(201).json({
       success: true,
       message: 'User created successfully',
@@ -746,31 +746,31 @@ exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { username, password, fullName, email, userPhone, userRole, shortBio } = req.body;
-    
+
     // Find the user
     const user = await User.findById(id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     // Check if updating with a username that already exists
     if (username && username !== user.username) {
       const existingUser = await User.findOne({ username });
-      
+
       if (existingUser) {
         return res.status(400).json({
           success: false,
           message: 'A user with this username already exists'
         });
       }
-      
+
       user.username = username;
     }
-    
+
     // Update fields if provided
     if (password) user.password = password;
     if (fullName !== undefined) user.fullName = fullName;
@@ -781,9 +781,9 @@ exports.updateUser = async (req, res) => {
       user.isAdmin = userRole === 'admin';
     }
     if (shortBio !== undefined) user.shortBio = shortBio;
-    
+
     await user.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'User updated successfully',
@@ -812,17 +812,17 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if user exists
     const user = await User.findById(id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     // Don't allow deleting the currently logged in user
     if (user.username === req.session.username) {
       return res.status(400).json({
@@ -830,9 +830,9 @@ exports.deleteUser = async (req, res) => {
         message: 'You cannot delete your own account'
       });
     }
-    
+
     await User.findByIdAndDelete(id);
-    
+
     res.status(200).json({
       success: true,
       message: 'User deleted successfully'
@@ -852,7 +852,7 @@ exports.showConferencesPage = async (req, res) => {
     const conferences = await Conference.find()
       .populate('location') // Populate location details
       .sort({ createdAt: -1 });
-      
+
     // Fetch all locations for the "Add/Edit Conference" modal dropdown
     const locations = await Location.find().sort({ name: 1 });
 
@@ -885,8 +885,8 @@ exports.getConferenceDetails = async (req, res) => {
     if (!conference) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy hội nghị' });
     }
-    
-    res.status(200).json({ success: true, conference: conference }); 
+
+    res.status(200).json({ success: true, conference: conference });
 
   } catch (error) {
     console.error('Error fetching conference details:', error);
@@ -946,10 +946,10 @@ exports.updateConference = async (req, res) => {
     await conference.save();
 
     req.flash('success_msg', 'Hội nghị đã được cập nhật thành công!');
-    res.status(200).json({ 
-        success: true, 
+    res.status(200).json({
+        success: true,
         message: 'Hội nghị đã được cập nhật thành công!'
-        // redirectUrl: '/admin/conferences' 
+        // redirectUrl: '/admin/conferences'
     });
 
   } catch (error) {
@@ -1014,14 +1014,14 @@ exports.getDashboardData = async (req, res) => {
   try {
     const { conferenceCode } = req.query;
     console.log(`Fetching dashboard data for conferenceCode: ${conferenceCode || 'all'}`);
-    
+
     let conferenceDetails = null;
     let query = {};
 
     if (conferenceCode && conferenceCode !== 'all') {
       query.conferenceCode = conferenceCode;
       console.log(`Filtering participants by conference code: ${conferenceCode}`);
-      
+
       conferenceDetails = await Conference.findOne({ code: conferenceCode }).populate('location');
       if (conferenceDetails) {
         // Format dates for display
@@ -1039,7 +1039,7 @@ exports.getDashboardData = async (req, res) => {
     // Sort by registration time descending for consistent ordering
     const participants = await Participant.find(query).sort({ registrationTime: -1 });
     console.log(`Found ${participants.length} participants matching the query`);
-    
+
     const totalParticipants = participants.length;
     const emailSentCount = participants.filter(p => p.emailSent).length;
     const lunchCount = participants.filter(p => p.lunch === true).length;
@@ -1047,7 +1047,7 @@ exports.getDashboardData = async (req, res) => {
     const transportCount = participants.filter(p => p.transport === true).length;
     const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().includes('học viện')).length;
     const donViNgoaiCount = totalParticipants - hocVienCount;
-    
+
     const participantsWithFormattedId = participants.map(p => {
       // Use the participantId field directly (it should be already formatted as a 4-digit string)
       const displayId = p.participantId || 'N/A';
@@ -1083,8 +1083,8 @@ exports.getDashboardData = async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching API dashboard data:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error fetching dashboard data from API',
       error: error.message
     });
@@ -1095,7 +1095,7 @@ exports.getDashboardData = async (req, res) => {
 exports.activateConference = async (req, res) => {
   try {
     const { conferenceCode } = req.params;
-    
+
     if (!conferenceCode) {
       return res.status(400).json({
         success: false,
@@ -1105,20 +1105,20 @@ exports.activateConference = async (req, res) => {
 
     // Deactivate all conferences first
     await Conference.updateMany({}, { isActive: false });
-    
+
     // Find and activate the selected conference
     const conference = await Conference.findOne({ code: conferenceCode });
-    
+
     if (!conference) {
       return res.status(404).json({
         success: false,
         message: 'Conference not found'
       });
     }
-    
+
     conference.isActive = true;
     await conference.save();
-    
+
     res.status(200).json({
       success: true,
       message: `Conference "${conference.name}" has been activated successfully`
@@ -1136,34 +1136,34 @@ exports.activateConference = async (req, res) => {
 exports.deactivateConference = async (req, res) => {
   try {
     const { conferenceCode } = req.params;
-    
+
     if (!conferenceCode) {
       return res.status(400).json({
         success: false,
         message: 'Conference code is required'
       });
     }
-    
+
     // Find and deactivate the selected conference
     const conference = await Conference.findOne({ code: conferenceCode });
-    
+
     if (!conference) {
       return res.status(404).json({
         success: false,
         message: 'Conference not found'
       });
     }
-    
+
     if (!conference.isActive) {
       return res.status(400).json({
         success: false,
         message: 'Conference is already inactive'
       });
     }
-    
+
     conference.isActive = false;
     await conference.save();
-    
+
     res.status(200).json({
       success: true,
       message: `Conference "${conference.name}" has been deactivated successfully`
@@ -1181,31 +1181,31 @@ exports.deactivateConference = async (req, res) => {
 exports.getParticipantDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid participant ID' 
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid participant ID'
       });
     }
 
     const participant = await Participant.findById(id);
     if (!participant) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Participant not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'Participant not found'
       });
     }
-    
-    res.status(200).json({ 
-      success: true, 
-      participant 
+
+    res.status(200).json({
+      success: true,
+      participant
     });
   } catch (error) {
     console.error('Error fetching participant details:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching participant details' 
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching participant details'
     });
   }
 };
@@ -1214,45 +1214,45 @@ exports.getParticipantDetails = async (req, res) => {
 exports.updateParticipant = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid participant ID' 
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid participant ID'
       });
     }
 
     // Find participant first to verify it exists
     const participant = await Participant.findById(id);
     if (!participant) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Participant not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'Participant not found'
       });
     }
-    
+
     // Create updated data object (preserving the participantId)
     const updatedData = { ...req.body };
-    
+
     // Never change participantId or conferenceCode through update
     delete updatedData.participantId;
     delete updatedData.conferenceCode;
     delete updatedData._id;
-    
+
     // Handle boolean fields properly
     ['speech', 'lunch', 'dinner', 'transport', 'emailSent'].forEach(field => {
       if (updatedData[field] !== undefined) {
         updatedData[field] = updatedData[field] === true || updatedData[field] === 'true';
       }
     });
-    
+
     // Update the participant
     const updatedParticipant = await Participant.findByIdAndUpdate(
-      id, 
+      id,
       { $set: updatedData },
       { new: true, runValidators: true }
     );
-    
+
     res.status(200).json({
       success: true,
       message: 'Participant updated successfully',
@@ -1271,25 +1271,25 @@ exports.updateParticipant = async (req, res) => {
 exports.deleteParticipant = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid participant ID' 
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid participant ID'
       });
     }
 
     const participant = await Participant.findById(id);
     if (!participant) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Participant not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'Participant not found'
       });
     }
-    
+
     // We don't reassign IDs, just delete the participant
     await Participant.findByIdAndDelete(id);
-    
+
     res.status(200).json({
       success: true,
       message: 'Participant deleted successfully'
@@ -1301,4 +1301,4 @@ exports.deleteParticipant = async (req, res) => {
       message: 'Error deleting participant: ' + (error.message || 'Unknown error')
     });
   }
-}; 
+};

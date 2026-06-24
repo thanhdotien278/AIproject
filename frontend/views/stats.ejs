@@ -28,7 +28,7 @@
 
     <% if (typeof stats !== 'undefined') { %>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto" id="stats-container">
-        
+
         <!-- Total Registrations -->
         <div class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl transition-shadow duration-300">
           <div class="mb-3">
@@ -74,7 +74,7 @@
           </h2>
           <p class="text-gray-600 font-medium text-lg">Đăng ký xe đưa đón</p>
         </div>
-        
+
         <!-- Hoc Vien Registrations -->
         <div class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl transition-shadow duration-300">
           <div class="mb-3">
@@ -101,7 +101,7 @@
     <% } else { %>
       <p class="text-center text-gray-600 text-xl">Không có dữ liệu thống kê để hiển thị.</p>
     <% } %>
-    
+
     <div class="text-center mt-10">
         <p class="text-sm text-gray-500" id="last-updated">
           <% if (typeof selectedConferenceCode !== 'undefined' && selectedConferenceCode !== 'all') { %>
@@ -121,7 +121,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     const socket = io();
     const selectedConferenceCode = "<%= typeof selectedConferenceCode !== 'undefined' ? selectedConferenceCode : 'all' %>";
-    
+
     const totalRegistrationsEl = document.getElementById('stats-total-registrations');
     const lunchCountEl = document.getElementById('stats-lunch-count');
     const dinnerCountEl = document.getElementById('stats-dinner-count');
@@ -140,14 +140,15 @@
 
       socket.on('statsUpdated', function (newStats) {
         console.log('Received GLOBAL statsUpdated:', newStats);
-        if (newStats && selectedConferenceCode === 'all') { // Double check still on 'all'
-          if (totalRegistrationsEl) totalRegistrationsEl.textContent = newStats.totalParticipants;
-          if (lunchCountEl) lunchCountEl.textContent = newStats.lunchCount;
-          if (dinnerCountEl) dinnerCountEl.textContent = newStats.dinnerCount;
-          if (transportCountEl) transportCountEl.textContent = newStats.transportCount;
-          if (hocVienCountEl) hocVienCountEl.textContent = newStats.hocVienCount;
-          if (donViNgoaiCountEl) donViNgoaiCountEl.textContent = newStats.donViNgoaiCount;
-          
+        if (newStats && selectedConferenceCode === 'all' && newStats.conferenceCode === 'all') { // Only accept global updates
+          const s = newStats.stats || newStats;
+          if (totalRegistrationsEl) totalRegistrationsEl.textContent = s.totalParticipants;
+          if (lunchCountEl) lunchCountEl.textContent = s.lunchCount;
+          if (dinnerCountEl) dinnerCountEl.textContent = s.dinnerCount;
+          if (transportCountEl) transportCountEl.textContent = s.transportCount;
+          if (hocVienCountEl) hocVienCountEl.textContent = s.hocVienCount;
+          if (donViNgoaiCountEl) donViNgoaiCountEl.textContent = s.donViNgoaiCount;
+
           if(lastUpdatedEl) {
             lastUpdatedEl.textContent = 'Dữ liệu tổng thể cập nhật lúc: ' + new Date().toLocaleTimeString('vi-VN');
           }
@@ -167,4 +168,4 @@
       console.log('Real-time updates disabled for specific conference view: ' + selectedConferenceCode);
     }
   });
-</script> 
+</script>

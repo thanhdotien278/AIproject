@@ -18,6 +18,8 @@ dotenv.config();
 // Import routes
 const registerRoutes = require('./routes/register');
 const adminRoutes = require('./routes/admin');
+const apiRoutes = require('./routes/api');
+const attendanceQrRoutes = require('./routes/attendanceQr');
 // Import controllers
 const registerController = require('./controllers/registerController');
 
@@ -77,6 +79,12 @@ app.use('/admin', (req, res, next) => {
 // Serve static files
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
+// React dashboard (built into frontend/public/dashboard)
+const dashboardIndexPath = path.join(__dirname, '../frontend/public/dashboard/index.html');
+app.get('/dashboard', (req, res) => res.redirect(301, '/dashboard/'));
+app.get('/dashboard/', (req, res) => res.sendFile(dashboardIndexPath));
+app.get('/dashboard/*', (req, res) => res.sendFile(dashboardIndexPath));
+
 // Connect to MongoDB
 // mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/conference-registration')
 mongoose.connect(process.env.MONGODB_URI)
@@ -92,6 +100,8 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/register', registerRoutes);
 app.use('/admin', adminRoutes);
+app.use('/api', apiRoutes);
+app.use(attendanceQrRoutes);
 
 // Public statistics route
 app.get('/stats', registerController.showPublicStatsPage);
@@ -101,18 +111,18 @@ app.get('/api/qrcode', async (req, res) => {
   try {
     // Get the conference code from query parameters
     const { code } = req.query;
-    
+
     // Build the registration URL using dynamic IP detection
     const ip = getLocalIpAddress();
     let registrationUrl = `http://${ip}:3000/register`;
-    
+
     // Add the conference code if provided
     if (code) {
       registrationUrl += `?code=${code}`;
     }
-    
+
     console.log('QR Code Registration URL:', registrationUrl);
-    
+
     // Generate QR code as buffer first
     const qrCodeBuffer = await QRCode.toBuffer(registrationUrl, {
       width: 300,
@@ -122,17 +132,17 @@ app.get('/api/qrcode', async (req, res) => {
         light: '#ffffff' // White background
       }
     });
-    
+
     try {
       // Load the favicon and overlay it on the QR code
       const faviconPath = path.join(__dirname, '../frontend/public/images/favicon.png');
       const logoSize = 60; // Logo size for better visibility but still scannable
-      
+
       const faviconBuffer = await sharp(faviconPath)
         .resize(logoSize, logoSize)
         .png()
         .toBuffer();
-      
+
       // Overlay favicon on QR code
       const finalQRCode = await sharp(qrCodeBuffer)
         .composite([
@@ -144,10 +154,10 @@ app.get('/api/qrcode', async (req, res) => {
         ])
         .png()
         .toBuffer();
-      
+
       // Convert to data URL
       const qrCodeDataUrl = `data:image/png;base64,${finalQRCode.toString('base64')}`;
-      
+
       // Send the QR code data URL
       res.send({ qrCodeDataUrl });
     } catch (logoError) {
@@ -174,15 +184,15 @@ app.get('/', async (req, res) => {
     const latestConference = await mongoose.model('Conference').findOne()
       .sort({ createdAt: -1 })
       .populate('location');
-    
+
     // Fetch the receptionist user with username 'rec1'
     const receptionist = await mongoose.model('User').findOne({ username: 'rec1' });
 
     // Fetch speakers
     const speakers = await mongoose.model('Speaker').find().sort({ createdAt: -1 }); // Fetch all speakers for now
-    
+
     if (!latestConference) {
-      return res.render('index', { 
+      return res.render('index', {
         receptionist,
         conference: null,
         formattedDates: null,
@@ -191,21 +201,21 @@ app.get('/', async (req, res) => {
         speakers: speakers || [] // Pass speakers even if no conference
       });
     }
-    
+
     // Format dates for display
     const startDate = new Date(latestConference.startDate);
     const endDate = new Date(latestConference.endDate);
     const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    
+
     let formattedDates = startDate.toLocaleDateString('en-US', formatOptions);
     if (startDate.getTime() !== endDate.getTime()) {
       formattedDates += ` - ${endDate.toLocaleDateString('en-US', formatOptions)}`;
     }
-    
+
     // Get location details
     const locationName = latestConference.location ? latestConference.location.name : 'To be announced';
     const locationAddress = latestConference.location ? latestConference.location.address : '';
-    
+
     res.render('index', {
       conference: latestConference,
       formattedDates,
@@ -216,7 +226,7 @@ app.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching data for homepage:', error);
-    res.render('index', { 
+    res.render('index', {
       conference: null,
       formattedDates: null,
       locationName: null,
@@ -237,27 +247,27 @@ app.get('/thankyou', async (req, res) => {
     const conferenceName = req.session.conferenceName;
     const conferenceCode = req.session.conferenceCode;
     const participantData = req.session.participantData;
-    
+
     if (!participantEmail) {
       console.timeEnd('Total /thankyou route time');
       return res.redirect('/');
     }
-    
+
     console.time('Find participant by email');
     // Find the participant in database to get all registration details
     const participant = await mongoose.model('Participant').findOne({ email: participantEmail });
     console.timeEnd('Find participant by email');
-    
+
     console.time('Find latest conference');
     // Find the latest conference details
     const conference = await mongoose.model('Conference').findOne()
                               .sort({ createdAt: -1 })
                               .populate('location');
     console.timeEnd('Find latest conference');
-    
+
     if (!conference) {
       console.time('Render thankyou page');
-      res.render('thankyou', { 
+      res.render('thankyou', {
         participantName,
         participantEmail,
         participant: participantData || null, // Use session data as fallback
@@ -271,21 +281,21 @@ app.get('/thankyou', async (req, res) => {
       console.timeEnd('Total /thankyou route time');
       return;
     }
-    
+
     // Format dates for display
     const startDate = new Date(conference.startDate);
     const endDate = new Date(conference.endDate);
     const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    
+
     let formattedDates = startDate.toLocaleDateString('vi-VN', formatOptions);
     if (startDate.getTime() !== endDate.getTime()) {
       formattedDates += ` - ${endDate.toLocaleDateString('vi-VN', formatOptions)}`;
     }
-    
+
     // Get location details
     const locationName = conference.location ? conference.location.name : 'Sẽ được thông báo sau';
     const locationAddress = conference.location ? conference.location.address : '';
-    
+
     const qrDataForPdf = {
       conferenceCode: conference ? conference.code : (conferenceCode || 'N/A'),
       participantId: participant ? (participant.id || participant._id) : (participantData ? (participantData.id || participantData._id) : 'N/A'),
@@ -293,7 +303,7 @@ app.get('/thankyou', async (req, res) => {
     };
 
     console.time('Render thankyou page');
-    res.render('thankyou', { 
+    res.render('thankyou', {
       participantName,
       participantEmail,
       participant: participant || participantData, // Use session data as fallback
@@ -314,7 +324,7 @@ app.get('/thankyou', async (req, res) => {
     const conferenceName = req.session.conferenceName;
     const conferenceCode = req.session.conferenceCode;
     const participantData = req.session.participantData;
-  
+
     const fallbackQrData = {
       conferenceCode: conferenceCode || 'N/A',
       participantId: 'N/A',
@@ -322,7 +332,7 @@ app.get('/thankyou', async (req, res) => {
     };
 
     console.time('Render thankyou page');
-    res.render('thankyou', { 
+    res.render('thankyou', {
       participantName,
       participantEmail,
       participant: participantData || null,
@@ -340,18 +350,18 @@ app.get('/thankyou', async (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).render('404', { 
+  res.status(404).render('404', {
     title: 'Page Not Found',
-    message: 'The page you are looking for does not exist.' 
+    message: 'The page you are looking for does not exist.'
   });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).render('error', { 
+  res.status(500).render('error', {
     title: 'Error',
-    message: 'Something went wrong on our end. Please try again later.' 
+    message: 'Something went wrong on our end. Please try again later.'
   });
 });
 
@@ -365,7 +375,7 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 
@@ -393,7 +403,7 @@ async function checkParticipantIds() {
         { participantId: '' }
       ]
     });
-    
+
     if (participantsWithoutIds.length > 0) {
       console.log(`Found ${participantsWithoutIds.length} participants without proper IDs`);
       // Could add logic here to fix IDs if needed
@@ -408,7 +418,7 @@ async function setActiveConferenceIfNone() {
   try {
     const Conference = mongoose.model('Conference');
     const activeConference = await Conference.findOne({ isActive: true });
-    
+
     if (!activeConference) {
       const latestConference = await Conference.findOne().sort({ createdAt: -1 });
       if (latestConference) {
@@ -420,4 +430,4 @@ async function setActiveConferenceIfNone() {
   } catch (error) {
     console.error('Error setting active conference:', error);
   }
-} 
+}

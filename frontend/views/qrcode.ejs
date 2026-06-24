@@ -10,7 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             display: flex;
             justify-content: center;
@@ -19,12 +19,12 @@
             background-color: #ffffff;
             font-family: Arial, sans-serif;
         }
-        
+
         .qr-container {
             text-align: center;
             padding: 20px;
         }
-        
+
         .qr-code {
             max-width: 400px;
             max-height: 400px;
@@ -34,30 +34,30 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .qr-title {
             margin-bottom: 20px;
             font-size: 24px;
             font-weight: bold;
             color: #1f2937;
         }
-        
+
         .qr-subtitle {
             margin-top: 15px;
             font-size: 16px;
             color: #6b7280;
         }
-        
+
         @media print {
             body {
                 margin: 0;
                 padding: 0;
             }
-            
+
             .qr-container {
                 padding: 0;
             }
-            
+
             .qr-code {
                 border: none;
                 box-shadow: none;
@@ -71,14 +71,17 @@
     <div class="qr-container">
         <h1 class="qr-title">Conference Registration</h1>
         <img id="qr-code" class="qr-code" src="" alt="Registration QR Code">
-        <p class="qr-subtitle">Scan to register for the conference</p>
+        <p class="qr-subtitle">Mã QR sẽ tự đổi mỗi 30 giây • <span id="qr-countdown">...</span></p>
+        <p id="qr-error" class="qr-subtitle" style="display:none;color:#b91c1c;">Không thể tải mã QR</p>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const qrCodeElement = document.getElementById('qr-code');
-            let qrCodeUrl = '/api/qrcode';
-            
+            const countdownEl = document.getElementById('qr-countdown');
+            const errorEl = document.getElementById('qr-error');
+            let qrCodeUrl = '/api/attendance-qr';
+
             // Get conference code from URL parameters if available
             const urlParams = new URLSearchParams(window.location.search);
             const conferenceCode = urlParams.get('code');
@@ -86,22 +89,55 @@
                 qrCodeUrl += `?code=${conferenceCode}`;
             }
 
-            fetch(qrCodeUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (qrCodeElement && data.qrCodeDataUrl) {
-                        qrCodeElement.src = data.qrCodeDataUrl;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching QR code:', error);
-                    if (qrCodeElement) {
-                        qrCodeElement.alt = "Error loading QR Code";
-                        qrCodeElement.style.display = 'none';
-                    }
-                });
-            qrCodeUrl = 'https://www.dropbox.com/scl/fo/wvlnthsjp3hd2a3t2j6qd/AAaL4k0Ni9upYGqsUvkiVrc?rlkey=nyzhcwqm3isuwoqwu77me3ljx&st=t9q4pydu&dl=0';
+            let refreshTimer = 0;
+            let countdownTimer = 0;
+
+            function stopTimers() {
+              if (refreshTimer) window.clearTimeout(refreshTimer);
+              if (countdownTimer) window.clearInterval(countdownTimer);
+              refreshTimer = 0;
+              countdownTimer = 0;
+            }
+
+            function startCountdown(expiresAt) {
+              if (!countdownEl) return;
+              if (countdownTimer) window.clearInterval(countdownTimer);
+              const tick = () => {
+                const msLeft = Math.max(0, expiresAt - Date.now());
+                const s = Math.ceil(msLeft / 1000);
+                countdownEl.textContent = `${s}s`;
+              };
+              tick();
+              countdownTimer = window.setInterval(tick, 250);
+            }
+
+            async function refreshQr() {
+              stopTimers();
+              if (errorEl) errorEl.style.display = 'none';
+              try {
+                const res = await fetch(qrCodeUrl, { cache: 'no-store' });
+                const data = await res.json();
+                if (!res.ok || !data?.success || !data?.qrCodeDataUrl) throw new Error(data?.message || 'Failed to load QR');
+                if (qrCodeElement) {
+                  qrCodeElement.src = data.qrCodeDataUrl;
+                  qrCodeElement.style.display = '';
+                }
+                const expiresAt = Number(data.expiresAt) || (Date.now() + 30000);
+                startCountdown(expiresAt);
+                const msUntilNext = Math.max(500, expiresAt - Date.now() + 150);
+                refreshTimer = window.setTimeout(refreshQr, msUntilNext);
+              } catch (error) {
+                console.error('Error fetching QR code:', error);
+                if (qrCodeElement) {
+                  qrCodeElement.alt = "Error loading QR Code";
+                }
+                if (errorEl) errorEl.style.display = '';
+                refreshTimer = window.setTimeout(refreshQr, 5000);
+              }
+            }
+
+            refreshQr();
         });
     </script>
 </body>
-</html> 
+</html>

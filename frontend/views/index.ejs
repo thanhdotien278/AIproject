@@ -7,7 +7,7 @@
     <!-- <img src="/images/backdrop.jpeg" alt="Background" class="w-full h-full object-cover opacity-80"> -->
     <img src="/images/backdrop.jpg" alt="Background" class="w-full h-full object-fill opacity-80">
   </div>
-  
+
   <!-- Bỏ phần header và logo -->
   <!-- Header Section -->
   <!-- <header class="py-4 px-8 flex items-center justify-start relative z-10"> -->
@@ -18,7 +18,7 @@
       <!-- <h1 class="text-4xl font-bold text-green-800">Học viện Quân y</h1> -->
     <!-- </div> -->
   <!-- </header> -->
-  
+
   <!-- Main Banner Area - Left aligned, 1/2 width, white text with blue outline -->
   <!-- <section class="flex-grow flex items-center px-8 py-6 relative z-10" style="top: -150px;"> -->
     <!-- <div class="w-1/2 text-left"> -->
@@ -29,12 +29,12 @@
       <!-- </h2> -->
     <!-- </div> -->
   <!-- </section> -->
-  
+
   <!-- Bottom Sections Container - for proper positioning -->
   <!-- <div class="mt-auto px-8 pb-4 flex justify-between relative z-10"> -->
     <!-- Information Section - 1/3 width, left aligned -->
-   
-    
+
+
     <!-- Speakers Section - 1/2 width, center aligned with sliding animation -->
     <!-- <div class="w-1/2 mx-auto overflow-hidden">
       <% if (typeof speakers !== 'undefined' && speakers.length > 0) { %>
@@ -60,11 +60,11 @@
               </div>
             <% }) %>
           </div>
-          
+
           <!-- Navigation dots (dynamically generated if needed by slider logic) -->
           <!-- <% if (speakers.length > 3) { // Only show dots if there are more slides than visible %>
             <div class="flex justify-center mt-4 speaker-dots-container">
-              <% for(let i = 0; i < Math.ceil(speakers.length / 3); i++) { %> 
+              <% for(let i = 0; i < Math.ceil(speakers.length / 3); i++) { %>
                 <div class="speaker-dot <%= i === 0 ? 'active bg-white' : 'bg-gray-400' %> w-2 h-2 rounded-full mx-1 cursor-pointer"></div>
               <% } %>
             </div>
@@ -75,7 +75,7 @@
       <% } %>
     </div> -->
   <!-- </div> -->
-  
+
   <!-- Footer -->
   <!-- <footer class="border-t border-blue-300 pt-3 text-center relative z-10">
     <p class="text-xl text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">&copy; Học viện Quân y - All rights reserved</p>
@@ -84,6 +84,9 @@
   <!-- QR Code (Moved to Bottom Left) -->
   <div class="absolute bottom-20 left-20 bg-white p-3 rounded-lg shadow-md z-20" id="qrCodeContainer">
     <img id="register-qr-code" src="" alt="Registration QR Code" class="h-32 w-32 border border-gray-200 bg-gray-50" style="min-width: 200px; min-height: 200px;">
+    <div class="mt-2 text-center text-xs text-gray-600">
+      QR sẽ tự đổi sau <span id="qr-countdown">...</span>
+    </div>
   </div>
 </div>
 
@@ -93,36 +96,60 @@
     // QR Code Logic
     const qrCodeElement = document.getElementById('register-qr-code');
     const qrCodeContainer = document.getElementById('qrCodeContainer');
-    
-    let qrCodeUrl = '/api/qrcode';
-    
+    const countdownEl = document.getElementById('qr-countdown');
+
+    let qrCodeUrl = '/api/attendance-qr';
+
     // Add conference code to QR URL if available
     const conferenceCode = "<%= typeof conference !== 'undefined' && conference ? conference.code : '' %>";
     if (conferenceCode) {
       qrCodeUrl += `?code=${conferenceCode}`;
     }
 
-    // Fetch and display QR code with favicon logo overlay
-    fetch(qrCodeUrl)
-      .then(response => response.json())
-      .then(data => {
-        if (qrCodeElement && data.qrCodeDataUrl) { 
-          qrCodeElement.src = data.qrCodeDataUrl;
-          console.log('QR code loaded successfully with favicon logo');
-          if (qrCodeContainer) {
-            setTimeout(() => {
-                if (qrCodeContainer) qrCodeContainer.style.display = 'none'; // Hide container after 1 minute
-            }, 3600000); // 3600000 milliseconds = 1 hour
-          }
-        }
-      })
-      .catch(error => { 
-        console.error('Error fetching QR code:', error);
+    let refreshTimer = 0;
+    let countdownTimer = 0;
+
+    function startCountdown(expiresAt) {
+      if (!countdownEl) return;
+      if (countdownTimer) window.clearInterval(countdownTimer);
+      const tick = () => {
+        const msLeft = Math.max(0, expiresAt - Date.now());
+        const s = Math.ceil(msLeft / 1000);
+        countdownEl.textContent = `${s}s`;
+      };
+      tick();
+      countdownTimer = window.setInterval(tick, 250);
+    }
+
+    async function refreshQr() {
+      if (refreshTimer) window.clearTimeout(refreshTimer);
+      try {
+        const res = await fetch(qrCodeUrl, { cache: 'no-store' });
+        const data = await res.json();
+        if (!res.ok || !data?.success || !data?.qrCodeDataUrl) throw new Error(data?.message || 'Failed to load QR');
+
         if (qrCodeElement) {
-          qrCodeElement.alt = "Error loading QR Code";
+          qrCodeElement.src = data.qrCodeDataUrl;
         }
-        if (qrCodeContainer) qrCodeContainer.style.display = 'none'; // Hide on error too
-      });
+
+        const expiresAt = Number(data.expiresAt) || (Date.now() + 30000);
+        startCountdown(expiresAt);
+        const msUntilNext = Math.max(500, expiresAt - Date.now() + 150);
+        refreshTimer = window.setTimeout(refreshQr, msUntilNext);
+
+        if (qrCodeContainer) {
+          setTimeout(() => {
+              if (qrCodeContainer) qrCodeContainer.style.display = 'none';
+          }, 3600000);
+        }
+      } catch (error) {
+        console.error('Error fetching QR code:', error);
+        if (qrCodeElement) qrCodeElement.alt = "Error loading QR Code";
+        refreshTimer = window.setTimeout(refreshQr, 5000);
+      }
+    }
+
+    refreshQr();
 
     // Title Animation Logic (assuming it exists and is needed)
     const titleLines = document.querySelectorAll('.title-line');
@@ -135,7 +162,7 @@
       });
     }
     if (titleLines.length > 0) {
-        runTitleAnimation(); 
+        runTitleAnimation();
         setInterval(runTitleAnimation, 10000);
     }
 
@@ -143,11 +170,11 @@
     const speakersTrack = document.querySelector('.speakers-track');
     const speakerSlides = document.querySelectorAll('.speaker-slide');
     const dotsContainer = document.querySelector('.speaker-dots-container');
-    
+
     if (speakersTrack && speakerSlides.length > 0) {
       const visibleSlides = 3; // Number of slides visible at once
       const totalSlides = speakerSlides.length;
-      const slideWidthPercentage = 100 / visibleSlides; 
+      const slideWidthPercentage = 100 / visibleSlides;
       // Adjust slide width if using flex-shrink-0 on slides that are themselves 1/3 width
       // For the current HTML (w-1/3 on slide), slideWidthPercentage should actually be based on how many groups of 3 you have.
       // Let's simplify: each slide is 1/3, so to move one full set of 3 slides, it's 100%.
@@ -191,11 +218,11 @@
             dot.addEventListener('click', () => {
                 currentSlideGroup = index;
                 updateDynamicSliderPosition();
-                startDynamicSliding(); 
+                startDynamicSliding();
             });
         });
       }
-      startDynamicSliding(); 
-    }    
+      startDynamicSliding();
+    }
   });
-</script> 
+</script>

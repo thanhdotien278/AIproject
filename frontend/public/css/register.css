@@ -1,0 +1,9 @@
+/* Small helpers for register.ejs client-side validation */
+
+#registration-form .ring-red-500 {
+  transition: box-shadow 120ms ease;
+}
+
+#registration-form .ring-green-500 {
+  transition: box-shadow 120ms ease;
+}
