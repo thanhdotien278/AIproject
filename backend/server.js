@@ -264,7 +264,8 @@ app.get('/thankyou', async (req, res) => {
         conference: { name: conferenceName || 'Hội Nghị', code: conferenceCode },
         formattedDates: null,
         locationName: null,
-        locationAddress: null
+        locationAddress: null,
+        registrationFields: ['name', 'email', 'phone'] // Default fields when no conference found
       });
       console.timeEnd('Render thankyou page');
       console.timeEnd('Total /thankyou route time');
@@ -300,7 +301,8 @@ app.get('/thankyou', async (req, res) => {
       formattedDates,
       locationName,
       locationAddress,
-      qrData: qrDataForPdf
+      qrData: qrDataForPdf,
+      registrationFields: conference ? (conference.registrationFields || ['name', 'email', 'phone']) : ['name', 'email', 'phone']
     });
     console.timeEnd('Render thankyou page');
     console.timeEnd('Total /thankyou route time');
@@ -328,7 +330,8 @@ app.get('/thankyou', async (req, res) => {
       formattedDates: null,
       locationName: null,
       locationAddress: null,
-      qrData: fallbackQrData
+      qrData: fallbackQrData,
+      registrationFields: ['name', 'email', 'phone'] // Default fields for fallback
     });
     console.timeEnd('Render thankyou page');
     console.timeEnd('Total /thankyou route time');
@@ -362,7 +365,7 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-server.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 

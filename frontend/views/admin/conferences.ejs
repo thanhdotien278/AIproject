@@ -126,6 +126,34 @@
           <textarea id="description" name="description" rows="3" class="form-textarea w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
         </div>
 
+        <!-- Target Audience -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Đối tượng tham dự <span class="text-red-500">*</span></label>
+          <p class="text-sm text-gray-600 mb-2">Chọn các đối tượng có thể tham dự hội nghị này.</p>
+          <div class="grid grid-cols-1 gap-2 border border-gray-300 rounded-md p-4">
+            <div class="flex items-center">
+              <input type="checkbox" id="conf-target-si-quan" name="targetAudience" value="Sĩ quan" class="form-checkbox h-4 w-4 text-blue-600">
+              <label for="conf-target-si-quan" class="ml-2 text-sm text-gray-700">Sĩ quan</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="conf-target-quan-nhan" name="targetAudience" value="Quân nhân chuyên nghiệp" class="form-checkbox h-4 w-4 text-blue-600">
+              <label for="conf-target-quan-nhan" class="ml-2 text-sm text-gray-700">Quân nhân chuyên nghiệp</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="conf-target-vien-chuc" name="targetAudience" value="Viên chức quốc phòng" class="form-checkbox h-4 w-4 text-blue-600">
+              <label for="conf-target-vien-chuc" class="ml-2 text-sm text-gray-700">Viên chức quốc phòng</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="conf-target-ha-si" name="targetAudience" value="Hạ sĩ quan binh sĩ" class="form-checkbox h-4 w-4 text-blue-600">
+              <label for="conf-target-ha-si" class="ml-2 text-sm text-gray-700">Hạ sĩ quan binh sĩ</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="conf-target-hoc-vien" name="targetAudience" value="Học viên" class="form-checkbox h-4 w-4 text-blue-600">
+              <label for="conf-target-hoc-vien" class="ml-2 text-sm text-gray-700">Học viên</label>
+            </div>
+          </div>
+        </div>
+
         <!-- Registration Fields -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Trường Thông Tin Đăng Ký</label>
@@ -149,9 +177,11 @@
                 { value: 'lunch', label: 'Ăn trưa' },
                 { value: 'dinner', label: 'Ăn tối' },
                 { value: 'transport', label: 'Xe đưa đón' },
+                { value: 'qime', label: 'Qime' },
                 { value: 'feedback', label: 'Góp ý' },
                 { value: 'questions', label: 'Câu hỏi' },
-                { value: 'source', label: 'Nguồn biết đến' }
+                { value: 'source', label: 'Nguồn biết đến' },
+                { value: 'targetAudience', label: 'Đối tượng' }
               ];
             %>
             <% allFields.forEach(field => { %>
@@ -209,6 +239,10 @@
       // Reset registration field checkboxes (except required ones)
       const checkboxes = regFieldsContainer.querySelectorAll('input[name="registrationFields"]:not(:disabled)');
       checkboxes.forEach(cb => cb.checked = false);
+      
+      // Reset target audience checkboxes
+      const targetAudienceCheckboxes = document.querySelectorAll('input[name="targetAudience"]');
+      targetAudienceCheckboxes.forEach(cb => cb.checked = false);
       conferenceModal.classList.remove('hidden');
     };
 
@@ -237,15 +271,25 @@
       const selectedFields = Array.from(regFieldsContainer.querySelectorAll('input[name="registrationFields"]:checked'))
                                   .map(cb => cb.value);
       
+      // Get selected target audience
+      const selectedTargetAudience = Array.from(document.querySelectorAll('input[name="targetAudience"]:checked'))
+                                        .map(cb => cb.value);
+      
       // Add selected fields to FormData (as multiple entries)
       const formData = new FormData(conferenceForm);
       
-      // Clear existing registrationFields from formData if any (from text/hidden inputs)
+      // Clear existing registrationFields and targetAudience from formData if any
       formData.delete('registrationFields'); 
+      formData.delete('targetAudience');
       
       // Append each selected field
       selectedFields.forEach(field => {
         formData.append('registrationFields', field);
+      });
+      
+      // Append each selected target audience
+      selectedTargetAudience.forEach(audience => {
+        formData.append('targetAudience', audience);
       });
       
       // You might want to disable the save button here to prevent double submission
@@ -330,6 +374,12 @@
             const checkboxes = regFieldsContainer.querySelectorAll('input[name="registrationFields"]:not(:disabled)');
             checkboxes.forEach(cb => {
                 cb.checked = conf.registrationFields.includes(cb.value);
+            });
+
+            // Reset and check target audience checkboxes
+            const targetAudienceCheckboxes = document.querySelectorAll('input[name="targetAudience"]');
+            targetAudienceCheckboxes.forEach(cb => {
+                cb.checked = conf.targetAudience && conf.targetAudience.includes(cb.value);
             });
 
             // Update form action or handle update logic separately if needed

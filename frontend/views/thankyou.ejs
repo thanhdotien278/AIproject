@@ -109,126 +109,140 @@
             <p class="text-gray-600"><%= (participant && participant.email) ? participant.email : (typeof participantEmail !== 'undefined' ? participantEmail : '---') %></p>
           </div>
           
-          <% if (participant && participant.phone) { %>
+          <% if (registrationFields.includes('phone') && participant && participant.phone) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Số điện thoại:</h3>
             <p class="text-gray-600"><%= participant.phone %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.workunit) { %>
+          <% if (registrationFields.includes('workunit') && participant && participant.workunit) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Đơn vị công tác:</h3>
             <p class="text-gray-600"><%= participant.workunit %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.address) { %>
+          <% if (registrationFields.includes('address') && participant && participant.address) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Địa chỉ:</h3>
             <p class="text-gray-600"><%= participant.address %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.age) { %>
+          <% if (registrationFields.includes('age') && participant && participant.age) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Tuổi:</h3>
             <p class="text-gray-600"><%= participant.age %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.business) { %>
+          <% if (registrationFields.includes('business') && participant && participant.business) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Lĩnh vực kinh doanh:</h3>
             <p class="text-gray-600"><%= participant.business %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.nationality) { %>
+          <% if (registrationFields.includes('nationality') && participant && participant.nationality) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Quốc tịch:</h3>
             <p class="text-gray-600"><%= participant.nationality %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.rank) { %>
+          <% if (registrationFields.includes('rank') && participant && participant.rank) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Cấp bậc:</h3>
             <p class="text-gray-600"><%= participant.rank %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.academic) { %>
+          <% if (registrationFields.includes('academic') && participant && participant.academic) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Học hàm học vị:</h3>
             <p class="text-gray-600"><%= participant.academic %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.position) { %>
+          <% if (registrationFields.includes('position') && participant && participant.position) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Chức vụ:</h3>
             <p class="text-gray-600"><%= participant.position %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.speciality) { %>
+          <% if (registrationFields.includes('speciality') && participant && participant.speciality) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Chuyên ngành:</h3>
             <p class="text-gray-600"><%= participant.speciality %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.role) { %>
+          <% if (registrationFields.includes('targetAudience') && participant && participant.targetAudience) { %>
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-1">Đối tượng:</h3>
+            <p class="text-gray-600"><%= participant.targetAudience %></p>
+          </div>
+          <% } %>
+          
+          <% if (registrationFields.includes('role') && participant && participant.role) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Vai trò:</h3>
             <p class="text-gray-600"><%= participant.role %></p>
           </div>
           <% } %>
           
-          <% if (participant && typeof participant.speech !== 'undefined') { %>
+          <% if (registrationFields.includes('speech') && participant && typeof participant.speech !== 'undefined') { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Có phát biểu:</h3>
             <p class="text-gray-600"><%= participant.speech === true ? 'Có' : 'Không' %></p>
           </div>
           <% } %>
           
-          <% if (participant && typeof participant.lunch !== 'undefined') { %>
+          <% if (registrationFields.includes('lunch') && participant && typeof participant.lunch !== 'undefined') { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Ăn trưa:</h3>
             <p class="text-gray-600"><%= participant.lunch === true ? 'Có' : 'Không' %></p>
           </div>
           <% } %>
           
-          <% if (participant && typeof participant.dinner !== 'undefined') { %>
+          <% if (registrationFields.includes('dinner') && participant && typeof participant.dinner !== 'undefined') { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Ăn tối:</h3>
             <p class="text-gray-600"><%= participant.dinner === true ? 'Có' : 'Không' %></p>
           </div>
           <% } %>
           
-          <% if (participant && typeof participant.transport !== 'undefined') { %>
+          <% if (registrationFields.includes('transport') && participant && typeof participant.transport !== 'undefined') { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Đăng ký theo xe về học viện:</h3>
             <p class="text-gray-600"><%= participant.transport === true ? 'Có' : 'Không' %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.source) { %>
+          <% if (registrationFields.includes('qime') && participant && typeof participant.qime !== 'undefined') { %>
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-1">Đã cài Qime:</h3>
+            <p class="text-gray-600"><%= participant.qime === true ? 'Có' : 'Không' %></p>
+          </div>
+          <% } %>
+          
+          <% if (registrationFields.includes('source') && participant && participant.source) { %>
           <div>
             <h3 class="font-semibold text-gray-700 mb-1">Bạn biết về hội nghị từ đâu:</h3>
             <p class="text-gray-600"><%= participant.source %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.feedback) { %>
+          <% if (registrationFields.includes('feedback') && participant && participant.feedback) { %>
           <div class="md:col-span-2">
             <h3 class="font-semibold text-gray-700 mb-1">Góp ý về công tác tổ chức:</h3>
             <p class="text-gray-600"><%- participant.feedback %></p>
           </div>
           <% } %>
           
-          <% if (participant && participant.questions) { %>
+          <% if (registrationFields.includes('questions') && participant && participant.questions) { %>
           <div class="md:col-span-2">
             <h3 class="font-semibold text-gray-700 mb-1">Câu hỏi:</h3>
             <p class="text-gray-600"><%- participant.questions %></p>

@@ -161,11 +161,13 @@ exports.registerParticipant = async (req, res) => {
     if (registrationFields.includes('rank')) participantData.rank = req.body.rank;
     if (registrationFields.includes('academic')) participantData.academic = req.body.academic;
     if (registrationFields.includes('role')) participantData.role = req.body.role;
+    if (registrationFields.includes('targetAudience')) participantData.targetAudience = req.body.targetAudience;
     if (registrationFields.includes('speech')) participantData.speech = req.body.speech === true || req.body.speech === 'true';
     if (registrationFields.includes('lunch')) participantData.lunch = req.body.lunch === true || req.body.lunch === 'true';
     if (registrationFields.includes('dinner')) participantData.dinner = req.body.dinner === true || req.body.dinner === 'true';
-    if (registrationFields.includes('feedback')) participantData.feedback = req.body.feedback;
     if (registrationFields.includes('transport')) participantData.transport = req.body.transport === true || req.body.transport === 'true';
+    if (registrationFields.includes('qime')) participantData.qime = req.body.qime === true || req.body.qime === 'true';
+    if (registrationFields.includes('feedback')) participantData.feedback = req.body.feedback;
     
     // Create new participant
     const participant = new Participant(participantData);
@@ -231,6 +233,7 @@ exports.registerParticipant = async (req, res) => {
           ${participantData.academic ? `<li>Học hàm/Học vị: ${participantData.academic}</li>` : ''}
           ${participantData.position ? `<li>Chức vụ: ${participantData.position}</li>` : ''}
           ${participantData.speciality ? `<li>Chuyên ngành: ${participantData.speciality}</li>` : ''}
+          ${participantData.targetAudience ? `<li>Đối tượng: ${participantData.targetAudience}</li>` : ''}
           ${participantData.address ? `<li>Địa chỉ: ${participantData.address}</li>` : ''}
           ${participantData.age ? `<li>Tuổi: ${participantData.age}</li>` : ''}
           ${participantData.business ? `<li>Lĩnh vực: ${participantData.business}</li>` : ''}
@@ -240,12 +243,17 @@ exports.registerParticipant = async (req, res) => {
           ${registrationFields.includes('lunch') ? `<li>Đăng ký ăn trưa: ${participantData.lunch ? 'Có' : 'Không'}</li>` : ''}
           ${registrationFields.includes('dinner') ? `<li>Đăng ký ăn tối: ${participantData.dinner ? 'Có' : 'Không'}</li>` : ''}
           ${registrationFields.includes('transport') ? `<li>Đăng ký xe đưa đón: ${participantData.transport ? 'Có' : 'Không'}</li>` : ''}
+          ${registrationFields.includes('qime') ? `<li>Đã cài Qime: ${participantData.qime ? 'Có' : 'Không'}</li>` : ''}
           ${participantData.feedback ? `<li>Góp ý: ${participantData.feedback}</li>` : ''}
           ${participantData.questions ? `<li>Câu hỏi cho BTC: ${participantData.questions}</li>` : ''}
           ${participantData.source ? `<li>Nguồn biết đến hội nghị: ${participantData.source}</li>` : ''}
         </ul>
         <p>Chúng tôi rất mong được đón tiếp bạn tại sự kiện.</p>
         ${attachments.length > 0 ? '<p><strong>Vui lòng kiểm tra các tài liệu quan trọng được đính kèm trong email này.</strong></p>' : ''}
+        <p><strong>Link để tải tài liệu hội nghị:</strong><br>
+        <a href="https://www.dropbox.com/scl/fo/wvlnthsjp3hd2a3t2j6qd/AAaL4k0Ni9upYGqsUvkiVrc?rlkey=nyzhcwqm3isuwoqwu77me3ljx&st=t9q4pydu&dl=0" target="_blank" style="color: #007bff; text-decoration: none;">
+        Tài liệu hội nghị - Dropbox
+        </a></p>
         <p>Trân trọng,<br>Ban tổ chức ${conference.name}</p>
       `,
       attachments: attachments
