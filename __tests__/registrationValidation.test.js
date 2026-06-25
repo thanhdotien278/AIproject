@@ -67,4 +67,39 @@ describe('registration validation', () => {
     validateEmail('not-an-email', formatErrors);
     expect(formatErrors.email).toBe('Email không đúng định dạng');
   });
+
+  test('normalizes academic before it is saved', () => {
+    const result = validateRegistrationForm(
+      {
+        name: 'Nguyen Van A',
+        email: 'a@example.com',
+        phone: '0123456789',
+        academic: 'TS, PGS',
+      },
+      { requiredFields: ['academic'] },
+    );
+
+    expect(result.isValid).toBe(true);
+    expect(result.sanitized.academic).toBe('PGS. TS.');
+  });
+
+  test.each([
+    ['GS, PGS, TS', 'Không thể chọn đồng thời GS. và PGS.'],
+    ['Cử nhân, ThS', 'Chỉ được chọn một học vị: Cử nhân, ThS. hoặc TS.'],
+    ['PGS', 'Nếu chọn GS./PGS. thì học vị phải là TS.'],
+    ['TS, Khác', 'Không thể chọn Khác đồng thời với học hàm/học vị chuẩn.'],
+  ])('reports academic validation error for %s', (academic, expected) => {
+    const result = validateRegistrationForm(
+      {
+        name: 'Nguyen Van A',
+        email: 'a@example.com',
+        phone: '0123456789',
+        academic,
+      },
+      { requiredFields: ['academic'] },
+    );
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors.academic).toBe(expected);
+  });
 });

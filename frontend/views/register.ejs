@@ -483,6 +483,7 @@
     registrationFields: <%- JSON.stringify(registrationFields || []) %>,
   };
 </script>
+<script src="/js/academic-selection.js"></script>
 <script src="/js/register-validation.js" defer></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -623,6 +624,7 @@
     const academicInput = document.getElementById('academic');
     const academicCheckboxContainer = document.getElementById('academic-checkbox-container');
     const academicOptionCheckboxes = document.querySelectorAll('.academic-option-cb');
+    const academicSelection = window.__academicSelection;
     let academicBlurTimeout;
 
     if (academicInput && academicCheckboxContainer) {
@@ -645,15 +647,30 @@
 
       academicOptionCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
-          const selectedValues = [];
-          academicOptionCheckboxes.forEach(cb => {
-            if (cb.checked) {
-              selectedValues.push(cb.value);
-            }
-          });
-          academicInput.value = selectedValues.join(', ');
-          // Hide container after selection
-          academicCheckboxContainer.classList.add('hidden'); 
+          if (checkbox.checked && (checkbox.value === 'GS' || checkbox.value === 'PGS')) {
+            academicOptionCheckboxes.forEach(cb => {
+              if (cb.value === 'TS') cb.checked = true;
+              if (cb.value === 'Cử nhân' || cb.value === 'ThS' || cb.value === 'Khác') cb.checked = false;
+            });
+          }
+
+          if (checkbox.checked && checkbox.value === 'Khác') {
+            academicOptionCheckboxes.forEach(cb => {
+              if (cb !== checkbox) cb.checked = false;
+            });
+          } else if (checkbox.checked) {
+            academicOptionCheckboxes.forEach(cb => {
+              if (cb.value === 'Khác') cb.checked = false;
+            });
+          }
+
+          const selectedValues = Array.from(academicOptionCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+          academicInput.value = academicSelection
+            ? academicSelection.formatAcademicSelection(selectedValues)
+            : selectedValues.join(', ');
+          academicInput.dispatchEvent(new Event('input', { bubbles: true }));
         });
       });
     }

@@ -180,6 +180,24 @@
   function validateField(form, field, { silent = false } = {}) {
     if (field === 'phone') return validatePhoneField(form, form.querySelector('#phone'), { silent });
     if (field === 'email') return validateEmailField(form, form.querySelector('#email'), { silent });
+    if (field === 'academic') {
+      const el = form.querySelector('#academic');
+      const raw = String(el?.value ?? '').trim();
+      if (!raw) {
+        if (!silent) setFieldState(form, 'academic', el, { valid: false, message: `${labelFor(field)} là trường bắt buộc` });
+        return false;
+      }
+
+      const academic = window.__academicSelection?.normalizeAcademicSelection(raw);
+      if (academic && !academic.isValid) {
+        if (!silent) setFieldState(form, 'academic', el, { valid: false, message: academic.errors[0] });
+        return false;
+      }
+
+      if (academic && el) el.value = academic.value;
+      if (!silent) setFieldState(form, 'academic', el, { valid: true });
+      return true;
+    }
 
     // workunit is composed in the UI
     if (field === 'workunit') {
@@ -252,7 +270,7 @@
       const onInput = () => {
         const errEl = getErrorEl(form, field);
         const hasError = errEl && errEl.style.display !== 'none';
-        validateField(form, field, { silent: !hasError });
+        validateField(form, field, { silent: field !== 'academic' && !hasError });
         updateSubmitState(form);
       };
 
