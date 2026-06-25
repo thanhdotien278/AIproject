@@ -137,13 +137,12 @@
             </div>
             <div class="relative flex-grow">
               <select id="targetAudience" name="targetAudience" class="w-full bg-transparent focus:outline-none text-gray-700 px-4 py-3 text-sm appearance-none">
-                <option value="">Đối tượng</option>
                 <% if (conference.targetAudience && conference.targetAudience.length > 0) { %>
                   <% conference.targetAudience.forEach(audience => { %>
-                    <option value="<%= audience %>"><%= audience %></option>
+                    <option value="<%= audience %>" <%= audience === 'Sĩ quan' ? 'selected' : '' %>><%= audience %></option>
                   <% }); %>
                 <% } else { %>
-                  <option value="Sĩ quan">Sĩ quan</option>
+                  <option value="Sĩ quan" selected>Sĩ quan</option>
                   <option value="Quân nhân chuyên nghiệp">Quân nhân chuyên nghiệp</option>
                   <option value="Viên chức quốc phòng">Viên chức quốc phòng</option>
                   <option value="Hạ sĩ quan binh sĩ">Hạ sĩ quan binh sĩ</option>
