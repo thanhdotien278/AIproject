@@ -1,6 +1,54 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Environment / secrets
 .env
+.env.*
+!.env.example
+*.env.copy
+.env copy
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Test outputs
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# Local browser/runtime profiles
+.chrome-profile/
+.playwright-mcp/
+
+# Local AI / agent tools
+.agents/
+.gemini/
+_bmad/
+_bmad-output/
+
+# IDE/editor local settings
+.vscode/
+.cursor/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
 .DS_Store
-**/.DS_Store
-*/.DS_Store
-*/**/.DS_Store
+Thumbs.db
+
+# Local storage/uploads
+uploads/
+storage/
+tmp/
+temp/
+.minio/
+postgres-data/
