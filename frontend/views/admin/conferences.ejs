@@ -128,6 +128,28 @@
             <input type="number" id="expected-participants" name="expectedParticipants" value="0" min="0" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
             <p class="mt-1 text-sm text-gray-500">Dùng khi chưa có danh sách đăng ký online. Có thể cập nhật lại sau.</p>
         </div>
+
+        <!-- QR Check-in Configuration -->
+        <div class="border border-gray-200 rounded-md p-4 bg-gray-50">
+          <h4 class="text-sm font-semibold text-gray-800 mb-3">Cấu hình QR Check-in</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="qr-available-from-time" class="block text-sm font-medium text-gray-700 mb-1">QR khả dụng từ</label>
+              <input type="time" id="qr-available-from-time" name="qrConfig[availableFromTime]" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+              <p class="mt-1 text-sm text-gray-500">Mặc định trước giờ bắt đầu hội nghị 15 phút. Định dạng HH:mm.</p>
+            </div>
+            <div>
+              <label for="qr-available-duration-minutes" class="block text-sm font-medium text-gray-700 mb-1">QR khả dụng trong ... phút</label>
+              <input type="number" id="qr-available-duration-minutes" name="qrConfig[availableDurationMinutes]" value="30" min="1" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+              <p class="mt-1 text-sm text-gray-500">Thời lượng QR Check-in còn khả dụng để điểm danh.</p>
+            </div>
+            <div>
+              <label for="qr-rotation-ttl-seconds" class="block text-sm font-medium text-gray-700 mb-1">QR tự đổi sau mỗi ... giây</label>
+              <input type="number" id="qr-rotation-ttl-seconds" name="qrConfig[rotationTtlSeconds]" value="30" min="1" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+              <p class="mt-1 text-sm text-gray-500">Tần suất mã QR động được đổi mới.</p>
+            </div>
+          </div>
+        </div>
         
         <!-- Description -->
         <div>
@@ -235,6 +257,15 @@
     const saveConferenceBtn = document.getElementById('save-conference-btn');
     const conferenceCodeInput = document.getElementById('conference-code');
     const regFieldsContainer = document.getElementById('registration-fields-container');
+    const qrAvailableFromTimeInput = document.getElementById('qr-available-from-time');
+    const qrAvailableDurationMinutesInput = document.getElementById('qr-available-duration-minutes');
+    const qrRotationTtlSecondsInput = document.getElementById('qr-rotation-ttl-seconds');
+
+    const setQrConfigFields = (qrConfig = {}) => {
+      qrAvailableFromTimeInput.value = qrConfig.availableFromTime || '';
+      qrAvailableDurationMinutesInput.value = qrConfig.availableDurationMinutes || 30;
+      qrRotationTtlSecondsInput.value = qrConfig.rotationTtlSeconds || 30;
+    };
 
     // Function to open the modal for adding
     const openAddModal = () => {
@@ -245,6 +276,7 @@
       conferenceForm.action = '/admin/conferences/create'; // Set form action for create
       document.getElementById('max-attendees').value = 100;
       document.getElementById('expected-participants').value = 0;
+      setQrConfigFields();
       // Clear location selection (set to default disabled option)
       document.getElementById('conference-location-select').selectedIndex = 0;
       // Reset registration field checkboxes (except required ones)
@@ -381,6 +413,7 @@
             document.getElementById('max-attendees').value = conf.maxAttendees || 100;
             document.getElementById('expected-participants').value = conf.expectedParticipants || 0;
             document.getElementById('description').value = conf.description || '';
+            setQrConfigFields(conf.qrConfig);
 
             // Reset and check registration field checkboxes
             const checkboxes = regFieldsContainer.querySelectorAll('input[name="registrationFields"]:not(:disabled)');

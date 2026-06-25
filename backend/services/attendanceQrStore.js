@@ -14,12 +14,18 @@ function nowMs() {
   return Date.now();
 }
 
-function getWindowStartMs(now = nowMs()) {
-  return Math.floor(now / TTL_MS) * TTL_MS;
+function getTtlMs(ttlMs) {
+  const parsed = Number(ttlMs);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : TTL_MS;
 }
 
-function makeWindowKey(conferenceCode, windowStartMs) {
-  return `${conferenceCode || 'all'}:${windowStartMs}`;
+function getWindowStartMs(now = nowMs(), ttlMs = TTL_MS) {
+  const activeTtlMs = getTtlMs(ttlMs);
+  return Math.floor(now / activeTtlMs) * activeTtlMs;
+}
+
+function makeWindowKey(conferenceCode, windowStartMs, ttlMs) {
+  return `${conferenceCode || 'all'}:${windowStartMs}:${getTtlMs(ttlMs)}`;
 }
 
 function createToken() {
@@ -40,9 +46,15 @@ function cleanupExpired(now = nowMs()) {
   }
 }
 
-function getOrCreateActiveToken({ conferenceCode = 'all', now = nowMs() } = {}) {
-  const windowStartMs = getWindowStartMs(now);
-  const key = makeWindowKey(conferenceCode, windowStartMs);
+function getOrCreateActiveToken({
+  conferenceCode = 'all',
+  now = nowMs(),
+  ttlMs = TTL_MS,
+  maxExpiresAt,
+} = {}) {
+  const activeTtlMs = getTtlMs(ttlMs);
+  const windowStartMs = getWindowStartMs(now, activeTtlMs);
+  const key = makeWindowKey(conferenceCode, windowStartMs, activeTtlMs);
   const existingToken = windowIndex.get(key);
   const existingRecord = existingToken ? tokenStore.get(existingToken) : null;
 
@@ -52,8 +64,11 @@ function getOrCreateActiveToken({ conferenceCode = 'all', now = nowMs() } = {}) 
 
   const token = createToken();
   const createdAt = windowStartMs;
-  const expiresAt = windowStartMs + TTL_MS;
-  const record = { token, conferenceCode, createdAt, expiresAt };
+  const configuredExpiresAt = windowStartMs + activeTtlMs;
+  const expiresAt = Number.isFinite(maxExpiresAt)
+    ? Math.min(configuredExpiresAt, maxExpiresAt)
+    : configuredExpiresAt;
+  const record = { token, conferenceCode, createdAt, expiresAt, ttlMs: activeTtlMs };
 
   tokenStore.set(token, record);
   windowIndex.set(key, token);

@@ -4,7 +4,9 @@ const QRCode = require('qrcode');
 const sharp = require('sharp');
 const os = require('os');
 
-const { getOrCreateActiveToken, startCleanupTimer, TTL_MS } = require('../services/attendanceQrStore');
+const Conference = require('../models/Conference');
+const { getOrCreateActiveToken, startCleanupTimer } = require('../services/attendanceQrStore');
+const { getAttendanceQrAvailability } = require('../services/attendanceQrWindow');
 const { requireValidAttendanceQrToken } = require('../middleware/attendanceQr');
 
 const router = express.Router();
@@ -52,8 +54,52 @@ async function generateQrDataUrl({ url, logoPath }) {
 // GET /api/attendance-qr?code=CONF
 router.get('/api/attendance-qr', async (req, res) => {
   try {
-    const conferenceCode = req.query.code || 'all';
-    const record = getOrCreateActiveToken({ conferenceCode });
+    const conferenceCode = String(req.query.code || '').trim().toUpperCase();
+    res.set('Cache-Control', 'no-store');
+
+    if (!conferenceCode || conferenceCode === 'ALL') {
+      return res.status(400).json({
+        success: false,
+        state: 'conference_required',
+        message: 'Vui lòng chọn hội nghị',
+      });
+    }
+
+    const conference = await Conference.findOne({ code: conferenceCode });
+    if (!conference) {
+      return res.status(404).json({
+        success: false,
+        state: 'conference_not_found',
+        conferenceCode,
+        message: 'Không tìm thấy hội nghị',
+      });
+    }
+
+    if (!conference.isActive) {
+      return res.status(403).json({
+        success: false,
+        state: 'conference_inactive',
+        conferenceCode,
+        message: 'Hội nghị chưa được kích hoạt',
+      });
+    }
+
+    const availability = getAttendanceQrAvailability(conference);
+    if (!availability.success) {
+      return res.status(400).json(availability);
+    }
+
+    if (availability.state !== 'available') {
+      return res.json(availability);
+    }
+
+    const ttlMs = availability.rotationTtlSeconds * 1000;
+    const record = getOrCreateActiveToken({
+      conferenceCode,
+      now: availability.serverNow,
+      ttlMs,
+      maxExpiresAt: availability.closeAt,
+    });
 
     // Use BASE_URL from env if available, otherwise construct from request
     let baseUrl = process.env.BASE_URL;
@@ -78,14 +124,15 @@ router.get('/api/attendance-qr', async (req, res) => {
     const logoPath = path.join(__dirname, '../../frontend/public/images/favicon.png');
     const qrCodeDataUrl = await generateQrDataUrl({ url: checkinUrl, logoPath });
 
-    res.set('Cache-Control', 'no-store');
     return res.json({
+      ...availability,
       success: true,
       qrCodeDataUrl,
       token: record.token,
       createdAt: record.createdAt,
       expiresAt: record.expiresAt,
-      ttlMs: TTL_MS,
+      ttlMs: record.ttlMs,
+      ttlSeconds: availability.rotationTtlSeconds,
       checkinUrl,
     });
   } catch (error) {

@@ -21,6 +21,25 @@ function parseExpectedParticipants(value) {
   return { value: parsed };
 }
 
+function normalizeQrConfig(body) {
+  const source = body.qrConfig || {};
+  const qrConfig = {
+    availableFromTime: source.availableFromTime ?? body['qrConfig[availableFromTime]'],
+    availableDurationMinutes: source.availableDurationMinutes ?? body['qrConfig[availableDurationMinutes]'],
+    rotationTtlSeconds: source.rotationTtlSeconds ?? body['qrConfig[rotationTtlSeconds]']
+  };
+
+  Object.keys(qrConfig).forEach(key => {
+    if (qrConfig[key] === undefined) delete qrConfig[key];
+  });
+
+  if (qrConfig.availableFromTime === '') {
+    delete qrConfig.availableFromTime;
+  }
+
+  return Object.keys(qrConfig).length ? qrConfig : undefined;
+}
+
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || 'gmail',
@@ -386,6 +405,8 @@ exports.createConference = async (req, res) => {
       });
     }
 
+    const qrConfig = normalizeQrConfig(req.body);
+
     // Create a new conference document
     const conference = new Conference({
       code: conferenceCodeUpper,
@@ -399,7 +420,8 @@ exports.createConference = async (req, res) => {
       expectedParticipants: expectedParticipantsResult.value,
       description: req.body.description || '',
       targetAudience: targetAudience,
-      registrationFields: registrationFields
+      registrationFields: registrationFields,
+      qrConfig
     });
 
     console.log('Conference object before save:', conference);
@@ -971,6 +993,10 @@ exports.updateConference = async (req, res) => {
     conference.description = req.body.description || conference.description;
     conference.targetAudience = targetAudience; // Update target audience
     conference.registrationFields = registrationFields; // Update the fields
+    const qrConfig = normalizeQrConfig(req.body);
+    if (qrConfig !== undefined) {
+      conference.qrConfig = qrConfig;
+    }
 
     // Save the updated conference
     await conference.save();
