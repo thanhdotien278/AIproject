@@ -301,24 +301,133 @@ exports.registerParticipant = async (req, res) => {
   }
 };
 
-function calculateStatsFromParticipants(participants) {
-  const totalParticipants = participants.length;
+function calculateStatsFromParticipants(participants, totals = {}) {
+  const totalRegisteredFromParticipants =
+    Number.isFinite(Number(totals.totalRegisteredFromParticipants))
+      ? Number(totals.totalRegisteredFromParticipants)
+      : participants.length;
+  const expectedParticipants =
+    totals.expectedParticipants !== undefined && totals.expectedParticipants !== null && Number.isFinite(Number(totals.expectedParticipants))
+      ? Number(totals.expectedParticipants)
+      : Number(totals.maxAttendees) || 0;
+  const maxAttendees =
+    Number.isFinite(Number(totals.maxAttendees)) ? Number(totals.maxAttendees) : 0;
+  const checkedInCount = totalRegisteredFromParticipants;
+  const notCheckedInCount = Math.max(expectedParticipants - checkedInCount, 0);
+  const totalSource = totalRegisteredFromParticipants > 0 ? 'participants' : 'manual';
+  const totalParticipants =
+    totalSource === 'participants' ? totalRegisteredFromParticipants : expectedParticipants;
   const lunchCount = participants.filter(p => p.lunch === true).length;
   const dinnerCount = participants.filter(p => p.dinner === true).length;
   const transportCount = participants.filter(p => p.transport === true).length;
-  const hocVienCount = participants.filter(
-    p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')
-  ).length;
-  const donViNgoaiCount = totalParticipants - hocVienCount;
+  const internalCount = participants.filter(p => {
+    const workunit = (p.workunit || p.workUnit || '').toLowerCase();
+    return workunit.includes('học viện');
+  }).length;
+  const externalCount = Math.max(checkedInCount - internalCount, 0);
+  const checkedInPercent = expectedParticipants > 0
+    ? Math.round((checkedInCount / expectedParticipants) * 100)
+    : 0;
+  const notCheckedInPercent = expectedParticipants > 0
+    ? Math.round((notCheckedInCount / expectedParticipants) * 100)
+    : 0;
 
   return {
+    totalRegisteredFromParticipants,
+    expectedParticipants,
+    maxAttendees,
     totalParticipants,
+    totalSource,
+    checkedInCount,
+    notCheckedInCount,
+    checkedInPercent,
+    notCheckedInPercent,
+    internalCount,
+    externalCount,
     lunchCount,
     dinnerCount,
     transportCount,
-    hocVienCount,
-    donViNgoaiCount,
+    hocVienCount: internalCount,
+    donViNgoaiCount: externalCount,
+    lastUpdated: new Date().toISOString(),
   };
+}
+
+function participantTimestampMs(participant) {
+  const raw = participant.registrationTime || participant.registrationDate || participant.createdAt;
+  const fromDate = raw ? new Date(raw).getTime() : 0;
+  if (Number.isFinite(fromDate) && fromDate > 0) return fromDate;
+  if (participant._id && typeof participant._id.getTimestamp === 'function') {
+    return participant._id.getTimestamp().getTime();
+  }
+  return 0;
+}
+
+function participantType(participant) {
+  const raw = [
+    participant.workunitType,
+    participant.workunit,
+    participant.workUnit,
+    participant.workunitDetail,
+  ].filter(Boolean).join(' ').toLowerCase();
+  return raw.includes('học viện') || raw.includes('hoc vien') || raw.includes('hvqy')
+    ? 'Nội bộ'
+    : 'Khách ngoài Học viện';
+}
+
+function mapRecentParticipant(participant) {
+  const time = participant.registrationTime || participant.registrationDate || participant.createdAt ||
+    (participant._id && typeof participant._id.getTimestamp === 'function' ? participant._id.getTimestamp() : null);
+
+  return {
+    id: String(participant._id || participant.id || participant.participantId || ''),
+    time,
+    rank: participant.rank || '',
+    academic: participant.academic || '',
+    fullName: participant.fullName || participant.name || '',
+    position: participant.position || '',
+    type: participantType(participant),
+    services: {
+      lunch: participant.lunch === true,
+      dinner: participant.dinner === true,
+      transport: participant.transport === true,
+    },
+    conferenceCode: participant.conferenceCode || '',
+  };
+}
+
+function recentCheckInsFromParticipants(participants, limit = 5) {
+  return participants
+    .slice()
+    .sort((a, b) => participantTimestampMs(b) - participantTimestampMs(a) || String(b._id || '').localeCompare(String(a._id || '')))
+    .slice(0, limit)
+    .map(mapRecentParticipant);
+}
+
+async function buildStats(conferenceCode = 'all') {
+  const normalizedCode =
+    typeof conferenceCode === 'string' && conferenceCode.toLowerCase() !== 'all'
+      ? conferenceCode.toUpperCase()
+      : 'all';
+  const query = normalizedCode === 'all' ? {} : { conferenceCode: normalizedCode };
+  const participants = await Participant.find(query).lean();
+  const totalRegisteredFromParticipants = await Participant.countDocuments(query);
+
+  let conference = null;
+  if (normalizedCode !== 'all') {
+    conference = await Conference.findOne({ code: normalizedCode }).lean();
+  }
+
+  const stats = calculateStatsFromParticipants(participants, {
+    totalRegisteredFromParticipants,
+    expectedParticipants: conference ? conference.expectedParticipants : 0,
+    maxAttendees: conference ? conference.maxAttendees : 0,
+  });
+
+  stats.selectedConferenceCode = normalizedCode;
+  stats.recentCheckIns = recentCheckInsFromParticipants(participants);
+
+  return { conferenceCode: normalizedCode, stats };
 }
 
 // Show public statistics page
@@ -332,21 +441,16 @@ exports.showPublicStatsPage = async (req, res) => {
       selectedConferenceCode && selectedConferenceCode !== 'all'
         ? selectedConferenceCode.toUpperCase()
         : selectedConferenceCode;
-    let participants;
     let conferenceNameForTitle = "Tất cả Hội nghị";
 
     if (normalizedConferenceCode && normalizedConferenceCode !== 'all') {
-      participants = await Participant.find({ conferenceCode: normalizedConferenceCode });
       const selectedConf = allConferences.find(c => c.code === normalizedConferenceCode);
       if (selectedConf) {
         conferenceNameForTitle = selectedConf.name;
       }
-    } else {
-      // Fetch all participants if 'all' or no specific code is selected
-      participants = await Participant.find();
     }
 
-    const stats = calculateStatsFromParticipants(participants);
+    const { stats } = await buildStats(normalizedConferenceCode || 'all');
 
     res.render('stats', {
       layout: 'layouts/main',
@@ -371,9 +475,7 @@ async function calculateAndEmitStats(conferenceCode = 'all') {
       typeof conferenceCode === 'string' && conferenceCode.toLowerCase() !== 'all'
         ? conferenceCode.toUpperCase()
         : 'all';
-    const query = normalizedCode === 'all' ? {} : { conferenceCode: normalizedCode };
-    const participants = await Participant.find(query).lean();
-    const stats = calculateStatsFromParticipants(participants);
+    const { stats } = await buildStats(normalizedCode);
 
     if (global.io) {
       const payload = { conferenceCode: normalizedCode, stats, ...stats };
@@ -403,14 +505,17 @@ exports.getConferencesApi = async (req, res) => {
 exports.getStatsApi = async (req, res) => {
   try {
     const conferenceCodeRaw = req.query.conferenceCode;
-    const conferenceCode =
+    let conferenceCode =
       typeof conferenceCodeRaw === 'string' && conferenceCodeRaw.toLowerCase() !== 'all'
         ? conferenceCodeRaw.toUpperCase()
         : 'all';
 
-    const query = conferenceCode === 'all' ? {} : { conferenceCode };
-    const participants = await Participant.find(query).lean();
-    const stats = calculateStatsFromParticipants(participants);
+    if (conferenceCode === 'all') {
+      const activeConference = await Conference.findOne({ isActive: true }).lean();
+      if (activeConference?.code) conferenceCode = activeConference.code;
+    }
+
+    const { stats } = await buildStats(conferenceCode);
 
     res.json({ success: true, conferenceCode, stats, ...stats });
   } catch (error) {

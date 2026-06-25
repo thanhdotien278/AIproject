@@ -1,6 +1,7 @@
 const PHONE_REGEX = /^0\d{9}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OPTIONAL_FIELDS = new Set(['feedback', 'questions']);
+const { normalizeAcademicSelection } = require('../../frontend/public/js/academic-selection');
 
 const FIELD_LABELS_VI = {
   name: 'Họ và tên',
@@ -110,6 +111,16 @@ function validateRegistrationForm(formData, { requiredFields = [] } = {}) {
     if (field === 'name' || field === 'email' || field === 'phone') continue;
     if (OPTIONAL_FIELDS.has(field)) continue;
     validateRequiredField(field, formData?.[field], errors);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(sanitized, 'academic') || requiredFields.includes('academic')) {
+    const academic = normalizeAcademicSelection(formData?.academic);
+    if (academic.isValid) {
+      sanitized.academic = academic.value;
+    } else {
+      sanitized.academic = toStringOrEmpty(formData?.academic).trim();
+      errors.academic = academic.errors[0];
+    }
   }
 
   return {

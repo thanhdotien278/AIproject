@@ -25,6 +25,7 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa điểm</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số người tối đa</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dự kiến tham gia</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th>
           </tr>
         </thead>
@@ -38,6 +39,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= conference.time || '-' %></td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= conference.location ? conference.location.name : 'Chưa có' %></td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"><%= conference.maxAttendees %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"><%= conference.expectedParticipants || 0 %></td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button class="text-indigo-600 hover:text-indigo-900 mr-2 edit-conference-btn" data-id="<%= conference._id %>">Sửa</button>
                 <button class="text-red-600 hover:text-red-900 delete-conference-btn" data-id="<%= conference._id %>">Xóa</button>
@@ -116,8 +118,15 @@
 
         <!-- Max Attendees -->
         <div>
-            <label for="max-attendees" class="block text-sm font-medium text-gray-700 mb-1">Số người tối đa</label>
+            <label for="max-attendees" class="block text-sm font-medium text-gray-700 mb-1">Số người tối đa / sức chứa cấu hình hội nghị</label>
             <input type="number" id="max-attendees" name="maxAttendees" value="100" min="1" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        </div>
+
+        <!-- Expected Participants -->
+        <div>
+            <label for="expected-participants" class="block text-sm font-medium text-gray-700 mb-1">Tổng số người tham gia dự kiến</label>
+            <input type="number" id="expected-participants" name="expectedParticipants" value="0" min="0" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <p class="mt-1 text-sm text-gray-500">Dùng khi chưa có danh sách đăng ký online. Có thể cập nhật lại sau.</p>
         </div>
         
         <!-- Description -->
@@ -234,6 +243,8 @@
       conferenceIdField.value = ''; // Clear ID field
       conferenceCodeInput.disabled = false; // Enable code input for new conferences
       conferenceForm.action = '/admin/conferences/create'; // Set form action for create
+      document.getElementById('max-attendees').value = 100;
+      document.getElementById('expected-participants').value = 0;
       // Clear location selection (set to default disabled option)
       document.getElementById('conference-location-select').selectedIndex = 0;
       // Reset registration field checkboxes (except required ones)
@@ -368,6 +379,7 @@
             document.getElementById('conference-time').value = conf.time || '';
             document.getElementById('conference-location-select').value = conf.location ? conf.location._id : ''; // Use location ID
             document.getElementById('max-attendees').value = conf.maxAttendees || 100;
+            document.getElementById('expected-participants').value = conf.expectedParticipants || 0;
             document.getElementById('description').value = conf.description || '';
 
             // Reset and check registration field checkboxes
@@ -435,4 +447,4 @@
     });
 
   });
-</script> 
+</script>
