@@ -3,6 +3,7 @@
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const booleanFields = new Set(['speech', 'lunch', 'dinner', 'transport', 'qime']);
+  const optionalFields = new Set(['feedback', 'questions']);
 
   const labels = {
     name: 'Họ và tên',
@@ -168,7 +169,7 @@
     const cfg = window.__REGISTER_VALIDATION_CONFIG || {};
     const registrationFields = Array.isArray(cfg.registrationFields) ? cfg.registrationFields : [];
     const requiredFields = new Set(
-      registrationFields.filter(f => typeof f === 'string' && f && !booleanFields.has(f)),
+      registrationFields.filter(f => typeof f === 'string' && f && !booleanFields.has(f) && !optionalFields.has(f)),
     );
     requiredFields.add('name');
     requiredFields.add('email');
