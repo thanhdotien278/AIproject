@@ -196,6 +196,7 @@ exports.registerParticipant = async (req, res) => {
     req.session.participantEmail = req.body.email;
     req.session.conferenceName = conference.name;
     req.session.conferenceCode = conference.code;
+    req.session.participantMongoId = participant._id.toString();
     req.session.participantId = participantId; // Store the new ID in session
     req.session.participantData = participantData; // participantData now contains participantId
     

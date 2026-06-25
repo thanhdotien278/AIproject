@@ -22,6 +22,7 @@ const apiRoutes = require('./routes/api');
 const attendanceQrRoutes = require('./routes/attendanceQr');
 // Import controllers
 const registerController = require('./controllers/registerController');
+const { buildThankyouViewModel } = require('./services/thankyouViewModel');
 
 // Initialize express
 const app = express();
@@ -241,79 +242,15 @@ app.get('/', async (req, res) => {
 app.get('/thankyou', async (req, res) => {
   console.time('Total /thankyou route time');
   try {
-    // Get participant data from session
-    const participantName = req.session.participantName;
     const participantEmail = req.session.participantEmail;
-    const conferenceName = req.session.conferenceName;
-    const conferenceCode = req.session.conferenceCode;
-    const participantData = req.session.participantData;
 
     if (!participantEmail) {
       console.timeEnd('Total /thankyou route time');
       return res.redirect('/');
     }
 
-    console.time('Find participant by email');
-    // Find the participant in database to get all registration details
-    const participant = await mongoose.model('Participant').findOne({ email: participantEmail });
-    console.timeEnd('Find participant by email');
-
-    console.time('Find latest conference');
-    // Find the latest conference details
-    const conference = await mongoose.model('Conference').findOne()
-                              .sort({ createdAt: -1 })
-                              .populate('location');
-    console.timeEnd('Find latest conference');
-
-    if (!conference) {
-      console.time('Render thankyou page');
-      res.render('thankyou', {
-        participantName,
-        participantEmail,
-        participant: participantData || null, // Use session data as fallback
-        conference: { name: conferenceName || 'Hội Nghị', code: conferenceCode },
-        formattedDates: null,
-        locationName: null,
-        locationAddress: null,
-        registrationFields: ['name', 'email', 'phone'] // Default fields when no conference found
-      });
-      console.timeEnd('Render thankyou page');
-      console.timeEnd('Total /thankyou route time');
-      return;
-    }
-
-    // Format dates for display
-    const startDate = new Date(conference.startDate);
-    const endDate = new Date(conference.endDate);
-    const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-
-    let formattedDates = startDate.toLocaleDateString('vi-VN', formatOptions);
-    if (startDate.getTime() !== endDate.getTime()) {
-      formattedDates += ` - ${endDate.toLocaleDateString('vi-VN', formatOptions)}`;
-    }
-
-    // Get location details
-    const locationName = conference.location ? conference.location.name : 'Sẽ được thông báo sau';
-    const locationAddress = conference.location ? conference.location.address : '';
-
-    const qrDataForPdf = {
-      conferenceCode: conference ? conference.code : (conferenceCode || 'N/A'),
-      participantId: participant ? (participant.id || participant._id) : (participantData ? (participantData.id || participantData._id) : 'N/A'),
-      participantName: participant ? participant.name : (participantName || 'N/A')
-    };
-
     console.time('Render thankyou page');
-    res.render('thankyou', {
-      participantName,
-      participantEmail,
-      participant: participant || participantData, // Use session data as fallback
-      conference,
-      formattedDates,
-      locationName,
-      locationAddress,
-      qrData: qrDataForPdf,
-      registrationFields: conference ? (conference.registrationFields || ['name', 'email', 'phone']) : ['name', 'email', 'phone']
-    });
+    res.render('thankyou', await buildThankyouViewModel(req.session));
     console.timeEnd('Render thankyou page');
     console.timeEnd('Total /thankyou route time');
   } catch (error) {
