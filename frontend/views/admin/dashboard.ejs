@@ -3,12 +3,12 @@
 <!-- Conference Selector -->
 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
   <div class="flex-1">
-    <h1 class="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
+    <h1 class="text-2xl font-bold text-slate-900 mb-2">Dashboard</h1>
     <div class="flex flex-col md:flex-row md:items-center gap-2">
       <div class="flex items-center">
-        <label for="conference-select" class="text-gray-700 font-medium mr-4">Choose Conference:</label>
+        <label for="conference-select" class="text-slate-700 font-medium mr-4">Choose Conference:</label>
         <div class="relative flex-1">
-          <select id="conference-select" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+          <select id="conference-select" class="block w-full min-w-[240px] appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/15">
             <% if (typeof conferences !== 'undefined' && conferences.length > 0) { %>
               <% conferences.forEach((conference, index) => { %>
                 <option value="<%= conference.code %>" <%= index === 0 ? 'selected' : '' %>><%= conference.name %></option>
@@ -17,30 +17,30 @@
               <option value="" disabled>No conferences available</option>
             <% } %>
           </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
             <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
             </svg>
           </div>
         </div>
       </div>
-      
+
       <!-- Conference Action Buttons moved next to dropdown -->
       <div class="flex items-center gap-2 mt-2 md:mt-0">
-        <button id="select-conference-btn" class="conference-action-btn btn bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75">
+        <button id="select-conference-btn" class="conference-action-btn btn inline-flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-medium text-sky-800 shadow-sm transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-300/30">
           Select
         </button>
-        <button id="stop-conference-btn" class="conference-action-btn btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75">
+        <button id="stop-conference-btn" class="conference-action-btn btn inline-flex items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-800 shadow-sm transition hover:bg-rose-100 focus:outline-none focus:ring-4 focus:ring-rose-300/30">
           Stop
         </button>
       </div>
     </div>
   </div>
-  
+
   <div class="flex items-center justify-end mt-4 md:mt-0">
     <!-- New Conference Button -->
-    <button id="new-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white flex items-center px-4 py-2 rounded-lg shadow-md">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <button id="new-conference-btn" class="btn inline-flex items-center rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2.5 text-sm font-semibold text-cyan-900 shadow-sm transition hover:bg-cyan-100 focus:outline-none focus:ring-4 focus:ring-cyan-300/30">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-cyan-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
       New Conference
@@ -49,24 +49,24 @@
 </div>
 
 <!-- Conference Information -->
-<div id="conference-info" class="bg-white rounded-lg shadow p-6 mb-8 hidden">
-  <h3 class="text-xl font-semibold text-gray-800 mb-4">Conference Information</h3>
+<div id="conference-info" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-black/5 mb-8 hidden">
+  <h3 class="text-xl font-semibold text-slate-900 mb-4">Conference Information</h3>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div>
-      <p class="text-gray-500 mb-1">Conference Name</p>
-      <p class="text-lg font-medium" id="conf-name">-</p>
+      <p class="text-slate-500 mb-1">Conference Name</p>
+      <p class="text-lg font-medium text-slate-900" id="conf-name">-</p>
     </div>
     <div>
-      <p class="text-gray-500 mb-1">Location</p>
-      <p class="text-lg font-medium" id="conf-location">-</p>
+      <p class="text-slate-500 mb-1">Location</p>
+      <p class="text-lg font-medium text-slate-900" id="conf-location">-</p>
     </div>
     <div>
-      <p class="text-gray-500 mb-1">Time</p>
-      <p class="text-lg font-medium" id="conf-time">-</p>
+      <p class="text-slate-500 mb-1">Time</p>
+      <p class="text-lg font-medium text-slate-900" id="conf-time">-</p>
     </div>
     <div>
-      <p class="text-gray-500 mb-1">Dates</p>
-      <p class="text-lg font-medium" id="conf-dates">-</p>
+      <p class="text-slate-500 mb-1">Dates</p>
+      <p class="text-lg font-medium text-slate-900" id="conf-dates">-</p>
     </div>
   </div>
 </div>
@@ -74,11 +74,11 @@
 <!-- Dashboard Stats -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
   <!-- Total Registrations -->
-  <div class="bg-white rounded-lg shadow p-6">
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-black/5">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Total Registrations</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="total-registrations"><%= stats.totalParticipants %></h2>
+        <p class="text-slate-500 text-sm">Total Registrations</p>
+        <h2 class="text-3xl font-bold text-slate-900" id="total-registrations"><%= stats.totalParticipants %></h2>
       </div>
       <div class="bg-blue-100 p-3 rounded-full">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,65 +87,65 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Lunch -->
-  <div class="bg-white rounded-lg shadow p-6">
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-black/5">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Lunch Registrations</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="lunch-count"><%= stats.lunchCount %></h2>
+        <p class="text-slate-500 text-sm">Lunch Registrations</p>
+        <h2 class="text-3xl font-bold text-slate-900" id="lunch-count"><%= stats.lunchCount %></h2>
       </div>
       <div class="bg-yellow-100 p-3 rounded-full">
-        <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> 
+        <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
       </div>
     </div>
   </div>
-  
+
   <!-- Dinner -->
-  <div class="bg-white rounded-lg shadow p-6">
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-black/5">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Dinner Registrations</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="dinner-count"><%= stats.dinnerCount %></h2>
+        <p class="text-slate-500 text-sm">Dinner Registrations</p>
+        <h2 class="text-3xl font-bold text-slate-900" id="dinner-count"><%= stats.dinnerCount %></h2>
       </div>
       <div class="bg-indigo-100 p-3 rounded-full">
         <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
       </div>
     </div>
   </div>
-  
+
   <!-- Transport -->
-  <div class="bg-white rounded-lg shadow p-6">
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-black/5">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Transport Registrations</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="transport-count"><%= stats.transportCount %></h2>
+        <p class="text-slate-500 text-sm">Transport Registrations</p>
+        <h2 class="text-3xl font-bold text-slate-900" id="transport-count"><%= stats.transportCount %></h2>
       </div>
       <div class="bg-pink-100 p-3 rounded-full">
-       <svg class="h-6 w-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
+       <svg class="h-6 w-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
       </div>
     </div>
   </div>
 
   <!-- Hoc Vien -->
-  <div class="bg-white rounded-lg shadow p-6">
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-black/5">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Học viện Registrations</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="hocvien-count"><%= stats.hocVienCount %></h2>
+        <p class="text-slate-500 text-sm">Học viện Registrations</p>
+        <h2 class="text-3xl font-bold text-slate-900" id="hocvien-count"><%= stats.hocVienCount %></h2>
       </div>
       <div class="bg-teal-100 p-3 rounded-full">
          <svg class="h-6 w-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
       </div>
     </div>
   </div>
-  
+
   <!-- Don Vi Ngoai -->
-  <div class="bg-white rounded-lg shadow p-6">
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-black/5">
     <div class="flex justify-between items-start">
       <div>
-        <p class="text-gray-500 text-sm">Đơn vị ngoài Registrations</p>
-        <h2 class="text-3xl font-bold text-gray-800" id="donvingoai-count"><%= stats.donViNgoaiCount %></h2>
+        <p class="text-slate-500 text-sm">Đơn vị ngoài Registrations</p>
+        <h2 class="text-3xl font-bold text-slate-900" id="donvingoai-count"><%= stats.donViNgoaiCount %></h2>
       </div>
       <div class="bg-purple-100 p-3 rounded-full">
         <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -163,7 +163,7 @@
     </svg>
     Export to Excel
   </a>
-  
+
   <button id="send-bulk-emails" class="btn bg-blue-600 hover:bg-blue-700 text-white">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -185,49 +185,49 @@
 </div>
 
 <!-- Registered Participants Table -->
-<div class="bg-white rounded-lg shadow">
-  <div class="px-6 py-4 border-b border-gray-200">
-    <h3 class="text-lg font-semibold text-gray-800">Registered Participants</h3>
-    <p class="text-sm text-gray-600 mt-1">
+<div class="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-black/5">
+  <div class="px-6 py-4 border-b border-slate-200">
+    <h3 class="text-lg font-semibold text-slate-900">Registered Participants</h3>
+    <p class="text-sm text-slate-600 mt-1">
       Participant IDs are conference-specific: each conference starts from "0001" regardless of other conferences.
     </p>
   </div>
-  
+
   <div>
     <% if (participants.length === 0) { %>
-      <div class="p-6 text-center text-gray-500">
+      <div class="p-6 text-center text-slate-500">
         <p>No participants registered yet.</p>
       </div>
     <% } else { %>
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
           <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">ID</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Phone</th>
             <%/* <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th> */%>
             <%/* <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th> */%>
             <%/* <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th> */%>
             <%/* <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nationality</th> */%>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Unit</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đối tượng</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speech</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lunch</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dinner</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transport</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feedback</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reg. Time</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email Sent</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Work Unit</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Rank</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Academic</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Đối tượng</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Role</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Speech</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Lunch</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Dinner</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Transport</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Feedback</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Questions</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Reg. Time</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Attendance</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email Sent</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200" id="participants-table-body">
+        <tbody class="bg-white divide-y divide-slate-200" id="participants-table-body">
           <% participants.forEach((participant, index) => { %>
             <%# participant.displayId is now directly available from the controller %>
             <% const participantIdToDisplay = participant.displayId || 'N/A'; %>
@@ -238,10 +238,10 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 <%= participant.name %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                 <%= participant.email %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                 <%= participant.phone || '-' %>
               </td>
               <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
@@ -256,19 +256,19 @@
               <%/* <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> */%>
                 <%/*= participant.nationality || '-' */%>
               <%/* </td> */%>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                 <%= participant.workunit || '-' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                 <%= participant.rank || '-' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                 <%= participant.academic || '-' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                 <%= participant.targetAudience || '-' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                 <%= participant.role || '-' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -379,7 +379,7 @@
         </svg>
       </button>
     </div>
-    
+
     <div class="overflow-y-auto flex-1">
     <form id="new-conference-form" class="px-6 py-4">
       <div class="space-y-6">
@@ -388,7 +388,7 @@
             <label for="conference-name" class="block text-md font-semibold text-gray-800 mb-2">Tên hội nghị <span class="text-red-500">*</span></label>
           <input type="text" id="conference-name" name="name" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" required>
         </div>
-        
+
         <!-- Conference Dates -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -400,7 +400,7 @@
             <input type="date" id="end-date" name="endDate" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800" required>
           </div>
         </div>
-        
+
         <!-- Conference Time and Code (side by side) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -413,7 +413,7 @@
               <input type="text" id="conference-code" name="code" maxlength="4" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800 uppercase" required pattern="[A-Za-z0-9]{4}" title="Vui lòng nhập mã 4 ký tự (chỉ chữ và số)">
           </div>
         </div>
-        
+
         <!-- Location Dropdown -->
         <div>
             <label for="location" class="block text-md font-semibold text-gray-800 mb-2">Địa điểm <span class="text-red-500">*</span></label>
@@ -429,13 +429,13 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Description -->
         <div>
             <label for="description" class="block text-md font-semibold text-gray-800 mb-2">Mô tả/Chương trình hội nghị</label>
           <textarea id="description" name="description" rows="3" class="form-input w-full border border-gray-400 rounded-md py-2 px-3 text-gray-800"></textarea>
         </div>
-        
+
         <!-- Target Audience -->
         <div>
             <label class="block text-md font-semibold text-gray-800 mb-2">Đối tượng tham dự <span class="text-red-500">*</span></label>
@@ -463,7 +463,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Registration Fields -->
         <div>
             <label class="block text-md font-semibold text-gray-800 mb-2">Các trường đăng ký</label>
@@ -564,16 +564,16 @@
               </div>
           </div>
         </div>
-        
+
         <!-- Main Speaker (hidden, moved to description) -->
         <input type="hidden" id="main-speaker" name="mainSpeaker" class="form-input w-full rounded-md">
-        
+
         <!-- Max Attendees (required but hidden) -->
         <input type="hidden" id="max-attendees" name="maxAttendees" value="100" class="form-input w-full rounded-md">
       </div>
     </form>
     </div>
-    
+
     <div class="px-6 py-4 border-t border-gray-200 flex justify-end sticky bottom-0 bg-white">
       <button type="button" id="cancel-conference-btn" class="btn border border-gray-400 bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded-md mr-2">Hủy</button>
       <button type="button" id="save-conference-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md">Tạo</button>
@@ -592,12 +592,12 @@
         </svg>
       </button>
     </div>
-    
+
     <div class="overflow-y-auto px-6 py-4 flex-1">
       <form id="edit-participant-form" class="space-y-4">
         <input type="hidden" id="participant-id" name="_id">
         <input type="hidden" id="conference-code" name="conferenceCode">
-        
+
         <!-- Basic Information -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -605,42 +605,42 @@
             <input type="text" id="participant-id-display" class="form-input w-full bg-gray-100 border border-gray-300 rounded-md py-2 px-3 text-gray-700" readonly>
             <p class="text-xs text-gray-500 mt-1">ID cannot be changed</p>
           </div>
-          
+
           <div>
             <label for="participant-name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
             <input type="text" id="participant-name" name="name" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700" required>
           </div>
-          
+
           <div>
             <label for="participant-email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
             <input type="email" id="participant-email" name="email" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700" required>
           </div>
-          
+
           <div>
             <label for="participant-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone <span class="text-red-500">*</span></label>
             <input type="tel" id="participant-phone" name="phone" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700" required>
           </div>
-          
+
           <div>
             <label for="participant-workunit" class="block text-sm font-medium text-gray-700 mb-1">Work Unit</label>
             <input type="text" id="participant-workunit" name="workunit" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
           </div>
-          
+
           <div>
             <label for="participant-rank" class="block text-sm font-medium text-gray-700 mb-1">Rank</label>
             <input type="text" id="participant-rank" name="rank" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
           </div>
-          
+
           <div>
             <label for="participant-academic" class="block text-sm font-medium text-gray-700 mb-1">Academic</label>
             <input type="text" id="participant-academic" name="academic" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
           </div>
-          
+
           <div>
             <label for="participant-position" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
             <input type="text" id="participant-position" name="position" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
           </div>
-          
+
           <div>
             <label for="participant-target-audience" class="block text-sm font-medium text-gray-700 mb-1">Đối tượng</label>
             <select id="participant-target-audience" name="targetAudience" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
@@ -652,18 +652,18 @@
               <option value="Học viên">Học viên</option>
             </select>
           </div>
-          
+
           <div>
             <label for="participant-role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
             <input type="text" id="participant-role" name="role" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
           </div>
-          
+
           <div>
             <label for="participant-speciality" class="block text-sm font-medium text-gray-700 mb-1">Speciality</label>
             <input type="text" id="participant-speciality" name="speciality" class="form-input w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700">
           </div>
         </div>
-        
+
         <!-- Additional Information -->
         <div class="mt-6">
           <h4 class="text-md font-medium text-gray-700 mb-2">Options</h4>
@@ -690,19 +690,19 @@
             </label>
           </div>
         </div>
-        
+
         <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="participant-feedback" class="block text-sm font-medium text-gray-700 mb-1">Feedback</label>
             <textarea id="participant-feedback" name="feedback" rows="3" class="form-textarea w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"></textarea>
           </div>
-          
+
           <div>
             <label for="participant-questions" class="block text-sm font-medium text-gray-700 mb-1">Questions</label>
             <textarea id="participant-questions" name="questions" rows="3" class="form-textarea w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"></textarea>
           </div>
         </div>
-        
+
         <!-- Registration Time (read-only) -->
         <div>
           <label for="participant-registration-time" class="block text-sm font-medium text-gray-700 mb-1">Registration Time</label>
@@ -710,7 +710,7 @@
         </div>
       </form>
     </div>
-    
+
     <div class="px-6 py-4 border-t border-gray-200 flex justify-end sticky bottom-0 bg-white z-10">
       <button id="close-modal-btn" class="btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded mr-2">Cancel</button>
       <button id="save-participant-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Save Changes</button>
@@ -745,14 +745,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectConferenceBtn = document.getElementById('select-conference-btn');
     const stopConferenceBtn = document.getElementById('stop-conference-btn');
     const conferenceActionBtns = document.querySelectorAll('.conference-action-btn');
-    
+
     // Important: Make sure we use the same variable throughout the code for the conference select dropdown
     // conferenceSelectDropdown should refer to the same element as conferenceSelect
     const conferenceSelectDropdown = conferenceSelect;
-    
+
     // Add this line to help debug
     console.log('Conference select found:', conferenceSelect ? 'Yes' : 'No');
-    
+
     // Ensure the dropdown exists before continuing
     if (!conferenceSelect) {
         console.error('Conference select dropdown not found in the DOM');
@@ -772,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             const isAlreadyActive = this.dataset.active === 'true';
             const selectedConferenceCode = conferenceSelectDropdown.value;
-            const selectedConferenceName = conferenceSelectDropdown.selectedOptions[0] ? 
+            const selectedConferenceName = conferenceSelectDropdown.selectedOptions[0] ?
                 conferenceSelectDropdown.selectedOptions[0].text : 'N/A';
 
             // Deactivate all conference action buttons first
@@ -797,7 +797,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (this.id === 'select-conference-btn') {
                     this.classList.remove(...selectDefaultClasses);
                     this.classList.add(...selectActiveClasses);
-                    
+
                     // Call API to activate the selected conference
                     fetch(`/admin/api/conferences/${selectedConferenceCode}/activate`, {
                         method: 'POST',
@@ -828,7 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (this.id === 'stop-conference-btn') {
                     this.classList.remove(...stopDefaultClasses);
                     this.classList.add(...stopActiveClasses);
-                    
+
                     // Call API to deactivate the selected conference
                     fetch(`/admin/api/conferences/${selectedConferenceCode}/deactivate`, {
                         method: 'POST',
@@ -880,14 +880,13 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.on('statsUpdated', (updatedStats) => {
         console.log('Received statsUpdated event:', updatedStats);
         const currentSelectedConference = conferenceSelect.value;
-        // Update stats only if they are for the currently selected conference or 'all'
-        if (updatedStats.conferenceCode === currentSelectedConference || currentSelectedConference === 'all') {
-            updateStatsDisplay(updatedStats.stats);
+        // Update only if the payload matches the currently selected conference (including 'all')
+        if (updatedStats && updatedStats.conferenceCode === currentSelectedConference) {
+            const s = updatedStats.stats || updatedStats;
+            updateStatsDisplay(s);
             if (updatedStats.participants) {
                  // If a specific conference is selected and matches, or if 'all' is selected, update table
-                if (currentSelectedConference === 'all' || updatedStats.conferenceCode === currentSelectedConference) {
-                    renderParticipantsTable(updatedStats.participants);
-                }
+                renderParticipantsTable(updatedStats.participants);
             }
             if (updatedStats.conferenceDetails && updatedStats.conferenceCode !== 'all') {
                 updateConferenceInfoDisplay(updatedStats.conferenceDetails);
@@ -909,14 +908,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchDashboardData(conferenceCode) {
         console.log(`Fetching data for conference: ${conferenceCode}`);
-        
+
         // Check if the conference code is valid
         if (!conferenceCode) {
             console.error('Invalid conference code provided to fetchDashboardData');
             showAdminAlert('Invalid conference selection', 'error');
             return;
         }
-        
+
         // Show loading indicator in the participants table
         participantsTableBody.innerHTML = `
             <tr>
@@ -931,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
             </tr>
         `;
-        
+
         fetch(`/admin/api/dashboard-data?conferenceCode=${conferenceCode}`)
             .then(response => {
                 if (!response.ok) {
@@ -943,18 +942,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     console.log('Dashboard data received:', data);
                     console.log(`Received ${data.participants ? data.participants.length : 0} participants`);
-                    
+
                     // Update stats
                     updateStatsDisplay(data.stats);
-                    
+
                     // Update participants table
                     renderParticipantsTable(data.participants);
-                    
+
                     // Update conference options to show active status if the data includes conference list
                     if (data.conferences && data.conferences.length > 0) {
                         updateConferenceDropdown(data.conferences, conferenceCode);
                     }
-                    
+
                     // Update conference details display
                     if (data.conferenceDetails) {
                         updateConferenceInfoDisplay(data.conferenceDetails);
@@ -962,7 +961,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         conferenceInfoDiv.classList.add('hidden');
                     }
-                    
+
                     // Update export URL
                     if (exportExcelBtn) {
                         exportExcelBtn.href = `/admin/export?conferenceCode=${conferenceCode}`;
@@ -981,21 +980,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateConferenceDropdown(conferences, currentSelection) {
         console.log(`Updating conference dropdown with selection: ${currentSelection}`);
-        
+
         // Store current scroll position
         const scrollPosition = window.scrollY;
-        
+
         // Save the current selection if not provided
         if (!currentSelection && conferenceSelect.selectedOptions.length > 0) {
             currentSelection = conferenceSelect.value;
             console.log(`Using existing selection: ${currentSelection}`);
         }
-        
+
         // Clear existing options
         while (conferenceSelect.options.length > 0) {
             conferenceSelect.remove(0);
         }
-        
+
         // Add conferences to dropdown
         if (conferences.length === 0) {
             const option = document.createElement('option');
@@ -1013,21 +1012,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Add data attributes for the active status
                 option.dataset.isActive = conference.isActive;
                 conferenceSelect.appendChild(option);
-                
+
                 if (conference.code === currentSelection) {
                     console.log(`Selected option created: ${option.text}`);
                 }
             });
-            
+
             // If the current selection is not in the list, select the first option
             if (conferenceSelect.selectedIndex === -1 && conferenceSelect.options.length > 0) {
                 conferenceSelect.selectedIndex = 0;
                 console.log(`Selection not found, defaulting to first option: ${conferenceSelect.options[0].text}`);
             }
         }
-        
+
         console.log(`Dropdown updated with ${conferenceSelect.options.length} options, selected: ${conferenceSelect.selectedIndex}`);
-        
+
         // Restore scroll position
         window.scrollTo(0, scrollPosition);
     }
@@ -1043,21 +1042,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderParticipantsTable(participants) {
         console.log(`Rendering ${participants ? participants.length : 0} participants in table`);
-        
+
         // Clear existing rows
-        participantsTableBody.innerHTML = ''; 
-        
+        participantsTableBody.innerHTML = '';
+
         // If no participants, show a message
         if (!participants || participants.length === 0) {
             participantsTableBody.innerHTML = '<tr><td colspan="19" class="text-center py-4 text-gray-500">No participants for this conference.</td></tr>';
             return;
         }
-        
+
         // Loop through participants and create table rows
         participants.forEach((participant, index) => {
             // Use participant.displayId which is already formatted as 4-digit string by the controller
-            const participantIdToDisplay = participant.displayId || 'N/A'; 
-            
+            const participantIdToDisplay = participant.displayId || 'N/A';
+
             const row = `
                 <tr data-id="${participant._id}" data-conference="${participant.conferenceCode || 'CONF'}">
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${participantIdToDisplay}</td>
@@ -1105,8 +1104,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">${participant.questions || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(participant.registrationTime || participant.registrationDate || participant.createdAt).toLocaleString('vi-VN')}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${participant.attendanceStatus === 'attended' ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Attended</span>' : 
-                          participant.attendanceStatus === 'absent' ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Absent</span>' : 
+                        ${participant.attendanceStatus === 'attended' ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Attended</span>' :
+                          participant.attendanceStatus === 'absent' ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Absent</span>' :
                           '<button class="mark-attendance-btn btn btn-sm bg-gray-200 hover:bg-gray-300 text-gray-700" data-action="attended">Mark Attended</button><button class="mark-attendance-btn btn btn-sm bg-gray-200 hover:bg-gray-300 text-gray-700 mt-1" data-action="absent">Mark Absent</button>'}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -1127,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             participantsTableBody.insertAdjacentHTML('beforeend', row);
         });
-        
+
         // Add event listeners to the newly created table rows
         addTableActionListeners();
         console.log('Table updated and event listeners attached');
@@ -1164,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
+
     async function markAttendance(participantId, action, button) {
         try {
             const response = await fetch(`/admin/api/participants/${participantId}/attendance`, {
@@ -1239,22 +1238,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(confirmBox);
-        
+
         // Handle button clicks
         confirmBox.querySelector('.btn-cancel').addEventListener('click', () => {
             document.body.removeChild(confirmBox);
         });
-        
+
         confirmBox.querySelector('.btn-confirm').addEventListener('click', async () => {
             try {
                 const response = await fetch(`/admin/api/participants/${participantId}`, {
                     method: 'DELETE'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showAdminAlert('Participant deleted successfully', 'success');
                     // Refresh the data to reflect deletion
@@ -1270,22 +1269,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     async function openEditParticipantModal(participantId) {
         try {
             const response = await fetch(`/admin/api/participants/${participantId}`);
             const result = await response.json();
-            
+
             if (result.success) {
                 const participant = result.participant;
-                
+
                 // Set modal title and switch to edit mode
                 modalTitle.textContent = 'Edit Participant';
-                
+
                 // Fill hidden fields
                 document.getElementById('participant-id').value = participant._id;
                 document.getElementById('conference-code').value = participant.conferenceCode;
-                
+
                 // Fill visible fields
                 document.getElementById('participant-id-display').value = participant.participantId || 'N/A';
                 document.getElementById('participant-name').value = participant.name || '';
@@ -1300,21 +1299,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('participant-role').value = participant.role || '';
                 document.getElementById('participant-feedback').value = participant.feedback || '';
                 document.getElementById('participant-questions').value = participant.questions || '';
-                
+
                 // Set checkboxes
                 document.getElementById('participant-speech').checked = participant.speech || false;
                 document.getElementById('participant-lunch').checked = participant.lunch || false;
                 document.getElementById('participant-dinner').checked = participant.dinner || false;
                 document.getElementById('participant-transport').checked = participant.transport || false;
                 document.getElementById('participant-email-sent').checked = participant.emailSent || false;
-                
+
                 // Format and set registration time
                 let registrationTime = participant.registrationTime || participant.registrationDate || participant.createdAt;
                 if (registrationTime) {
                     registrationTime = new Date(registrationTime).toLocaleString();
                 }
                 document.getElementById('participant-registration-time').value = registrationTime || 'Unknown';
-                
+
                 // Show modal
                 participantModal.classList.remove('hidden');
             } else {
@@ -1325,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showAdminAlert('An error occurred while loading participant details', 'error');
         }
     }
-    
+
     // Save participant changes
     saveParticipantBtn.addEventListener('click', async function() {
         if (!editParticipantForm.checkValidity()) {
@@ -1333,35 +1332,35 @@ document.addEventListener('DOMContentLoaded', function() {
             editParticipantForm.reportValidity();
             return;
         }
-        
+
         try {
             const participantId = document.getElementById('participant-id').value;
-            
+
             // Create form data object
             const formData = new FormData(editParticipantForm);
             const participantData = {};
-            
+
             // Convert form data to JSON object
             formData.forEach((value, key) => {
                 // Handle checkboxes
-                if (key === 'speech' || key === 'lunch' || key === 'dinner' || 
+                if (key === 'speech' || key === 'lunch' || key === 'dinner' ||
                     key === 'transport' || key === 'emailSent') {
                     participantData[key] = true; // Checked checkboxes are included in formData
                 } else {
                     participantData[key] = value;
                 }
             });
-            
+
             // For unchecked checkboxes, they won't be in formData, so add them explicitly
             ['speech', 'lunch', 'dinner', 'transport', 'emailSent'].forEach(field => {
                 if (!participantData.hasOwnProperty(field)) {
                     participantData[field] = false;
                 }
             });
-            
+
             saveParticipantBtn.disabled = true;
             saveParticipantBtn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
-            
+
             const response = await fetch(`/admin/api/participants/${participantId}`, {
                 method: 'PUT',
                 headers: {
@@ -1369,13 +1368,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(participantData)
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 closeModal();
                 showAdminAlert('Participant updated successfully', 'success');
-                
+
                 // Refresh the data to reflect changes
                 fetchDashboardData(conferenceSelect.value);
             } else {
@@ -1389,19 +1388,19 @@ document.addEventListener('DOMContentLoaded', function() {
             saveParticipantBtn.innerHTML = 'Save Changes';
         }
     });
-    
+
     // Close modal when clicking close buttons or outside
     [closeModalBtn, closeModalFooterBtn].forEach(btn => {
         btn.addEventListener('click', closeModal);
     });
-    
+
     // Close modal when clicking outside
     window.addEventListener('click', e => {
         if (e.target === participantModal) {
             closeModal();
         }
     });
-    
+
     function closeModal() {
         participantModal.classList.add('hidden');
         // Clear form when modal is closed
@@ -1447,14 +1446,14 @@ document.addEventListener('DOMContentLoaded', function() {
         conferenceSelect.addEventListener('change', function() {
             const selectedConferenceCode = this.value;
             console.log('Conference selection changed to:', selectedConferenceCode);
-            
+
             // Update UI elements to show which conference is selected
             document.querySelectorAll('#conference-select option').forEach(option => {
                 if (option.value === selectedConferenceCode) {
                     console.log(`Selected conference: ${option.text}`);
                 }
             });
-            
+
             // Call the fetch function to update the dashboard with the new selection
             fetchDashboardData(selectedConferenceCode);
         });
@@ -1500,7 +1499,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const closeAlertHandler = () => {
             clearTimeout(alertTimeout);
             container.classList.add('hidden');
-            closeButton.removeEventListener('click', closeAlertHandler); 
+            closeButton.removeEventListener('click', closeAlertHandler);
         };
         closeButton.removeEventListener('click', closeAlertHandler); // Remove previous before adding new
         closeButton.addEventListener('click', closeAlertHandler);
@@ -1508,7 +1507,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (newConferenceBtn) {
         newConferenceBtn.addEventListener('click', () => {
-            window.location.href = '/admin/conferences/new'; 
+            window.location.href = '/admin/conferences/new';
         });
     }
 
@@ -1533,4 +1532,4 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 });
-</script> 
+</script>

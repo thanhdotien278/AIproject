@@ -4,6 +4,7 @@ const Counter = require('../models/Counter');
 const nodemailer = require('nodemailer');
 const fs = require('fs').promises;
 const path = require('path');
+const { validateRegistrationForm } = require('../middleware/registrationValidation');
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -116,6 +117,21 @@ exports.registerParticipant = async (req, res) => {
     
     // Get registration fields from conference
     const registrationFields = conference.registrationFields || ['name', 'email', 'phone'];
+
+    // Server-side validation (do not trust client-side)
+    const booleanFields = ['speech', 'lunch', 'dinner', 'transport', 'qime'];
+    const requiredFields = Array.from(
+      new Set(registrationFields.filter(f => typeof f === 'string' && f && !booleanFields.includes(f)).concat(['name', 'email', 'phone'])),
+    );
+    const { isValid, errors, sanitized } = validateRegistrationForm(req.body, { requiredFields });
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Dữ liệu không hợp lệ',
+        errors,
+      });
+    }
+    req.body = { ...req.body, ...sanitized };
     
     // Validate required fields
     if (!req.body.name || !req.body.email || !req.body.phone) {
@@ -180,6 +196,7 @@ exports.registerParticipant = async (req, res) => {
     req.session.participantEmail = req.body.email;
     req.session.conferenceName = conference.name;
     req.session.conferenceCode = conference.code;
+    req.session.participantMongoId = participant._id.toString();
     req.session.participantId = participantId; // Store the new ID in session
     req.session.participantData = participantData; // participantData now contains participantId
     
@@ -191,7 +208,8 @@ exports.registerParticipant = async (req, res) => {
     });
 
     // After sending response, update and emit stats (fire and forget)
-    calculateAndEmitStats();
+    calculateAndEmitStats('all');
+    calculateAndEmitStats(confCode);
     
     // Send confirmation email in the background (without blocking the response)
     setImmediate(async () => {
@@ -228,25 +246,25 @@ exports.registerParticipant = async (req, res) => {
           <li>Họ và tên: ${req.body.name}</li>
           <li>Email: ${req.body.email}</li>
           <li>Điện thoại: ${req.body.phone}</li>
-          ${participantData.workunit ? `<li>Đơn vị công tác: ${participantData.workunit}</li>` : ''}
-          ${participantData.rank ? `<li>Cấp bậc: ${participantData.rank}</li>` : ''}
-          ${participantData.academic ? `<li>Học hàm/Học vị: ${participantData.academic}</li>` : ''}
-          ${participantData.position ? `<li>Chức vụ: ${participantData.position}</li>` : ''}
-          ${participantData.speciality ? `<li>Chuyên ngành: ${participantData.speciality}</li>` : ''}
-          ${participantData.targetAudience ? `<li>Đối tượng: ${participantData.targetAudience}</li>` : ''}
-          ${participantData.address ? `<li>Địa chỉ: ${participantData.address}</li>` : ''}
-          ${participantData.age ? `<li>Tuổi: ${participantData.age}</li>` : ''}
-          ${participantData.business ? `<li>Lĩnh vực: ${participantData.business}</li>` : ''}
-          ${participantData.nationality ? `<li>Quốc tịch: ${participantData.nationality}</li>` : ''}
-          ${participantData.role ? `<li>Vai trò tham dự: ${participantData.role}</li>` : ''}
+          ${registrationFields.includes('workunit') && participantData.workunit ? `<li>Đơn vị công tác: ${participantData.workunit}</li>` : ''}
+          ${registrationFields.includes('rank') && participantData.rank ? `<li>Cấp bậc: ${participantData.rank}</li>` : ''}
+          ${registrationFields.includes('academic') && participantData.academic ? `<li>Học hàm/Học vị: ${participantData.academic}</li>` : ''}
+          ${registrationFields.includes('position') && participantData.position ? `<li>Chức vụ: ${participantData.position}</li>` : ''}
+          ${registrationFields.includes('speciality') && participantData.speciality ? `<li>Chuyên ngành: ${participantData.speciality}</li>` : ''}
+          ${registrationFields.includes('targetAudience') && participantData.targetAudience ? `<li>Đối tượng: ${participantData.targetAudience}</li>` : ''}
+          ${registrationFields.includes('address') && participantData.address ? `<li>Địa chỉ: ${participantData.address}</li>` : ''}
+          ${registrationFields.includes('age') && participantData.age ? `<li>Tuổi: ${participantData.age}</li>` : ''}
+          ${registrationFields.includes('business') && participantData.business ? `<li>Lĩnh vực: ${participantData.business}</li>` : ''}
+          ${registrationFields.includes('nationality') && participantData.nationality ? `<li>Quốc tịch: ${participantData.nationality}</li>` : ''}
+          ${registrationFields.includes('role') && participantData.role ? `<li>Vai trò tham dự: ${participantData.role}</li>` : ''}
           ${registrationFields.includes('speech') ? `<li>Đăng ký phát biểu: ${participantData.speech ? 'Có' : 'Không'}</li>` : ''}
           ${registrationFields.includes('lunch') ? `<li>Đăng ký ăn trưa: ${participantData.lunch ? 'Có' : 'Không'}</li>` : ''}
           ${registrationFields.includes('dinner') ? `<li>Đăng ký ăn tối: ${participantData.dinner ? 'Có' : 'Không'}</li>` : ''}
           ${registrationFields.includes('transport') ? `<li>Đăng ký xe đưa đón: ${participantData.transport ? 'Có' : 'Không'}</li>` : ''}
           ${registrationFields.includes('qime') ? `<li>Đã cài Qime: ${participantData.qime ? 'Có' : 'Không'}</li>` : ''}
-          ${participantData.feedback ? `<li>Góp ý: ${participantData.feedback}</li>` : ''}
-          ${participantData.questions ? `<li>Câu hỏi cho BTC: ${participantData.questions}</li>` : ''}
-          ${participantData.source ? `<li>Nguồn biết đến hội nghị: ${participantData.source}</li>` : ''}
+          ${registrationFields.includes('feedback') && participantData.feedback ? `<li>Góp ý: ${participantData.feedback}</li>` : ''}
+          ${registrationFields.includes('questions') && participantData.questions ? `<li>Câu hỏi cho BTC: ${participantData.questions}</li>` : ''}
+          ${registrationFields.includes('source') && participantData.source ? `<li>Nguồn biết đến hội nghị: ${participantData.source}</li>` : ''}
         </ul>
         <p>Chúng tôi rất mong được đón tiếp bạn tại sự kiện.</p>
         ${attachments.length > 0 ? '<p><strong>Vui lòng kiểm tra các tài liệu quan trọng được đính kèm trong email này.</strong></p>' : ''}
@@ -283,6 +301,26 @@ exports.registerParticipant = async (req, res) => {
   }
 };
 
+function calculateStatsFromParticipants(participants) {
+  const totalParticipants = participants.length;
+  const lunchCount = participants.filter(p => p.lunch === true).length;
+  const dinnerCount = participants.filter(p => p.dinner === true).length;
+  const transportCount = participants.filter(p => p.transport === true).length;
+  const hocVienCount = participants.filter(
+    p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')
+  ).length;
+  const donViNgoaiCount = totalParticipants - hocVienCount;
+
+  return {
+    totalParticipants,
+    lunchCount,
+    dinnerCount,
+    transportCount,
+    hocVienCount,
+    donViNgoaiCount,
+  };
+}
+
 // Show public statistics page
 exports.showPublicStatsPage = async (req, res) => {
   try {
@@ -290,12 +328,16 @@ exports.showPublicStatsPage = async (req, res) => {
     const allConferences = await Conference.find().sort({ name: 1 }).select('code name');
 
     const selectedConferenceCode = req.query.conferenceCode;
+    const normalizedConferenceCode =
+      selectedConferenceCode && selectedConferenceCode !== 'all'
+        ? selectedConferenceCode.toUpperCase()
+        : selectedConferenceCode;
     let participants;
     let conferenceNameForTitle = "Tất cả Hội nghị";
 
-    if (selectedConferenceCode && selectedConferenceCode !== 'all') {
-      participants = await Participant.find({ conferenceCode: selectedConferenceCode });
-      const selectedConf = allConferences.find(c => c.code === selectedConferenceCode);
+    if (normalizedConferenceCode && normalizedConferenceCode !== 'all') {
+      participants = await Participant.find({ conferenceCode: normalizedConferenceCode });
+      const selectedConf = allConferences.find(c => c.code === normalizedConferenceCode);
       if (selectedConf) {
         conferenceNameForTitle = selectedConf.name;
       }
@@ -304,27 +346,14 @@ exports.showPublicStatsPage = async (req, res) => {
       participants = await Participant.find();
     }
 
-    // Calculate statistics based on the fetched participants
-    const totalParticipants = participants.length;
-    const lunchCount = participants.filter(p => p.lunch === true).length;
-    const dinnerCount = participants.filter(p => p.dinner === true).length;
-    const transportCount = participants.filter(p => p.transport === true).length;
-    const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
-    const donViNgoaiCount = totalParticipants - hocVienCount;
+    const stats = calculateStatsFromParticipants(participants);
 
     res.render('stats', {
       layout: 'layouts/main',
       title: `Thống kê: ${conferenceNameForTitle}`,
       conferences: allConferences, // Pass the list of all conferences
-      selectedConferenceCode: selectedConferenceCode || 'all', // Pass the selected code, default to 'all'
-      stats: {
-        totalParticipants,
-        lunchCount,
-        dinnerCount,
-        transportCount,
-        hocVienCount,
-        donViNgoaiCount,
-      }
+      selectedConferenceCode: normalizedConferenceCode || 'all', // Pass the selected code, default to 'all'
+      stats
     });
   } catch (error) {
     console.error('Error fetching data for public statistics page:', error);
@@ -336,32 +365,56 @@ exports.showPublicStatsPage = async (req, res) => {
   }
 };
 
-async function calculateAndEmitStats() {
+async function calculateAndEmitStats(conferenceCode = 'all') {
   try {
-    const participants = await Participant.find();
-    const totalParticipants = participants.length;
-    const lunchCount = participants.filter(p => p.lunch === true).length;
-    const dinnerCount = participants.filter(p => p.dinner === true).length;
-    const transportCount = participants.filter(p => p.transport === true).length;
-    const hocVienCount = participants.filter(p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')).length;
-    const donViNgoaiCount = totalParticipants - hocVienCount;
-
-    const newStats = {
-      totalParticipants,
-      lunchCount,
-      dinnerCount,
-      transportCount,
-      hocVienCount,
-      donViNgoaiCount,
-    };
+    const normalizedCode =
+      typeof conferenceCode === 'string' && conferenceCode.toLowerCase() !== 'all'
+        ? conferenceCode.toUpperCase()
+        : 'all';
+    const query = normalizedCode === 'all' ? {} : { conferenceCode: normalizedCode };
+    const participants = await Participant.find(query).lean();
+    const stats = calculateStatsFromParticipants(participants);
 
     if (global.io) {
-      global.io.emit('statsUpdated', newStats);
-      console.log('Emitted statsUpdated:', newStats);
+      const payload = { conferenceCode: normalizedCode, stats, ...stats };
+      global.io.emit('statsUpdated', payload);
+      console.log('Emitted statsUpdated:', payload);
     } else {
       console.log('Socket.io instance (global.io) not found. Cannot emit stats.');
     }
   } catch (error) {
     console.error('Error calculating and emitting stats:', error);
   }
-} 
+}
+
+exports.getConferencesApi = async (req, res) => {
+  try {
+    const conferences = await Conference.find()
+      .sort({ name: 1 })
+      .select('code name isActive')
+      .lean();
+    res.json({ success: true, conferences });
+  } catch (error) {
+    console.error('Error fetching conferences for API:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch conferences' });
+  }
+};
+
+exports.getStatsApi = async (req, res) => {
+  try {
+    const conferenceCodeRaw = req.query.conferenceCode;
+    const conferenceCode =
+      typeof conferenceCodeRaw === 'string' && conferenceCodeRaw.toLowerCase() !== 'all'
+        ? conferenceCodeRaw.toUpperCase()
+        : 'all';
+
+    const query = conferenceCode === 'all' ? {} : { conferenceCode };
+    const participants = await Participant.find(query).lean();
+    const stats = calculateStatsFromParticipants(participants);
+
+    res.json({ success: true, conferenceCode, stats, ...stats });
+  } catch (error) {
+    console.error('Error fetching stats for API:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch stats' });
+  }
+};

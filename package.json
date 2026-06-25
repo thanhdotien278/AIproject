@@ -8,12 +8,17 @@
     "dev": "nodemon backend/server.js",
     "build": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css",
     "build:css": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css",
+    "test": "jest --coverage",
+    "dashboard:dev": "vite --config frontend/react-dashboard/vite.config.js",
+    "dashboard:build": "vite build --config frontend/react-dashboard/vite.config.js",
+    "dashboard:preview": "vite preview --config frontend/react-dashboard/vite.config.js",
     "watch:css": "tailwindcss -i ./frontend/public/css/src/input.css -o ./frontend/public/css/styles.css --watch",
     "seed": "node backend/config/seedAdmin.js",
     "seed:locations": "node backend/seedLocations.js",
     "seed:export": "node backend/seedExport.js",
     "seed:import": "node backend/seedImport.js",
-    "dev:all": "concurrently \"npm run watch:css\" \"npm run dev\""
+    "dev:all": "concurrently \"npm run watch:css\" \"npm run dev\"",
+    "dev:dashboard": "concurrently \"npm run watch:css\" \"npm run dev\" \"npm run dashboard:dev\""
   },
   "keywords": [
     "conference",
@@ -36,20 +41,28 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.17.3",
     "jspdf": "^2.5.1",
+    "lucide-react": "^0.539.0",
     "mongoose": "^7.6.3",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.7",
     "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.15.4",
     "sharp": "^0.34.3",
+    "socket.io-client": "^4.8.1",
     "socket.io": "^4.8.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.2",
+    "jest": "^29.7.0",
     "nodemon": "^3.0.1",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
-    "tailwindcss-animation-delay": "^2.0.2"
+    "tailwindcss-animation-delay": "^2.0.2",
+    "vite": "^5.4.11"
   }
 }

@@ -1,0 +1,16 @@
+{
+    "general": {
+        "previewFeatures": true
+    },
+    "mcpServers": {
+        "chrome-devtools": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "chrome-devtools-mcp@latest",
+                "--executablePath",
+                "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+            ]
+        }
+    }
+}

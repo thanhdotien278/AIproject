@@ -237,13 +237,13 @@ sudo ufw status
    ```bash
    # Check PM2 status
    pm2 status
-   
+
    # View logs
    pm2 logs
-   
+
    # Check Nginx status
    sudo systemctl status nginx
-   
+
    # Check MongoDB status
    sudo systemctl status mongod
    ```
@@ -379,4 +379,4 @@ pm2 set pm2-logrotate:retain 7
    - Check application logs for errors
    - Monitor access logs for suspicious activity
 
-Your Conference Registration System should now be live and accessible at your domain! 
+Your Conference Registration System should now be live and accessible at your domain!

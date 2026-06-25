@@ -1,0 +1,4 @@
+chrome_crashpad_handler: --database is required
+Try 'chrome_crashpad_handler --help' for more information.
+[1218/145426.282765:ERROR:third_party/crashpad/crashpad/util/file/file_io.cc:103] ReadExactly: expected 8, observed 0
+[1218/145426.283194:ERROR:third_party/crashpad/crashpad/client/crash_report_database_mac.mm:109] mkdir : No such file or directory (2)
