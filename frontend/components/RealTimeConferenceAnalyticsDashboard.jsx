@@ -205,12 +205,12 @@ function ProgressRow({ label, count, total, colorClass }) {
   );
 }
 
-function ServiceProgressCard({ stats, total }) {
+function ServiceProgressCard({ stats, total, className = '' }) {
   return (
     <Card
       title="Tỷ lệ đăng ký dịch vụ"
       aside={<span className="text-xs font-medium text-slate-500">trên số đã ghi nhận</span>}
-      className="h-full"
+      className={`h-full ${className}`}
     >
       <div className="space-y-4">
         <ProgressRow label="Ăn trưa" count={stats.lunchCount} total={total} colorClass="bg-gradient-to-r from-amber-400 to-orange-500" />
@@ -236,7 +236,7 @@ function ChartTooltip({ active, payload, label }) {
   );
 }
 
-function InternalExternalDonut({ stats, total }) {
+function InternalExternalDonut({ stats, total, className = '' }) {
   const internalPct = percent(stats.internalCount, total);
   const externalPct = percent(stats.externalCount, total);
   const data = [
@@ -245,7 +245,7 @@ function InternalExternalDonut({ stats, total }) {
   ];
 
   return (
-    <Card title="Nội bộ vs Bên ngoài" className="h-full">
+    <Card title="Nội bộ vs Bên ngoài" className={`h-full ${className}`}>
       <div className="grid grid-cols-[minmax(0,1fr)_minmax(96px,0.8fr)] items-center gap-2">
         <div className="relative h-32 min-w-0">
           <ResponsiveContainer width="100%" height="100%">
@@ -279,9 +279,9 @@ function InternalExternalDonut({ stats, total }) {
   );
 }
 
-function CheckInQrCard({ qr, countdown, onDownload }) {
+function CheckInQrCard({ qr, countdown, onDownload, className = '' }) {
   return (
-    <section className="rounded-2xl border border-blue-400 bg-white p-4 shadow-[0_12px_32px_rgba(37,99,235,0.10)]">
+    <section className={`rounded-2xl border border-blue-400 bg-white p-4 shadow-[0_12px_32px_rgba(37,99,235,0.10)] ${className}`}>
       <div className="flex justify-end">
         <Info className="h-5 w-5 text-slate-500" aria-label="Thông tin QR check-in" />
       </div>
@@ -319,9 +319,9 @@ function CheckInQrCard({ qr, countdown, onDownload }) {
   );
 }
 
-function QuickSummaryCard({ stats, lastUpdatedAt }) {
+function QuickSummaryCard({ stats, lastUpdatedAt, className = '' }) {
   return (
-    <Card title="Tổng quan nhanh" aside={<Clock3 className="h-5 w-5 text-slate-400" aria-hidden="true" />}>
+    <Card title="Tổng quan nhanh" aside={<Clock3 className="h-5 w-5 text-slate-400" aria-hidden="true" />} className={className}>
       <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
         <div>
           <dt className="text-xs text-slate-600">Số dự kiến</dt>
@@ -655,26 +655,26 @@ export default function RealTimeConferenceAnalyticsDashboard({
         </div>
       ) : null}
 
-      <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(300px,340px)] xl:items-start">
-        <div className="space-y-4">
+      <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(300px,340px)] xl:items-stretch">
+        <div className="flex flex-col gap-4">
           <StatCard label="Đã check-in" value={checkedInCount} percentText={`${checkedInPct}% trên số dự kiến`} Icon={UserCheck} accent="bg-gradient-to-br from-orange-400 to-orange-600" />
           <StatCard label="Nội bộ (Học viện)" value={stats.internalCount} percentText={`${internalPct}% trên số đã check-in`} Icon={Building2} accent="bg-gradient-to-br from-emerald-500 to-teal-600" />
-          <ServiceProgressCard stats={stats} total={checkedInCount} />
+          <ServiceProgressCard stats={stats} total={checkedInCount} className="flex-1" />
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <StatCard label="Chưa check-in" value={notCheckedInCount} percentText={`${notCheckedInPct}% còn lại${overExpected ? ' · Vượt dự kiến' : ''}`} Icon={UserX} accent="bg-gradient-to-br from-violet-500 to-fuchsia-600" />
           <StatCard label="Khách ngoài Học viện" value={stats.externalCount} percentText={`${externalPct}% trên số đã check-in`} Icon={Globe} accent="bg-gradient-to-br from-sky-500 to-indigo-600" />
-          <InternalExternalDonut stats={stats} total={checkedInCount} />
+          <InternalExternalDonut stats={stats} total={checkedInCount} className="flex-1" />
         </div>
 
-        <aside className="space-y-4 xl:sticky xl:top-4">
+        <aside className="flex flex-col gap-4">
           <CheckInQrCard
             qr={qr}
             countdown={countdown}
             onDownload={handleDownloadQr}
           />
-          <QuickSummaryCard stats={stats} lastUpdatedAt={lastUpdatedAt} />
+          <QuickSummaryCard stats={stats} lastUpdatedAt={lastUpdatedAt} className="flex-1" />
         </aside>
       </div>
 

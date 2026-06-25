@@ -3282,14 +3282,6 @@ body {
 }
 
 @media (min-width: 1280px) {
-  .xl\:sticky {
-    position: sticky;
-  }
-
-  .xl\:top-4 {
-    top: 1rem;
-  }
-
   .xl\:grid-cols-5 {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
@@ -3302,12 +3294,12 @@ body {
     flex-direction: row;
   }
 
-  .xl\:items-start {
-    align-items: flex-start;
-  }
-
   .xl\:items-center {
     align-items: center;
+  }
+
+  .xl\:items-stretch {
+    align-items: stretch;
   }
 
   .xl\:justify-between {
