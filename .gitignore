@@ -28,7 +28,7 @@ playwright-report/
 .agents/
 .gemini/
 _bmad/
-_bmad-output/
+#_bmad-output/
 
 # IDE/editor local settings
 .vscode/
