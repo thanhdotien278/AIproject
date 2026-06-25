@@ -71,6 +71,11 @@ const conferenceSchema = new mongoose.Schema({
     required: true,
     min: 1
   },
+  expectedParticipants: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   description: {
     type: String,
     trim: true
@@ -130,4 +135,4 @@ conferenceSchema.pre('save', function(next) {
 // Create model
 const Conference = mongoose.model('Conference', conferenceSchema);
 
-module.exports = Conference; 
+module.exports = Conference;

@@ -301,24 +301,64 @@ exports.registerParticipant = async (req, res) => {
   }
 };
 
-function calculateStatsFromParticipants(participants) {
-  const totalParticipants = participants.length;
+function calculateStatsFromParticipants(participants, totals = {}) {
+  const totalRegisteredFromParticipants =
+    Number.isFinite(Number(totals.totalRegisteredFromParticipants))
+      ? Number(totals.totalRegisteredFromParticipants)
+      : participants.length;
+  const expectedParticipants =
+    Number.isFinite(Number(totals.expectedParticipants)) ? Number(totals.expectedParticipants) : 0;
+  const maxAttendees =
+    Number.isFinite(Number(totals.maxAttendees)) ? Number(totals.maxAttendees) : 0;
+  const checkedInCount = participants.filter(p => p.attendance === true).length;
+  const totalSource = totalRegisteredFromParticipants > 0 ? 'participants' : 'manual';
+  const totalParticipants =
+    totalSource === 'participants' ? totalRegisteredFromParticipants : expectedParticipants;
   const lunchCount = participants.filter(p => p.lunch === true).length;
   const dinnerCount = participants.filter(p => p.dinner === true).length;
   const transportCount = participants.filter(p => p.transport === true).length;
   const hocVienCount = participants.filter(
     p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')
   ).length;
-  const donViNgoaiCount = totalParticipants - hocVienCount;
+  const donViNgoaiCount = Math.max(totalRegisteredFromParticipants - hocVienCount, 0);
 
   return {
+    totalRegisteredFromParticipants,
+    expectedParticipants,
+    maxAttendees,
     totalParticipants,
+    totalSource,
+    checkedInCount,
+    notCheckedInCount: Math.max(totalParticipants - checkedInCount, 0),
     lunchCount,
     dinnerCount,
     transportCount,
     hocVienCount,
     donViNgoaiCount,
   };
+}
+
+async function buildStats(conferenceCode = 'all') {
+  const normalizedCode =
+    typeof conferenceCode === 'string' && conferenceCode.toLowerCase() !== 'all'
+      ? conferenceCode.toUpperCase()
+      : 'all';
+  const query = normalizedCode === 'all' ? {} : { conferenceCode: normalizedCode };
+  const participants = await Participant.find(query).lean();
+  const totalRegisteredFromParticipants = await Participant.countDocuments(query);
+
+  let conference = null;
+  if (normalizedCode !== 'all') {
+    conference = await Conference.findOne({ code: normalizedCode }).lean();
+  }
+
+  const stats = calculateStatsFromParticipants(participants, {
+    totalRegisteredFromParticipants,
+    expectedParticipants: conference ? conference.expectedParticipants || 0 : 0,
+    maxAttendees: conference ? conference.maxAttendees || 0 : 0,
+  });
+
+  return { conferenceCode: normalizedCode, stats };
 }
 
 // Show public statistics page
@@ -332,21 +372,16 @@ exports.showPublicStatsPage = async (req, res) => {
       selectedConferenceCode && selectedConferenceCode !== 'all'
         ? selectedConferenceCode.toUpperCase()
         : selectedConferenceCode;
-    let participants;
     let conferenceNameForTitle = "Tất cả Hội nghị";
 
     if (normalizedConferenceCode && normalizedConferenceCode !== 'all') {
-      participants = await Participant.find({ conferenceCode: normalizedConferenceCode });
       const selectedConf = allConferences.find(c => c.code === normalizedConferenceCode);
       if (selectedConf) {
         conferenceNameForTitle = selectedConf.name;
       }
-    } else {
-      // Fetch all participants if 'all' or no specific code is selected
-      participants = await Participant.find();
     }
 
-    const stats = calculateStatsFromParticipants(participants);
+    const { stats } = await buildStats(normalizedConferenceCode || 'all');
 
     res.render('stats', {
       layout: 'layouts/main',
@@ -371,9 +406,7 @@ async function calculateAndEmitStats(conferenceCode = 'all') {
       typeof conferenceCode === 'string' && conferenceCode.toLowerCase() !== 'all'
         ? conferenceCode.toUpperCase()
         : 'all';
-    const query = normalizedCode === 'all' ? {} : { conferenceCode: normalizedCode };
-    const participants = await Participant.find(query).lean();
-    const stats = calculateStatsFromParticipants(participants);
+    const { stats } = await buildStats(normalizedCode);
 
     if (global.io) {
       const payload = { conferenceCode: normalizedCode, stats, ...stats };
@@ -403,14 +436,17 @@ exports.getConferencesApi = async (req, res) => {
 exports.getStatsApi = async (req, res) => {
   try {
     const conferenceCodeRaw = req.query.conferenceCode;
-    const conferenceCode =
+    let conferenceCode =
       typeof conferenceCodeRaw === 'string' && conferenceCodeRaw.toLowerCase() !== 'all'
         ? conferenceCodeRaw.toUpperCase()
         : 'all';
 
-    const query = conferenceCode === 'all' ? {} : { conferenceCode };
-    const participants = await Participant.find(query).lean();
-    const stats = calculateStatsFromParticipants(participants);
+    if (conferenceCode === 'all') {
+      const activeConference = await Conference.findOne({ isActive: true }).lean();
+      if (activeConference?.code) conferenceCode = activeConference.code;
+    }
+
+    const { stats } = await buildStats(conferenceCode);
 
     res.json({ success: true, conferenceCode, stats, ...stats });
   } catch (error) {

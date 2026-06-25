@@ -8,6 +8,19 @@ const fs = require('fs');
 const Location = require('../models/Location');
 const mongoose = require('mongoose');
 
+function parseExpectedParticipants(value) {
+  if (value === undefined || value === null || String(value).trim() === '') {
+    return { value: 0 };
+  }
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return { error: 'Tổng số người tham gia dự kiến phải là số không âm.' };
+  }
+
+  return { value: parsed };
+}
+
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || 'gmail',
@@ -365,6 +378,14 @@ exports.createConference = async (req, res) => {
       });
     }
 
+    const expectedParticipantsResult = parseExpectedParticipants(req.body.expectedParticipants);
+    if (expectedParticipantsResult.error) {
+      return res.status(400).json({
+        success: false,
+        message: expectedParticipantsResult.error
+      });
+    }
+
     // Create a new conference document
     const conference = new Conference({
       code: conferenceCodeUpper,
@@ -375,6 +396,7 @@ exports.createConference = async (req, res) => {
       location: req.body.location,
       mainSpeaker: req.body.mainSpeaker || '',
       maxAttendees: parseInt(req.body.maxAttendees) || 100,
+      expectedParticipants: expectedParticipantsResult.value,
       description: req.body.description || '',
       targetAudience: targetAudience,
       registrationFields: registrationFields
@@ -938,6 +960,14 @@ exports.updateConference = async (req, res) => {
     conference.location = req.body.location || conference.location;
     conference.mainSpeaker = req.body.mainSpeaker || conference.mainSpeaker;
     conference.maxAttendees = parseInt(req.body.maxAttendees) || conference.maxAttendees;
+    const expectedParticipantsResult = parseExpectedParticipants(req.body.expectedParticipants);
+    if (expectedParticipantsResult.error) {
+      return res.status(400).json({
+        success: false,
+        message: expectedParticipantsResult.error
+      });
+    }
+    conference.expectedParticipants = expectedParticipantsResult.value;
     conference.description = req.body.description || conference.description;
     conference.targetAudience = targetAudience; // Update target audience
     conference.registrationFields = registrationFields; // Update the fields

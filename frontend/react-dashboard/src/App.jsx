@@ -11,11 +11,8 @@ export default function App() {
           apiBaseUrl={apiBaseUrl}
           title="Real-time Conference Dashboard"
         />
-        <p className="mt-6 text-center text-xs text-slate-500">
-          Data source:{' '}
-          <code className="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-slate-700">/api/stats</code> • Realtime
-          event:{' '}
-          <code className="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-slate-700">statsUpdated</code>
+        <p className="mt-6 text-center text-xs font-medium text-slate-500">
+          Hệ thống Quản lý Hội nghị của Học viện Quân y - K80
         </p>
       </div>
     </main>
