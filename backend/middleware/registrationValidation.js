@@ -1,5 +1,6 @@
 const PHONE_REGEX = /^0\d{9}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OPTIONAL_FIELDS = new Set(['feedback', 'questions']);
 
 const FIELD_LABELS_VI = {
   name: 'Họ và tên',
@@ -107,6 +108,7 @@ function validateRegistrationForm(formData, { requiredFields = [] } = {}) {
 
   for (const field of requiredFields) {
     if (field === 'name' || field === 'email' || field === 'phone') continue;
+    if (OPTIONAL_FIELDS.has(field)) continue;
     validateRequiredField(field, formData?.[field], errors);
   }
 
