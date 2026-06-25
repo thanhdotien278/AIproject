@@ -307,20 +307,30 @@ function calculateStatsFromParticipants(participants, totals = {}) {
       ? Number(totals.totalRegisteredFromParticipants)
       : participants.length;
   const expectedParticipants =
-    Number.isFinite(Number(totals.expectedParticipants)) ? Number(totals.expectedParticipants) : 0;
+    totals.expectedParticipants !== undefined && totals.expectedParticipants !== null && Number.isFinite(Number(totals.expectedParticipants))
+      ? Number(totals.expectedParticipants)
+      : Number(totals.maxAttendees) || 0;
   const maxAttendees =
     Number.isFinite(Number(totals.maxAttendees)) ? Number(totals.maxAttendees) : 0;
-  const checkedInCount = participants.filter(p => p.attendance === true).length;
+  const checkedInCount = totalRegisteredFromParticipants;
+  const notCheckedInCount = Math.max(expectedParticipants - checkedInCount, 0);
   const totalSource = totalRegisteredFromParticipants > 0 ? 'participants' : 'manual';
   const totalParticipants =
     totalSource === 'participants' ? totalRegisteredFromParticipants : expectedParticipants;
   const lunchCount = participants.filter(p => p.lunch === true).length;
   const dinnerCount = participants.filter(p => p.dinner === true).length;
   const transportCount = participants.filter(p => p.transport === true).length;
-  const hocVienCount = participants.filter(
-    p => p.workunit && p.workunit.toLowerCase().startsWith('học viện')
-  ).length;
-  const donViNgoaiCount = Math.max(totalRegisteredFromParticipants - hocVienCount, 0);
+  const internalCount = participants.filter(p => {
+    const workunit = (p.workunit || p.workUnit || '').toLowerCase();
+    return workunit.includes('học viện');
+  }).length;
+  const externalCount = Math.max(checkedInCount - internalCount, 0);
+  const checkedInPercent = expectedParticipants > 0
+    ? Math.round((checkedInCount / expectedParticipants) * 100)
+    : 0;
+  const notCheckedInPercent = expectedParticipants > 0
+    ? Math.round((notCheckedInCount / expectedParticipants) * 100)
+    : 0;
 
   return {
     totalRegisteredFromParticipants,
@@ -329,13 +339,69 @@ function calculateStatsFromParticipants(participants, totals = {}) {
     totalParticipants,
     totalSource,
     checkedInCount,
-    notCheckedInCount: Math.max(totalParticipants - checkedInCount, 0),
+    notCheckedInCount,
+    checkedInPercent,
+    notCheckedInPercent,
+    internalCount,
+    externalCount,
     lunchCount,
     dinnerCount,
     transportCount,
-    hocVienCount,
-    donViNgoaiCount,
+    hocVienCount: internalCount,
+    donViNgoaiCount: externalCount,
+    lastUpdated: new Date().toISOString(),
   };
+}
+
+function participantTimestampMs(participant) {
+  const raw = participant.registrationTime || participant.registrationDate || participant.createdAt;
+  const fromDate = raw ? new Date(raw).getTime() : 0;
+  if (Number.isFinite(fromDate) && fromDate > 0) return fromDate;
+  if (participant._id && typeof participant._id.getTimestamp === 'function') {
+    return participant._id.getTimestamp().getTime();
+  }
+  return 0;
+}
+
+function participantType(participant) {
+  const raw = [
+    participant.workunitType,
+    participant.workunit,
+    participant.workUnit,
+    participant.workunitDetail,
+  ].filter(Boolean).join(' ').toLowerCase();
+  return raw.includes('học viện') || raw.includes('hoc vien') || raw.includes('hvqy')
+    ? 'Nội bộ'
+    : 'Khách ngoài Học viện';
+}
+
+function mapRecentParticipant(participant) {
+  const time = participant.registrationTime || participant.registrationDate || participant.createdAt ||
+    (participant._id && typeof participant._id.getTimestamp === 'function' ? participant._id.getTimestamp() : null);
+
+  return {
+    id: String(participant._id || participant.id || participant.participantId || ''),
+    time,
+    rank: participant.rank || '',
+    academic: participant.academic || '',
+    fullName: participant.fullName || participant.name || '',
+    position: participant.position || '',
+    type: participantType(participant),
+    services: {
+      lunch: participant.lunch === true,
+      dinner: participant.dinner === true,
+      transport: participant.transport === true,
+    },
+    conferenceCode: participant.conferenceCode || '',
+  };
+}
+
+function recentCheckInsFromParticipants(participants, limit = 5) {
+  return participants
+    .slice()
+    .sort((a, b) => participantTimestampMs(b) - participantTimestampMs(a) || String(b._id || '').localeCompare(String(a._id || '')))
+    .slice(0, limit)
+    .map(mapRecentParticipant);
 }
 
 async function buildStats(conferenceCode = 'all') {
@@ -354,9 +420,12 @@ async function buildStats(conferenceCode = 'all') {
 
   const stats = calculateStatsFromParticipants(participants, {
     totalRegisteredFromParticipants,
-    expectedParticipants: conference ? conference.expectedParticipants || 0 : 0,
-    maxAttendees: conference ? conference.maxAttendees || 0 : 0,
+    expectedParticipants: conference ? conference.expectedParticipants : 0,
+    maxAttendees: conference ? conference.maxAttendees : 0,
   });
+
+  stats.selectedConferenceCode = normalizedCode;
+  stats.recentCheckIns = recentCheckInsFromParticipants(participants);
 
   return { conferenceCode: normalizedCode, stats };
 }
