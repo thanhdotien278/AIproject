@@ -1,5 +1,9 @@
 const Conference = require('../backend/models/Conference');
 
+function vietnamDateTimeIso(year, month, day, hour, minute) {
+  return new Date(Date.UTC(year, month - 1, day, hour, minute) - 7 * 60 * 60 * 1000).toISOString();
+}
+
 function buildConference(overrides = {}) {
   return new Conference({
     code: 'QR01',
@@ -27,15 +31,29 @@ describe('Conference qrConfig', () => {
     const conference = buildConference();
 
     await expect(conference.validate()).resolves.toBeUndefined();
-    expect(conference.qrConfig.availableFromTime).toBe('07:45');
+    expect(conference.qrConfig.availableFromAt.toISOString()).toBe(vietnamDateTimeIso(2026, 7, 1, 7, 45));
     expect(conference.qrConfig.availableDurationMinutes).toBe(30);
     expect(conference.qrConfig.rotationTtlSeconds).toBe(30);
   });
 
-  test('rejects invalid availableFromTime format', async () => {
+  test('accepts a configured QR available datetime', async () => {
+    const availableFromAt = new Date(vietnamDateTimeIso(2026, 7, 1, 8, 15));
     const conference = buildConference({
       qrConfig: {
-        availableFromTime: '8am',
+        availableFromAt,
+        availableDurationMinutes: 30,
+        rotationTtlSeconds: 30,
+      },
+    });
+
+    await expect(conference.validate()).resolves.toBeUndefined();
+    expect(conference.qrConfig.availableFromAt.toISOString()).toBe(availableFromAt.toISOString());
+  });
+
+  test('rejects invalid availableFromAt', async () => {
+    const conference = buildConference({
+      qrConfig: {
+        availableFromAt: 'not-a-date',
         availableDurationMinutes: 30,
         rotationTtlSeconds: 30,
       },
@@ -43,13 +61,13 @@ describe('Conference qrConfig', () => {
 
     const error = await getValidationError(conference);
 
-    expect(error.errors['qrConfig.availableFromTime']).toBeDefined();
+    expect(error.errors['qrConfig.availableFromAt']).toBeDefined();
   });
 
   test('rejects non-positive availableDurationMinutes', async () => {
     const conference = buildConference({
       qrConfig: {
-        availableFromTime: '07:45',
+        availableFromAt: new Date(vietnamDateTimeIso(2026, 7, 1, 7, 45)),
         availableDurationMinutes: 0,
         rotationTtlSeconds: 30,
       },
@@ -63,7 +81,7 @@ describe('Conference qrConfig', () => {
   test('rejects non-numeric availableDurationMinutes', async () => {
     const conference = buildConference({
       qrConfig: {
-        availableFromTime: '07:45',
+        availableFromAt: new Date(vietnamDateTimeIso(2026, 7, 1, 7, 45)),
         availableDurationMinutes: 'abc',
         rotationTtlSeconds: 30,
       },
@@ -77,7 +95,7 @@ describe('Conference qrConfig', () => {
   test('rejects non-positive rotationTtlSeconds', async () => {
     const conference = buildConference({
       qrConfig: {
-        availableFromTime: '07:45',
+        availableFromAt: new Date(vietnamDateTimeIso(2026, 7, 1, 7, 45)),
         availableDurationMinutes: 30,
         rotationTtlSeconds: -1,
       },
@@ -91,7 +109,7 @@ describe('Conference qrConfig', () => {
   test('rejects non-numeric rotationTtlSeconds', async () => {
     const conference = buildConference({
       qrConfig: {
-        availableFromTime: '07:45',
+        availableFromAt: new Date(vietnamDateTimeIso(2026, 7, 1, 7, 45)),
         availableDurationMinutes: 30,
         rotationTtlSeconds: 'abc',
       },
@@ -105,7 +123,7 @@ describe('Conference qrConfig', () => {
   test('rejects rotation TTL greater than the availability window', async () => {
     const conference = buildConference({
       qrConfig: {
-        availableFromTime: '07:45',
+        availableFromAt: new Date(vietnamDateTimeIso(2026, 7, 1, 7, 45)),
         availableDurationMinutes: 1,
         rotationTtlSeconds: 61,
       },
@@ -116,14 +134,38 @@ describe('Conference qrConfig', () => {
     expect(error.errors['qrConfig.rotationTtlSeconds']).toBeDefined();
   });
 
-  test('rejects missing availableFromTime when conference time has no HH:mm start', async () => {
+  test('rejects missing availableFromAt when conference time has no HH:mm start', async () => {
     const conference = buildConference({
       time: 'Morning session',
     });
 
     const error = await getValidationError(conference);
 
-    expect(error.errors['qrConfig.availableFromTime']).toBeDefined();
+    expect(error.errors['qrConfig.availableFromAt']).toBeDefined();
+  });
+
+  test('derives availableFromAt from legacy availableFromTime', async () => {
+    const conference = buildConference({
+      qrConfig: {
+        availableFromTime: '09:30',
+        availableDurationMinutes: 30,
+        rotationTtlSeconds: 30,
+      },
+    });
+
+    await expect(conference.validate()).resolves.toBeUndefined();
+    expect(conference.qrConfig.availableFromAt.toISOString()).toBe(vietnamDateTimeIso(2026, 7, 1, 9, 30));
+  });
+
+  test('defaults QR timing to the previous day when start time is after midnight', async () => {
+    const conference = buildConference({
+      startDate: new Date('2026-06-26T00:00:00.000Z'),
+      endDate: new Date('2026-06-26T00:00:00.000Z'),
+      time: '00:10 - 02:00',
+    });
+
+    await expect(conference.validate()).resolves.toBeUndefined();
+    expect(conference.qrConfig.availableFromAt.toISOString()).toBe(vietnamDateTimeIso(2026, 6, 25, 23, 55));
   });
 
   test('validates qrConfig after update-style mutation', async () => {
@@ -131,7 +173,7 @@ describe('Conference qrConfig', () => {
     await expect(conference.validate()).resolves.toBeUndefined();
 
     conference.qrConfig = {
-      availableFromTime: '07:45',
+      availableFromAt: new Date(vietnamDateTimeIso(2026, 7, 1, 7, 45)),
       availableDurationMinutes: 1,
       rotationTtlSeconds: 90,
     };

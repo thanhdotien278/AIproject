@@ -17,14 +17,18 @@ const router = require('../backend/routes/attendanceQr');
 const attendanceQrHandler = router.stack.find(layer => layer.route?.path === '/api/attendance-qr')
   .route.stack[0].handle;
 
+function vietnamTimeMs(year, month, day, hour, minute, second = 0) {
+  return Date.UTC(year, month - 1, day, hour, minute, second) - 7 * 60 * 60 * 1000;
+}
+
 function buildConference(overrides = {}) {
   return {
     code: 'QR01',
     isActive: true,
-    startDate: new Date(2026, 6, 1),
+    startDate: new Date('2026-07-01T00:00:00.000Z'),
     time: '08:00 - 17:00',
     qrConfig: {
-      availableFromTime: '07:45',
+      availableFromAt: new Date(vietnamTimeMs(2026, 7, 1, 7, 45)),
       availableDurationMinutes: 1,
       rotationTtlSeconds: 10,
     },
@@ -59,16 +63,12 @@ async function invokeAttendanceQr(query = { code: 'QR01' }) {
   return res;
 }
 
-function localTimeMs(hour, minute, second = 0) {
-  return new Date(2026, 6, 1, hour, minute, second).getTime();
-}
-
 describe('attendance QR API window behavior', () => {
   const originalBaseUrl = process.env.BASE_URL;
 
   beforeEach(() => {
     process.env.BASE_URL = 'http://example.test';
-    jest.spyOn(Date, 'now').mockReturnValue(localTimeMs(7, 45, 5));
+    jest.spyOn(Date, 'now').mockReturnValue(vietnamTimeMs(2026, 7, 1, 7, 45, 5));
     Conference.findOne.mockResolvedValue(buildConference());
   });
 
@@ -86,6 +86,7 @@ describe('attendance QR API window behavior', () => {
       success: true,
       state: 'available',
       conferenceCode: 'QR01',
+      source: 'qrConfig.availableFromAt',
       rotationTtlSeconds: 10,
       ttlMs: 10000,
       ttlSeconds: 10,
@@ -97,7 +98,7 @@ describe('attendance QR API window behavior', () => {
   });
 
   test('before the window returns not_available_yet and no QR payload', async () => {
-    Date.now.mockReturnValue(localTimeMs(7, 44, 59));
+    Date.now.mockReturnValue(vietnamTimeMs(2026, 7, 1, 7, 44, 59));
 
     const res = await invokeAttendanceQr();
 
@@ -114,7 +115,7 @@ describe('attendance QR API window behavior', () => {
   });
 
   test('after the window returns window_closed and no QR payload', async () => {
-    Date.now.mockReturnValue(localTimeMs(7, 46, 1));
+    Date.now.mockReturnValue(vietnamTimeMs(2026, 7, 1, 7, 46, 1));
 
     const res = await invokeAttendanceQr();
 
@@ -158,19 +159,18 @@ describe('attendance QR API window behavior', () => {
     expect(QRCode.toBuffer).not.toHaveBeenCalled();
   });
 
-  test('missing rotation config keeps the 30 second default', async () => {
+  test('missing availableFromAt does not issue QR', async () => {
     Conference.findOne.mockResolvedValue(buildConference({ qrConfig: undefined }));
 
     const res = await invokeAttendanceQr();
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      success: true,
-      state: 'available',
+      success: false,
+      state: 'invalid_config',
       rotationTtlSeconds: 30,
-      ttlMs: 30000,
-      ttlSeconds: 30,
     });
-    expect(res.body.qrCodeDataUrl).toMatch(/^data:image\/png;base64,/);
+    expect(res.body).not.toHaveProperty('qrCodeDataUrl');
+    expect(QRCode.toBuffer).not.toHaveBeenCalled();
   });
 });

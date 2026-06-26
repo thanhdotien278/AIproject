@@ -32,7 +32,6 @@ async function createAdminUser() {
       console.log(`Admin user '${adminUsername}' already exists.`);
       return false;
     }
-     eate new admin user
     const adminUser = new User({
       username: adminUsername,
       password: adminPassword,

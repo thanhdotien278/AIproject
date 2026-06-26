@@ -1,29 +1,11 @@
 const mongoose = require('mongoose');
-
-const HH_MM_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
-const FIRST_HH_MM_PATTERN = /\b([01]\d|2[0-3]):([0-5]\d)\b/;
-
-function parseFirstTimeMinutes(time) {
-  const match = String(time || '').match(FIRST_HH_MM_PATTERN);
-  if (!match) return null;
-  return Number(match[1]) * 60 + Number(match[2]);
-}
-
-function formatMinutes(totalMinutes) {
-  const minutesInDay = 24 * 60;
-  const normalized = ((totalMinutes % minutesInDay) + minutesInDay) % minutesInDay;
-  const hours = String(Math.floor(normalized / 60)).padStart(2, '0');
-  const minutes = String(normalized % 60).padStart(2, '0');
-  return `${hours}:${minutes}`;
-}
-
-function defaultQrAvailableFromTime(conferenceTime) {
-  const startMinutes = parseFirstTimeMinutes(conferenceTime);
-  if (startMinutes === null) return null;
-  return formatMinutes(startMinutes - 15);
-}
+const { deriveAvailableFromAt } = require('../services/qrConfigTime');
 
 const qrConfigSchema = new mongoose.Schema({
+  availableFromAt: {
+    type: Date
+  },
+  // Legacy read path for conferences saved before exact QR datetime existed.
   availableFromTime: {
     type: String,
     trim: true
@@ -177,18 +159,18 @@ conferenceSchema.pre('validate', function(next) {
     this.qrConfig = {};
   }
 
-  if (this.qrConfig.availableFromTime === undefined || this.qrConfig.availableFromTime === null) {
-    const defaultAvailableFromTime = defaultQrAvailableFromTime(this.time);
-    if (defaultAvailableFromTime) {
-      this.qrConfig.availableFromTime = defaultAvailableFromTime;
+  const availableFromAtCastError = this.$__?.validationError?.errors?.['qrConfig.availableFromAt']
+    || this.qrConfig.$__?.validationError?.errors?.availableFromAt;
+  if (!availableFromAtCastError && !Number.isFinite(new Date(this.qrConfig.availableFromAt).getTime())) {
+    const availableFromAt = deriveAvailableFromAt(this);
+    if (availableFromAt) {
+      this.qrConfig.availableFromAt = availableFromAt;
     } else {
       this.invalidate(
-        'qrConfig.availableFromTime',
-        'QR availableFromTime is required when Conference.time has no HH:mm start time.'
+        'qrConfig.availableFromAt',
+        'QR availableFromAt must be a valid Date.'
       );
     }
-  } else if (!HH_MM_PATTERN.test(String(this.qrConfig.availableFromTime))) {
-    this.invalidate('qrConfig.availableFromTime', 'QR availableFromTime must use HH:mm format.');
   }
 
   const duration = this.qrConfig.availableDurationMinutes;

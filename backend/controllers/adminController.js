@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const Location = require('../models/Location');
 const mongoose = require('mongoose');
+const { parseVietnamDateTimeInput } = require('../services/qrConfigTime');
 
 function parseExpectedParticipants(value) {
   if (value === undefined || value === null || String(value).trim() === '') {
@@ -23,22 +24,26 @@ function parseExpectedParticipants(value) {
 
 function normalizeQrConfig(body) {
   const source = body.qrConfig || {};
+  const availableFromDate = source.availableFromDate ?? body['qrConfig[availableFromDate]'];
+  const availableFromTime = source.availableFromTime ?? body['qrConfig[availableFromTime]'];
   const qrConfig = {
-    availableFromTime: source.availableFromTime ?? body['qrConfig[availableFromTime]'],
+    availableFromAt: source.availableFromAt ?? body['qrConfig[availableFromAt]'],
     availableDurationMinutes: source.availableDurationMinutes ?? body['qrConfig[availableDurationMinutes]'],
     rotationTtlSeconds: source.rotationTtlSeconds ?? body['qrConfig[rotationTtlSeconds]']
   };
 
-  Object.keys(qrConfig).forEach(key => {
-    if (qrConfig[key] === undefined) delete qrConfig[key];
-  });
-
-  if (qrConfig.availableFromTime === '') {
-    delete qrConfig.availableFromTime;
+  if (availableFromDate || availableFromTime) {
+    qrConfig.availableFromAt = parseVietnamDateTimeInput(availableFromDate, availableFromTime) || new Date('invalid');
   }
+
+  Object.keys(qrConfig).forEach(key => {
+    if (qrConfig[key] === undefined || qrConfig[key] === '') delete qrConfig[key];
+  });
 
   return Object.keys(qrConfig).length ? qrConfig : undefined;
 }
+
+exports._normalizeQrConfig = normalizeQrConfig;
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({

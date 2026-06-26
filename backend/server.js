@@ -99,6 +99,12 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error('Could not connect to MongoDB', err));
 
 // Routes
+app.get('/registration-closed', (req, res) => {
+  return res.render('registration_closed', {
+    message: 'Đã hết thời gian đăng ký',
+    layout: false
+  });
+});
 app.use('/register', registerRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api', apiRoutes);
