@@ -59,13 +59,13 @@ The repository already supports conference registration, configurable registrati
 
 The docs folder is treated as current source-of-truth for the existing system. It identifies several launch blockers and mismatches: participant IDs are generated per conference but enforced globally unique, PM2 cluster mode conflicts with process-local QR tokens, registration route params are not consistently read, IP filtering exists but is not mounted, admin attendance and conference-scoped bulk-email UI calls lack matching backend routes, admin authorization is authentication-only, CSRF is not visible for mutations, and the seed command is currently broken.
 
-The MVP must create a safe internal-production path without broad redesign. Stories below preserve the current 30-second Attendance QR lifetime unless a later product decision changes it.
+The MVP must create a safe internal-production path without broad redesign. Stories below now treat the 30-second Attendance QR lifetime as the default `rotationTtlSeconds`, with Conference-specific QR timing owned by `Conference.qrConfig`.
 
 ## 4. BMAD Role Synthesis
 
 ### Analyst Extraction
 
-Product requirements are FR-1 through FR-14 and NFR-1 through NFR-17 from the PRD. Implementation notes are kept separate: Express, Mongoose, EJS, Socket.IO, PM2, route names, schema fields, and dashboard components are constraints and source context, not product goals. The attendance/check-in architecture spine is now the binding implementation substrate for token validation, network verification, attendance state, evidence, admin inspection/correction, realtime updates, export, performance, accessibility, role authorization, and CSRF.
+Product requirements are FR-1 through FR-15 and NFR-1 through NFR-17 from the PRD. Implementation notes are kept separate: Express, Mongoose, EJS, Socket.IO, PM2, route names, schema fields, and dashboard components are constraints and source context, not product goals. The attendance/check-in architecture spine is now the binding implementation substrate for token validation, network verification, attendance state, evidence, admin inspection/correction, realtime updates, export, performance, accessibility, role authorization, and CSRF.
 
 Key contradictions and decisions:
 
@@ -111,25 +111,27 @@ Required regression coverage appears in the relevant stories for token expiry, d
 | --- | --- | --- |
 | EP-01 | Production Readiness and Security Foundation | The app has safe environment, seed, auth, CSRF, QR base URL, and deployment decisions before attendance data can be trusted. |
 | EP-02 | Conference-Scoped Participant Identity and Registration Correctness | Participant identity, registration route scoping, duplicate detection, and thank-you confirmation are correct per conference. |
-| EP-03 | Attendance QR Issuance and Token Validation | Attendance QR generation rejects unknown conferences, preserves the 30-second TTL, and validates tokens safely for the selected deployment mode. |
+| EP-03 | Attendance QR Issuance and Token Validation | Attendance QR generation rejects unknown conferences, preserves the 30-second default TTL, and validates tokens safely for the selected deployment mode. |
 | EP-04 | Participant Identity Resolution and Check-in Recording | A valid QR scan resolves exactly one participant, persists attendance state, handles duplicates, and records evidence. |
 | EP-05 | Network Verification and IP Whitelist Enforcement | Check-in is blocked outside allowed venue networks and network behavior is configurable for registration. |
 | EP-06 | Realtime Attendance Dashboard | Admin dashboards show persisted attendance counts by conference and update in realtime after successful check-ins. |
 | EP-07 | Admin Attendance Management and Route Alignment | Admin attendance controls use real backend routes, correct vocabulary, authorization, CSRF, and export behavior. |
 | EP-08 | Conference-Scoped Bulk Email Decision or UI Removal | The conference bulk-email mismatch is resolved by implementing scoped email or removing the action from MVP. |
 | EP-09 | Audit Evidence, Export, Observability, and Regression Testing | The MVP has audit evidence, exports, operational logs, automated regression coverage, and event rehearsal criteria. |
+| EP-10 | Conference QR Check-in Configuration | Admins can configure QR availability and rotation per Conference, and QR generation follows that persisted config. |
 
 ## 6. Suggested Implementation Order
 
 1. EP-01: resolve launch-blocking production and security prerequisites.
 2. EP-02: fix conference-scoped identity before check-in depends on participant lookup.
 3. EP-03: make Attendance QR issuance and validation safe.
-4. EP-04: implement participant resolution and persisted check-in.
-5. EP-05: enforce venue network controls around the new check-in path.
-6. EP-06: expose persisted attendance counts and realtime updates.
-7. EP-07: align admin attendance management and exports.
-8. EP-08: resolve the bulk-email UI/backend mismatch.
-9. EP-09: complete audit, observability, and regression hardening before rollout.
+4. EP-10: add Conference-specific QR timing before check-in depends on rotation/window behavior.
+5. EP-04: implement participant resolution and persisted check-in.
+6. EP-05: enforce venue network controls around the new check-in path.
+7. EP-06: expose persisted attendance counts and realtime updates.
+8. EP-07: align admin attendance management and exports.
+9. EP-08: resolve the bulk-email UI/backend mismatch.
+10. EP-09: complete audit, observability, and regression hardening before rollout.
 
 ## 7. Dependency Map
 
@@ -142,6 +144,10 @@ Required regression coverage appears in the relevant stories for token expiry, d
 | ST-2.2 registration route scoping | route catalog | ST-2.3, ST-4.1 |
 | ST-3.1 QR generation hardening | ST-1.3 if strategy changes QR store | ST-3.2, EP-04 |
 | ST-3.2 token validation errors | ST-3.1 | EP-04, EP-05 |
+| ST-10.1 qrConfig data model and validation | Conference model and admin create/update flow | ST-10.2, ST-10.3 |
+| ST-10.2 Add/Edit Conference QR config UI | ST-10.1 | ST-10.3 |
+| ST-10.3 QR availability window behavior | ST-3.1, ST-3.2, ST-10.1 | EP-04, EP-05 |
+| ST-10.4 QR timing regression tests | ST-10.1, ST-10.2, ST-10.3 | launch readiness |
 | ST-4.1 identity resolution | ST-2.1, ST-2.2, ST-3.2 | ST-4.2, ST-4.3 |
 | ST-4.2 persisted attendance | ST-4.1 | EP-06, EP-07, EP-09 |
 | ST-5.1 network trust boundary | ST-1.3 | ST-5.2, ST-5.3 |
@@ -181,12 +187,13 @@ Decision Required: final role policy, including whether `staff` or `receptionist
 | EP-07 | Apply AD-10 admin inspection, AD-11 correction route, AD-12 role matrix, AD-13 CSRF, and AD-16 export rules. |
 | EP-08 | Apply AD-12 bulk-email permission and AD-13 CSRF if conference-scoped bulk email remains in MVP. |
 | EP-09 | Apply AD-9 audit evidence, AD-16 export rules, AD-17 accessibility, AD-18 performance criteria, and BMAD QA deterministic test-quality rules. |
+| EP-10 | Store QR timing on `Conference.qrConfig`, keep backend validation authoritative, and apply configured availability/rotation through the selected production-safe token strategy. |
 
 ## 10. FR/NFR Coverage Map
 
 | Requirement | Epic | Story | Specific AC coverage | Test coverage note |
 | --- | --- | --- | --- | --- |
-| FR-1 Generate scoped Attendance QR | EP-03 | ST-3.1, ST-3.3 | ST-3.1 validates selected Conference Code, rejects unknown/missing code, preserves 30-second TTL, rejects unauthorized QR generation; ST-3.3 refreshes from expiry metadata. | Test valid/unknown/missing code, TTL metadata, authorized/unauthorized roles, and QR refresh/error behavior. |
+| FR-1 Generate scoped Attendance QR | EP-03, EP-10 | ST-3.1, ST-3.3, ST-10.3 | ST-3.1 validates selected Conference Code, rejects unknown/missing code, preserves 30-second default TTL, rejects unauthorized QR generation; ST-3.3 refreshes from expiry metadata; ST-10.3 applies Conference-specific availability and rotation. | Test valid/unknown/missing code, default/configured TTL metadata, authorized/unauthorized roles, QR refresh/error behavior, and before/during/after window states. |
 | FR-2 Validate Check-in Token | EP-03 | ST-1.3, ST-3.2 | ST-1.3 blocks implementation without production-safe token strategy; ST-3.2 accepts valid unexpired token and rejects expired, missing, unknown, mismatched token before attendance actions. | Test selected token strategy, expiry, missing, unknown, mismatched code, and no participant lookup after failure. |
 | FR-3 Resolve Participant for Check-in | EP-04 | ST-2.1, ST-2.2, ST-4.1, ST-4.3 | ST-4.1 requires chosen identity input and exactly one conference-scoped participant; ST-4.3 distinguishes not-found and ambiguous outcomes. | Test participant ID plus conference lookup, no match, ambiguous match, and same identity across conferences. |
 | FR-4 Record Attendance State | EP-04 | ST-4.2, ST-4.3 | ST-4.2 persists checked-in state and timestamp before success; ST-4.3 prevents conflicting duplicate attendance state. | Test success persistence, DB failure, no success before save, duplicate check-in, and scoped update query. |
@@ -200,6 +207,7 @@ Decision Required: final role policy, including whether `staff` or `receptionist
 | FR-12 Duplicate and ambiguous identity protection | EP-02, EP-04 | ST-2.3, ST-4.1, ST-4.3 | ST-2.3 keeps duplicate email scoped by conference; ST-4.1/4.3 require not-found/ambiguous states and no silent selection. | Test same email across conferences, duplicate names/phones, ambiguous identity, not-found, and duplicate check-in. |
 | FR-13 Admin attendance API aligns with UI | EP-07 | ST-7.1, ST-7.2 | ST-7.1 registers secured correction route; ST-7.2 removes/disabled broken endpoint calls and aligns UI vocabulary with backend state. | Test registered route, UI/client does not call missing route, success/failure display, auth/CSRF denial. |
 | FR-14 Conference-scoped bulk email or UI removal | EP-08 | ST-8.1, ST-8.2, ST-8.3 | ST-8.1 requires product decision; ST-8.2 implements scoped send with role/CSRF; ST-8.3 removes/disables action if deferred. | If included, test scoped recipients and auth/CSRF; if deferred, verify no missing route call remains. |
+| FR-15 Configure QR availability and rotation per Conference | EP-10 | ST-10.1, ST-10.2, ST-10.3, ST-10.4 | ST-10.1 adds `Conference.qrConfig` defaults and backend validation; ST-10.2 adds Admin Add/Edit fields with Vietnamese labels and help text; ST-10.3 returns `not_available_yet`, generates during window using configured TTL, and returns `window_closed`; ST-10.4 locks timing behavior with focused Jest tests. | Test default available time, default duration, default TTL, invalid validation cases, window states, and configured TTL behavior. |
 | NFR-1 Persist before success | EP-04, EP-09 | ST-4.2, ST-9.2 | ST-4.2 success only after persisted attendance and timestamp; ST-9.2 regression suite blocks acceptance on failures. | Test no success before save, DB failure path, persisted state after response, regression gate. |
 | NFR-2 Token validation works in deployment topology | EP-01, EP-03 | ST-1.3, ST-3.2 | ST-1.3 requires selected strategy across workers or explicit deployment constraint; ST-3.2 applies selected strategy. | Test cross-worker or chosen constraint, token validation under selected strategy, and deployment doc check. |
 | NFR-3 Check-in completes within 2 seconds | EP-04, EP-09 | ST-4.2, ST-9.4 | ST-4.2 and ST-9.4 define 4 desks, one check-in per 10 seconds for 10 minutes, 60-second burst at twice rate, p95 under 2 seconds, errors under 1%. | Run or simulate load scenario; record p95 latency, error rate, and persisted-count reconciliation. |
@@ -322,7 +330,7 @@ As a system operator, I want token validation to match the event-day deployment 
 **Tasks/Subtasks:**
 
 - Decide between shared token store, stateless signed token, sticky routing, or single-process deployment.
-- Preserve the current 30-second QR lifetime unless the product owner changes it explicitly.
+- Preserve the 30-second default QR rotation while allowing EP-10 to override it per Conference.
 - Document the selected token deployment constraint in deployment docs.
 - Verify QR base URL behavior with `BASE_URL` and request-derived fallback.
 
@@ -515,9 +523,13 @@ As staff, I want Attendance QR generation to be scoped to one known conference, 
 **Then** the API returns a non-success response
 **And** no usable token is issued.
 
-**Given** the current product decision is unchanged
-**When** an Attendance QR is generated
-**Then** the TTL remains 30 seconds.
+**Given** an Attendance QR is generated for a Conference without custom QR config
+**When** staff requests Attendance QR
+**Then** the rotation TTL defaults to 30 seconds.
+
+**Given** an Attendance QR is generated for a Conference with custom QR config
+**When** staff requests Attendance QR during the configured availability window
+**Then** the rotation TTL follows `Conference.qrConfig.rotationTtlSeconds`.
 
 **Given** a user requests Attendance QR generation
 **When** the user's role is not allowed by the Role Authorization Matrix
@@ -527,7 +539,7 @@ As staff, I want Attendance QR generation to be scoped to one known conference, 
 
 - Validate `Conference.code` before issuing QR data.
 - Enforce the Role Authorization Matrix for QR generation.
-- Preserve the 30-second lifetime from `attendanceQrStore.TTL_MS`.
+- Preserve the 30-second default while allowing `Conference.qrConfig.rotationTtlSeconds` to replace the hardcoded `attendanceQrStore.TTL_MS` behavior.
 - Return enough expiry metadata for `qrcode.ejs` to refresh correctly.
 
 **Testing Notes:**
@@ -1356,11 +1368,200 @@ As an operator, I want a rehearsal checklist, so internal production starts only
 
 - Internal production launch has concrete verification evidence, not only passing unit tests.
 
+## Epic 10: Conference QR Check-in Configuration
+
+Goal: make QR availability and rotation configurable per Conference while preserving existing defaults and keeping backend validation authoritative.
+
+### Story 10.1: Add `Conference.qrConfig` Data Model and Backend Validation
+
+As an admin, I want QR timing stored on each Conference, so QR Check-in behavior is durable and event-specific.
+
+**Acceptance Criteria:**
+
+**Given** an admin creates a Conference without QR config
+**When** the backend saves the Conference
+**Then** `qrConfig.availableDurationMinutes` defaults to `30`
+**And** `qrConfig.rotationTtlSeconds` defaults to `30`
+**And** `qrConfig.availableFromTime` defaults to 15 minutes before the Conference start time.
+
+**Given** the Conference time starts at `08:00`
+**When** default QR config is calculated
+**Then** `qrConfig.availableFromTime` is `07:45`.
+
+**Given** `qrConfig.availableFromTime` is provided
+**When** backend validation runs
+**Then** the value must match `HH:mm`.
+
+**Given** `qrConfig.availableDurationMinutes` or `qrConfig.rotationTtlSeconds` is zero, negative, or not numeric
+**When** backend validation runs
+**Then** the backend rejects the request with a clear validation error.
+
+**Given** `qrConfig.rotationTtlSeconds` is greater than `qrConfig.availableDurationMinutes * 60`
+**When** backend validation runs
+**Then** the backend rejects the request with a clear validation error.
+
+**Tasks/Subtasks:**
+
+- Add `qrConfig` to `backend/models/Conference.js`:
+  - `availableFromTime: String` in `HH:mm`
+  - `availableDurationMinutes: Number`, default `30`
+  - `rotationTtlSeconds: Number`, default `30`
+- Add backend normalization/validation in the existing create/update Conference path.
+- Derive the default `availableFromTime` from the first `HH:mm` found in `Conference.time`, minus 15 minutes.
+- If no start time can be parsed and `availableFromTime` is missing, reject with a clear backend validation error instead of guessing.
+- Keep backend code CommonJS and Mongoose-based.
+
+**Testing Notes:**
+
+- Add focused Jest tests for Conference QR config defaults and validation.
+- Required tests: default QR start time equals Conference start time minus 15 minutes, default duration equals 30 minutes, default TTL equals 30 seconds, invalid `HH:mm`, non-positive duration, non-positive TTL, and TTL greater than duration window.
+
+**Definition of Done:**
+
+- QR config is persisted on Conference with safe defaults and backend-enforced constraints.
+
+### Story 10.2: Add QR Check-in Configuration Fields to Add/Edit Conference UI
+
+As an admin, I want QR Check-in fields in both Add Conference and Edit Conference, so I can configure each event without code changes.
+
+**Acceptance Criteria:**
+
+**Given** an admin opens Add Conference
+**When** the form is displayed
+**Then** it includes a section titled `Cấu hình QR Check-in`
+**And** it includes fields labeled `QR khả dụng từ`, `QR khả dụng trong ... phút`, and `QR tự đổi sau mỗi ... giây`.
+
+**Given** the admin enters a Conference start time
+**When** the QR section has no manual open time yet
+**Then** the UI defaults `QR khả dụng từ` to 15 minutes before the Conference start time.
+
+**Given** an admin opens Edit Conference
+**When** the existing Conference details load
+**Then** saved `qrConfig` values are shown in the QR fields
+**And** missing legacy values fall back to the same defaults used by Add Conference.
+
+**Given** the admin submits Add Conference or Edit Conference
+**When** the request reaches the backend
+**Then** the QR config fields are submitted with the Conference payload.
+
+**Given** the admin reads the QR config section
+**When** help text is visible
+**Then** it explains that open time controls when QR Check-in starts, duration controls how long QR remains valid for check-in, and rotation TTL controls how often the displayed QR changes.
+
+**Tasks/Subtasks:**
+
+- Add the QR config section to the existing Admin Dashboard Conference modal/form in `frontend/views/admin/dashboard.ejs`.
+- Use native time/number inputs; do not add a new date/time picker dependency.
+- Wire the existing create/update Conference JavaScript to include `qrConfig`.
+- Load existing `qrConfig` through `GET /admin/api/conferences/:id` for Edit Conference.
+- Keep Vietnamese labels exactly as specified.
+
+**Testing Notes:**
+
+- Add focused UI/form tests if existing test harness supports them; otherwise include a documented manual check for Add and Edit form payloads.
+- Verify browser-side defaults match backend defaults, but do not rely on frontend validation alone.
+
+**Definition of Done:**
+
+- Admins can see, edit, and submit QR config from both Add Conference and Edit Conference.
+
+### Story 10.3: Enforce QR Availability Window and Configured Rotation in QR API
+
+As reception staff, I want QR generation to follow the Conference's configured window and rotation, so check-in opens and closes at the intended time.
+
+**Acceptance Criteria:**
+
+**Given** the current server time is before `qrConfig.availableFromTime`
+**When** staff requests `/api/attendance-qr?code=CONF`
+**Then** the API does not generate a valid QR
+**And** it returns a clear `not_available_yet` state.
+
+**Given** the current server time is within `qrConfig.availableFromTime + qrConfig.availableDurationMinutes`
+**When** staff requests `/api/attendance-qr?code=CONF`
+**Then** the API generates a valid QR
+**And** token rotation uses `qrConfig.rotationTtlSeconds`.
+
+**Given** the current server time is after the QR availability window
+**When** staff requests `/api/attendance-qr?code=CONF`
+**Then** the API does not generate a valid QR
+**And** it returns a clear `window_closed` state.
+
+**Given** a Conference spans multiple days
+**When** the QR availability window is evaluated
+**Then** the window applies once from the first `Conference.startDate` and `qrConfig.availableFromTime`
+**And** the same window does not repeat on later Conference days.
+
+**Given** production may run multiple Node processes
+**When** QR token generation and validation use configured TTL
+**Then** the implementation follows the selected ST-1.3 production-safe token strategy
+**And** does not introduce durable QR or check-in state that exists only in process-local memory.
+
+**Tasks/Subtasks:**
+
+- Load the target Conference before QR generation.
+- Compute the QR availability window using server time, `Conference.startDate`, and `qrConfig.availableFromTime`.
+- Treat multi-day Conference windows as one continuous window from the first start date/time, not a daily repeating window.
+- Replace hardcoded `TTL_MS` behavior with Conference-specific `rotationTtlSeconds`, keeping 30 seconds as default.
+- Return structured API states for `not_available_yet` and `window_closed`.
+- Keep `/qr/checkin` token validation aligned with configured TTL and Conference Code.
+
+**Testing Notes:**
+
+- Add focused Jest tests for before-window rejection, during-window QR generation, after-window rejection, and configured TTL.
+- Include a test proving default TTL remains 30 seconds when no custom config exists.
+
+**Definition of Done:**
+
+- QR generation is blocked outside the configured window and rotates according to the Conference's persisted config.
+
+### Story 10.4: Add Focused QR Timing Regression Coverage
+
+As a developer, I want regression tests around QR timing, so defaults and Conference-specific behavior do not drift.
+
+**Acceptance Criteria:**
+
+**Given** the test suite runs
+**When** QR config tests execute
+**Then** they verify default QR start time equals Conference start time minus 15 minutes.
+
+**Given** the test suite runs
+**When** QR config defaults are checked
+**Then** default duration is 30 minutes
+**And** default TTL is 30 seconds.
+
+**Given** the test suite runs against QR generation
+**When** server time is before, during, and after the configured availability window
+**Then** before-window QR is rejected, during-window QR is allowed, and after-window QR is rejected.
+
+**Given** a Conference has custom `rotationTtlSeconds`
+**When** QR generation runs during the availability window
+**Then** the returned expiry/TTL metadata follows the Conference config.
+
+**Given** a Conference spans multiple days
+**When** QR window tests run
+**Then** the window is evaluated once from the first start date/time and does not repeat daily.
+
+**Tasks/Subtasks:**
+
+- Add focused Jest tests under `__tests__/` for model validation and QR route/service timing behavior.
+- Prefer module/controller tests with mocked time and mocked Conference lookup over broad server startup tests.
+- Keep tests CommonJS-compatible.
+
+**Testing Notes:**
+
+- Run the narrow Jest tests for QR/conference timing behavior.
+- If full `npm test` is blocked by existing coverage thresholds, run the focused tests and note the coverage limitation.
+
+**Definition of Done:**
+
+- QR timing defaults, validation, window states, and configured TTL are protected by automated tests.
+
 ## 12. Risks and Unresolved Decisions
 
 ### Risks
 
 - Process-local QR tokens can fail in PM2 cluster mode.
+- Misconfigured QR timing can block valid event-day check-in if backend defaults or validation drift.
 - Participant ID indexes can block per-conference `0001` behavior until migrated.
 - A shared Attendance QR does not identify a participant without an explicit identity step.
 - Admin attendance routes are unsafe unless authentication, authorization, and CSRF are addressed.
@@ -1394,12 +1595,13 @@ Reason: these stories remove launch blockers and identity/deployment contradicti
 
 ## 14. Final Self-Check
 
-- All FR-1 through FR-14 are mapped in section 10 with epic, story, acceptance-criteria coverage, and test notes.
+- All FR-1 through FR-15 are mapped in section 10 with epic, story, acceptance-criteria coverage, and test notes.
 - All NFR-1 through NFR-17 are mapped in section 10 with epic, story, acceptance-criteria coverage, and test notes.
 - Every story includes Given/When/Then acceptance criteria.
 - Every story includes tasks/subtasks, testing notes, and Definition of Done.
 - Required QA regressions are explicitly covered: token expiry, denied network, duplicate check-in, ambiguous participant lookup, conference-scoped participant IDs, admin attendance mutation, dashboard count consistency, and thank-you identity correctness.
-- The current 30-second Attendance QR lifetime is preserved unless changed by explicit product decision.
+- The 30-second Attendance QR lifetime is preserved as the default `qrConfig.rotationTtlSeconds`, not as a hardcoded rule.
+- Conference-specific QR availability and rotation are covered by EP-10.
 - Unknown Conference Codes cannot generate Attendance QR in the planned QR story.
 - Check-in success is blocked until Attendance State is persisted.
 - Participant lookup is always scoped by Conference Code.

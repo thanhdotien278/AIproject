@@ -87,9 +87,10 @@ Staff can generate an Attendance QR for a selected active Conference Code from t
 
 **Consequences (testable):**
 - The generated Attendance QR contains a Check-in URL scoped to exactly one Conference Code.
-- The Attendance QR expires after a short configured lifetime; the current implementation uses 30 seconds and v1 should preserve that unless changed by an explicit product decision.
+- The Attendance QR expires after the Conference-specific rotation TTL; the default remains 30 seconds.
 - The response includes enough expiry information for the QR page to refresh before or at expiry.
 - The system does not generate Attendance QR for an unknown Conference Code.
+- The system does not generate a valid Attendance QR outside the Conference-specific QR availability window.
 
 #### FR-2: Validate Check-in Token before attendance actions
 
@@ -248,6 +249,34 @@ The Admin Dashboard either supports conference-scoped bulk email or does not exp
 - If excluded, the UI does not call a missing conference-scoped bulk email route.
 - Existing all-participant unsent-email behavior is not silently reused for a selected conference action.
 
+### 4.7 Conference QR Check-in Configuration
+
+**Description:** Admin users can configure when Attendance QR check-in opens, how long it remains available, and how often the QR rotates for each Conference. This is an explicit product decision replacing the previously hardcoded 30-second QR token lifetime while preserving 30 seconds as the default. Realizes UJ-1, UJ-2, and UJ-3.
+
+**Functional Requirements:**
+
+#### FR-15: Configure QR availability and rotation per Conference
+
+Admin users can configure QR Check-in settings in both Add Conference and Edit Conference flows.
+
+**Consequences (testable):**
+- Conference stores QR settings in `qrConfig.availableFromTime`, `qrConfig.availableDurationMinutes`, and `qrConfig.rotationTtlSeconds`.
+- `qrConfig.availableFromTime` is a `String` in `HH:mm` format.
+- `qrConfig.availableDurationMinutes` is a `Number` with default `30`.
+- `qrConfig.rotationTtlSeconds` is a `Number` with default `30`.
+- If Admin does not provide `availableFromTime`, the system defaults it to 15 minutes before the Conference start time.
+- For a Conference time of `08:00-17:00`, default `availableFromTime` is `07:45`.
+- Backend validation rejects non-`HH:mm` `availableFromTime`.
+- Backend validation rejects non-positive `availableDurationMinutes` and non-positive `rotationTtlSeconds`.
+- Backend validation rejects `rotationTtlSeconds` greater than `availableDurationMinutes * 60`.
+- Frontend validation may help Admins, but backend validation is the authority.
+- Before the QR availability window, the Attendance QR API does not generate a valid QR and returns a clear `not_available_yet` state.
+- During the QR availability window, the Attendance QR API generates QR using the Conference-specific `rotationTtlSeconds`.
+- After the QR availability window, the Attendance QR API does not generate a valid QR and returns a clear `window_closed` state.
+- For multi-day Conferences, the QR availability window applies once from the first Conference `startDate` plus `qrConfig.availableFromTime`; it does not repeat daily.
+- Admin UI labels are Vietnamese: `Cấu hình QR Check-in`, `QR khả dụng từ`, `QR khả dụng trong ... phút`, and `QR tự đổi sau mỗi ... giây`.
+- Admin UI includes helpful descriptions explaining QR open time, availability duration, and rotation TTL.
+
 ## 5. Cross-Cutting Non-Functional Requirements
 
 - **Reliability:** Check-in must persist Attendance State before reporting success to the user.
@@ -291,6 +320,7 @@ The Admin Dashboard either supports conference-scoped bulk email or does not exp
 ### 8.1 In Scope
 
 - Attendance QR generation for a selected Conference Code.
+- Conference-specific QR availability and rotation configuration.
 - Server-side Check-in Token validation.
 - Participant identity resolution before Check-in.
 - Persisted Attendance State and check-in timestamp.
@@ -334,6 +364,7 @@ The Admin Dashboard either supports conference-scoped bulk email or does not exp
 ## 10. Risks and Mitigations
 
 - **Risk:** Process-local Check-in Tokens fail in multi-worker deployment. **Mitigation:** Require shared token validation, single-process event-day deployment, or sticky routing as an explicit production decision before launch.
+- **Risk:** Admin configures QR rotation longer than the QR availability window. **Mitigation:** Backend validation rejects `rotationTtlSeconds > availableDurationMinutes * 60`.
 - **Risk:** QR scan validates freshness but does not identify the Participant. **Mitigation:** Make Participant identity resolution a first-class Check-in step and block Check-in without it.
 - **Risk:** Participant ID uniqueness conflicts across conferences. **Mitigation:** Treat Participant ID as Conference-scoped in requirements, lookup, and data constraints.
 - **Risk:** Admin Dashboard shows actions that backend routes do not support. **Mitigation:** Align backend routes and UI before marking MVP complete.

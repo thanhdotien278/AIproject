@@ -571,7 +571,7 @@
         const result = await response.json();
         
         if (result.success) {
-          window.location.href = '/thankyou';
+          window.location.href = result.redirectUrl === '/thankyou' ? result.redirectUrl : '/thankyou';
         } else {
           if (result && result.errors && window.__registerValidation) {
             window.__registerValidation.applyServerErrors(form, result.errors);

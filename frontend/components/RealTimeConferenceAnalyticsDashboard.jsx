@@ -23,6 +23,7 @@ import {
 
 const DEFAULT_SOCKET_TRANSPORTS = ['websocket'];
 const DEFAULT_QR_TTL_SECONDS = 30;
+const DEFAULT_QR_REFRESH_MS = DEFAULT_QR_TTL_SECONDS * 1000;
 
 const emptyStats = Object.freeze({
   totalRegisteredFromParticipants: 0,
@@ -145,18 +146,28 @@ function formatServices(services = {}) {
   return labels.length ? labels.join(', ') : '—';
 }
 
-function getQrTtlSeconds(data) {
+function getQrRefreshDelayMs(data) {
+  const expiresAt = toNumber(data?.expiresAt);
+  const openAt = toNumber(data?.openAt);
+  const serverNow = toNumber(data?.serverNow);
+  if (serverNow > 0) {
+    if (expiresAt > 0) return Math.max(expiresAt - serverNow, 0);
+    if (data?.state === 'not_available_yet' && openAt > 0) return Math.max(openAt - serverNow, 0);
+  }
+
+  const rotationTtlSeconds = toNumber(data?.rotationTtlSeconds);
+  if (rotationTtlSeconds > 0) return rotationTtlSeconds * 1000;
   const ttlSeconds = toNumber(data?.ttlSeconds);
-  if (ttlSeconds > 0) return ttlSeconds;
+  if (ttlSeconds > 0) return ttlSeconds * 1000;
   const ttlMs = toNumber(data?.ttlMs);
-  if (ttlMs > 0) return Math.ceil(ttlMs / 1000);
-  return DEFAULT_QR_TTL_SECONDS;
+  if (ttlMs > 0) return ttlMs;
+  return DEFAULT_QR_REFRESH_MS;
 }
 
-function getQrExpiryMs(data) {
-  const expiresAt = toNumber(data?.expiresAt);
-  if (expiresAt > 0) return expiresAt;
-  return Date.now() + getQrTtlSeconds(data) * 1000;
+function getQrStateMessage(data) {
+  if (data?.state === 'window_closed') return 'Đã hết thời gian đăng ký';
+  if (data?.state === 'not_available_yet') return 'Chưa đến thời gian mở QR Check-in';
+  return data?.message || 'Chưa có QR code';
 }
 
 function StatCard({ label, value, percentText, Icon, accent }) {
@@ -280,6 +291,8 @@ function InternalExternalDonut({ stats, total, className = '' }) {
 }
 
 function CheckInQrCard({ qr, countdown, onDownload, className = '' }) {
+  const hasQr = qr?.state === 'available' && qr?.qrCodeDataUrl;
+
   return (
     <section className={`rounded-2xl border border-blue-400 bg-white p-4 shadow-[0_12px_32px_rgba(37,99,235,0.10)] ${className}`}>
       <div className="flex justify-end">
@@ -288,33 +301,36 @@ function CheckInQrCard({ qr, countdown, onDownload, className = '' }) {
 
       <div className="mt-3 flex justify-center">
         <div className="rounded-2xl border-4 border-blue-500 bg-white p-2">
-          {qr?.qrCodeDataUrl ? (
+          {hasQr ? (
             <img src={qr.qrCodeDataUrl} alt="QR code check-in tham dự hội nghị" className="h-[188px] w-[188px] object-contain sm:h-[200px] sm:w-[200px]" />
           ) : (
-            <div className="flex h-[188px] w-[188px] items-center justify-center rounded-xl bg-slate-100 text-center text-sm text-slate-500 sm:h-[200px] sm:w-[200px]">
-              Chưa có QR code
+            <div className="flex h-[188px] w-[188px] items-center justify-center rounded-xl bg-slate-100 px-4 text-center text-sm font-semibold text-slate-600 sm:h-[200px] sm:w-[200px]">
+              {getQrStateMessage(qr)}
             </div>
           )}
         </div>
       </div>
 
-      <p className="mt-3 text-center text-sm font-bold text-slate-700">Quét mã để check-in tham dự</p>
-      <p className="mt-2 flex items-center justify-center gap-2 text-sm font-bold text-blue-600">
-        <Clock3 className="h-5 w-5" aria-hidden="true" />
-        QR hết hạn sau: {String(Math.max(countdown, 0)).padStart(2, '0')}s
-      </p>
+      {hasQr ? (
+        <>
+          <p className="mt-3 text-center text-sm font-bold text-slate-700">Quét mã để check-in tham dự</p>
+          <p className="mt-2 flex items-center justify-center gap-2 text-sm font-bold text-blue-600">
+            <Clock3 className="h-5 w-5" aria-hidden="true" />
+            QR hết hạn sau: {String(Math.max(countdown, 0)).padStart(2, '0')}s
+          </p>
 
-      <div className="mt-3 space-y-3">
-        <button
-          type="button"
-          onClick={onDownload}
-          disabled={!qr?.qrCodeDataUrl}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Download className="h-4 w-4" aria-hidden="true" />
-          Tải QR code
-        </button>
-      </div>
+          <div className="mt-3 space-y-3">
+            <button
+              type="button"
+              onClick={onDownload}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
+            >
+              <Download className="h-4 w-4" aria-hidden="true" />
+              Tải QR code
+            </button>
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }
@@ -474,21 +490,53 @@ export default function RealTimeConferenceAnalyticsDashboard({
   const fetchQr = useCallback(async code => {
     const requestId = qrRequestRef.current + 1;
     qrRequestRef.current = requestId;
+    if (!code || code === 'all') {
+      setQr({
+        state: 'not_selected',
+        qrCodeDataUrl: '',
+        message: 'Chọn hội nghị để hiển thị QR Check-in',
+      });
+      setCountdown(0);
+      return;
+    }
+
     setQrLoading(true);
     try {
       const res = await fetch(`${apiBaseUrl}/api/attendance-qr?code=${encodeURIComponent(code)}`, {
         headers: { Accept: 'application/json' },
       });
       const data = await res.json();
-      if (!res.ok || !data?.success) throw new Error(data?.message || 'Failed to load QR code');
       if (qrRequestRef.current !== requestId) return;
-      const expiresAtMs = getQrExpiryMs(data);
+      if (!res.ok || !data?.success) {
+        setQr({
+          state: data?.state || 'error',
+          qrCodeDataUrl: '',
+          message: data?.message || 'Failed to load QR code',
+        });
+        setCountdown(0);
+        return;
+      }
+
+      const refreshDelayMs = getQrRefreshDelayMs(data);
+      const expiresAtMs = data.state === 'available' ? Date.now() + refreshDelayMs : null;
+      const refreshAtMs = data.state === 'not_available_yet' ? Date.now() + refreshDelayMs : null;
       setQr({
-        qrCodeDataUrl: data.qrCodeDataUrl || data.qrUrl || '',
+        state: data.state || 'available',
+        qrCodeDataUrl: data.state === 'available' ? data.qrCodeDataUrl || data.qrUrl || '' : '',
         expiresAtMs,
+        refreshAtMs,
+        message: getQrStateMessage(data),
       });
-      setCountdown(Math.max(Math.ceil((expiresAtMs - Date.now()) / 1000), 0));
+      setCountdown(expiresAtMs ? Math.max(Math.ceil((expiresAtMs - Date.now()) / 1000), 0) : 0);
     } catch {
+      if (qrRequestRef.current === requestId) {
+        setQr({
+          state: 'error',
+          qrCodeDataUrl: '',
+          message: 'Không thể tải QR Check-in',
+        });
+        setCountdown(0);
+      }
     } finally {
       if (qrRequestRef.current === requestId) setQrLoading(false);
     }
@@ -525,14 +573,20 @@ export default function RealTimeConferenceAnalyticsDashboard({
 
   useEffect(() => {
     const expiresAtMs = qr?.expiresAtMs;
-    if (!expiresAtMs) return undefined;
+    if (qr?.state !== 'available' || !expiresAtMs) return undefined;
     const timer = window.setInterval(() => {
       const remaining = Math.max(Math.ceil((expiresAtMs - Date.now()) / 1000), 0);
       setCountdown(remaining);
-      if (remaining === 0 && !qrLoading) fetchQr(conferenceCode);
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [conferenceCode, fetchQr, qr?.expiresAtMs, qrLoading]);
+  }, [qr?.expiresAtMs, qr?.state]);
+
+  useEffect(() => {
+    const refreshAtMs = qr?.refreshAtMs || qr?.expiresAtMs;
+    if (!refreshAtMs || qr?.state === 'window_closed') return undefined;
+    const timer = window.setTimeout(() => fetchQr(conferenceCode), Math.max(refreshAtMs - Date.now(), 0));
+    return () => window.clearTimeout(timer);
+  }, [conferenceCode, fetchQr, qr?.expiresAtMs, qr?.refreshAtMs, qr?.state]);
 
   useEffect(() => {
     const socket = io(socketUrl ?? (apiBaseUrl || undefined), {

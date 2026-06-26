@@ -18,6 +18,8 @@ This addendum preserves technical and source context that informed the PRD but d
 ## Current-State Evidence
 
 - Current `/api/attendance-qr` issues dynamic QR data for a `Conference Code` with a 30-second token TTL.
+- Product decision as of 2026-06-25: QR timing is now configurable per Conference. The 30-second token TTL remains only the default `qrConfig.rotationTtlSeconds`, not a hardcoded product rule.
+- Product decision as of 2026-06-25: for multi-day Conferences, the QR availability window applies once from the first Conference start date/time and does not repeat daily.
 - Current `/qr/checkin` validates a token and redirects to `/register?code=CONF`; it does not identify a participant or record attendance.
 - Current `Participant` model has `attendance: false` by default and `participantId` marked globally unique.
 - Current `Counter` model issues participant IDs per conference using keys like `participants_CONF`.
@@ -30,6 +32,7 @@ This addendum preserves technical and source context that informed the PRD but d
 ## Implementation Notes to Carry Forward
 
 - Product requirements intentionally avoid choosing MongoDB, Redis, TOTP, JWT, or sticky sessions as the token strategy. Architecture should choose the smallest production-safe strategy.
+- Add `Conference.qrConfig` as the recommended durable home for QR availability and rotation settings: `availableFromTime` (`HH:mm` string), `availableDurationMinutes` (positive number, default 30), and `rotationTtlSeconds` (positive number, default 30).
 - If participant identity is resolved by email or phone, ambiguous matches must be handled explicitly because names and phone numbers may not be globally unique.
 - If participant identity is resolved by participant ID, every lookup and route must include `Conference Code`.
 - If admin staff with non-admin roles can mutate attendance, route authorization needs more than `req.session.isAuthenticated`.

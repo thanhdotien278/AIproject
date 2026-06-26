@@ -3026,10 +3026,6 @@ body {
   cursor: not-allowed;
 }
 
-.disabled\:opacity-50:disabled {
-  opacity: 0.5;
-}
-
 .disabled\:opacity-60:disabled {
   opacity: 0.6;
 }

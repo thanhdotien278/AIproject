@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const fs = require('fs').promises;
 const path = require('path');
 const { validateRegistrationForm } = require('../middleware/registrationValidation');
+const { getQrAvailabilityState } = require('../services/qrConfigTime');
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -15,11 +16,57 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+function normalizeConferenceCode(value) {
+  const code = String(value || '').trim();
+  return code ? code.toUpperCase() : '';
+}
+
+function resolveConferenceCode(req) {
+  return normalizeConferenceCode(
+    req.params?.conferenceCode || req.query?.code || req.body?.conferenceCode,
+  );
+}
+
+function buildRegistrationClosedViewModel(conference, availability) {
+  const formatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+  return {
+    layout: false,
+    message: availability?.message || 'Đã hết thời gian đăng kí. Xin cảm ơn!',
+    conference,
+    qrAvailableFrom: availability?.availableFromAt
+      ? availability.availableFromAt.toLocaleString('vi-VN', formatOptions)
+      : '',
+    qrAvailableUntil: availability?.availableUntilAt
+      ? availability.availableUntilAt.toLocaleString('vi-VN', formatOptions)
+      : '',
+  };
+}
+
+function renderRegistrationClosed(res, conference, availability) {
+  return res.render('registration_closed', buildRegistrationClosedViewModel(conference, availability));
+}
+
+function jsonRegistrationClosed(res, conference, availability) {
+  const viewModel = buildRegistrationClosedViewModel(conference, availability);
+  return res.status(403).json({
+    success: false,
+    state: availability?.state || 'registration_closed',
+    message: viewModel.message,
+    conferenceCode: conference?.code,
+    redirectUrl: '/registration-closed',
+  });
+}
+
 // Display registration form
 exports.showRegisterForm = async (req, res) => {
   try {
-    // Get conference code from query parameter
-    const conferenceCode = req.query.code;
+    const conferenceCode = resolveConferenceCode(req);
     
     // Find the conference by code
     let conference;
@@ -27,10 +74,7 @@ exports.showRegisterForm = async (req, res) => {
       conference = await Conference.findOne({ code: conferenceCode }).populate('location');
       // If specific conference requested, check if it's active
       if (conference && !conference.isActive) {
-        return res.render('registration_closed', {
-          message: 'Đã hết thời gian đăng kí. Xin cảm ơn!',
-          layout: false
-        });
+        return renderRegistrationClosed(res, conference);
       }
     } else {
       // Fallback to active conference if no code provided
@@ -42,10 +86,7 @@ exports.showRegisterForm = async (req, res) => {
         
         // If found but not active, show registration closed message
         if (conference) {
-          return res.render('registration_closed', {
-            message: 'Đã hết thời gian đăng kí. Xin cảm ơn!',
-            layout: false
-          });
+          return renderRegistrationClosed(res, conference);
         }
       }
     }
@@ -55,6 +96,11 @@ exports.showRegisterForm = async (req, res) => {
         message: 'No conferences available for registration',
         layout: false
       });
+    }
+
+    const availability = getQrAvailabilityState(conference);
+    if (!availability.success || availability.state !== 'available') {
+      return renderRegistrationClosed(res, conference, availability);
     }
     
     // Format dates for display
@@ -74,7 +120,7 @@ exports.showRegisterForm = async (req, res) => {
     // Get registration fields from conference
     const registrationFields = conference.registrationFields || ['name', 'email', 'phone'];
     
-    res.render('register', { 
+    return res.render('register', {
       conference: conference,
       formattedDates,
       locationName,
@@ -83,7 +129,7 @@ exports.showRegisterForm = async (req, res) => {
     });
   } catch (error) {
     console.error('Error displaying registration form:', error);
-    res.status(500).render('error', { 
+    return res.status(500).render('error', {
       message: 'An error occurred while loading the registration form',
       layout: false
     });
@@ -93,13 +139,12 @@ exports.showRegisterForm = async (req, res) => {
 // Process registration submission
 exports.registerParticipant = async (req, res) => {
   try {
-    // Find the conference by code from form
+    const conferenceCode = resolveConferenceCode(req);
+
+    // Find the conference by code from route/query/form
     let conference;
-    if (req.body.conferenceCode) {
-      conference = await Conference.findOne({ 
-        code: req.body.conferenceCode,
-        isActive: true // Only allow registration for active conferences
-      });
+    if (conferenceCode) {
+      conference = await Conference.findOne({ code: conferenceCode });
     } else {
       // Fallback to active conference if no code provided
       conference = await Conference.findOne({ isActive: true });
@@ -110,6 +155,15 @@ exports.registerParticipant = async (req, res) => {
         success: false, 
         message: 'Registration is currently closed or no active conferences available' 
       });
+    }
+
+    if (!conference.isActive) {
+      return jsonRegistrationClosed(res, conference);
+    }
+
+    const availability = getQrAvailabilityState(conference);
+    if (!availability.success || availability.state !== 'available') {
+      return jsonRegistrationClosed(res, conference, availability);
     }
     
     // Use the conference code from the found conference
@@ -199,6 +253,12 @@ exports.registerParticipant = async (req, res) => {
     req.session.participantMongoId = participant._id.toString();
     req.session.participantId = participantId; // Store the new ID in session
     req.session.participantData = participantData; // participantData now contains participantId
+
+    if (typeof req.session.save === 'function') {
+      await new Promise((resolve, reject) => {
+        req.session.save(error => (error ? reject(error) : resolve()));
+      });
+    }
     
     // Redirect to thank you page immediately without waiting for email
     res.status(201).json({ 

@@ -1,4 +1,28 @@
 const mongoose = require('mongoose');
+const { deriveAvailableFromAt } = require('../services/qrConfigTime');
+
+const qrConfigSchema = new mongoose.Schema({
+  availableFromAt: {
+    type: Date
+  },
+  // Legacy read path for conferences saved before exact QR datetime existed.
+  availableFromTime: {
+    type: String,
+    trim: true
+  },
+  availableDurationMinutes: {
+    type: Number,
+    default: 30,
+    min: [1, 'QR availableDurationMinutes must be a positive number.'],
+    cast: 'QR availableDurationMinutes must be a positive number.'
+  },
+  rotationTtlSeconds: {
+    type: Number,
+    default: 30,
+    min: [1, 'QR rotationTtlSeconds must be a positive number.'],
+    cast: 'QR rotationTtlSeconds must be a positive number.'
+  }
+}, { _id: false });
 
 const conferenceSchema = new mongoose.Schema({
   code: {
@@ -117,6 +141,10 @@ const conferenceSchema = new mongoose.Schema({
       'targetAudience'
     ]
   }],
+  qrConfig: {
+    type: qrConfigSchema,
+    default: () => ({})
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -124,6 +152,37 @@ const conferenceSchema = new mongoose.Schema({
   updatedAt: {
     type: Date
   }
+});
+
+conferenceSchema.pre('validate', function(next) {
+  if (!this.qrConfig) {
+    this.qrConfig = {};
+  }
+
+  const availableFromAtCastError = this.$__?.validationError?.errors?.['qrConfig.availableFromAt']
+    || this.qrConfig.$__?.validationError?.errors?.availableFromAt;
+  if (!availableFromAtCastError && !Number.isFinite(new Date(this.qrConfig.availableFromAt).getTime())) {
+    const availableFromAt = deriveAvailableFromAt(this);
+    if (availableFromAt) {
+      this.qrConfig.availableFromAt = availableFromAt;
+    } else {
+      this.invalidate(
+        'qrConfig.availableFromAt',
+        'QR availableFromAt must be a valid Date.'
+      );
+    }
+  }
+
+  const duration = this.qrConfig.availableDurationMinutes;
+  const ttl = this.qrConfig.rotationTtlSeconds;
+  if (Number.isFinite(duration) && Number.isFinite(ttl) && ttl > duration * 60) {
+    this.invalidate(
+      'qrConfig.rotationTtlSeconds',
+      'QR rotationTtlSeconds cannot exceed availableDurationMinutes * 60.'
+    );
+  }
+
+  next();
 });
 
 // Update the updatedAt field before saving
